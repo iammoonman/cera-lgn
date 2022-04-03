@@ -7,7 +7,7 @@ def generatepack_c1c2_special(
     sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None
 ):
     """
-    Takes a JSON dict object, parsed.
+    Takes a set_template JSON object, parsed.
 
     Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
 
@@ -29,12 +29,14 @@ def generatepack_c1c2_special(
         [u[0] for u in setJSON["rare_slot_odds"]],
         [u[1] for u in setJSON["rare_slot_odds"]],
     )[0]
-    pack = []
+    pack = []  # The pack object. Put [cn,set_code] objects into this list.
     keydrops_c = []
+    # Contains the keys from the common ABCD to skip adding to make room for foils.
     keydrops_u = []
-    keydrops_r = 0
-    # takes a number of cards from one of the sheets in that rarity's ABCD
+    # Contains the keys from the uncommon ABCD to skip adding to make room for foils.
+    keydrops_r = 0  # Might be redundant. Tallies the number of rares to drop if using extra sheets. Number rather than list due to rarity independence.
     if "drops" in distribution.keys():
+        # Calculate drops, which remove one number from a given key for the ABCD.
         if "c" in distribution["drops"]:
             for d in range(distribution["drops"]["c"]):
                 keydrops_c.append(random.choice(list(ABCD_c.keys())))
@@ -43,11 +45,8 @@ def generatepack_c1c2_special(
                 keydrops_u.append(random.choice(list(ABCD_u.keys())))
         if "r" in distribution["drops"]:
             keydrops_r += distribution["drops"]["r"]
-    # Actually take out cards.
-    # {"c": 9,"u": 3,"r": 1,"special":1}
-    # {"a": 2,"b": 2,"c": 5} <- ABCD_c
-    # for each of "a" "b" "c" "d" in the ABCD, take the value and grab that many cards from the sheet
     for key, value in ABCD_c.items():
+        # For each sheet key in the ABCD, take the value and grab that many cards from the sheet.
         sheet_index = sheet_index_func(value)
         for p in range(value - len([j for j in keydrops_c if j == key])):
             pack = pack + [
@@ -59,6 +58,7 @@ def generatepack_c1c2_special(
                 )
             ]
     for key, value in ABCD_u.items():
+        # For each sheet key in the ABCD, take the value and grab that many cards from the sheet.
         sheet_index = sheet_index_func(value)
         for p in range(value - len([j for j in keydrops_u if j == key])):
             pack = pack + [
@@ -70,6 +70,7 @@ def generatepack_c1c2_special(
                 )
             ]
     for key, value in ABCD_r.items():
+        # Grab that many rares from the selected rare sheet.
         sheet_index = sheet_index_func(value)
         # Manually check if the rare has been hit recently.
         # If it tries to hit a duplicate more than 10 times, reset the tracker. Can't calculate how far out this would be, but it should prevent a ton of duplicate rares.
@@ -84,7 +85,7 @@ def generatepack_c1c2_special(
                 prev_rares = [[], 0]
                 pickle.dump(prev_rares, f)
         while sheet_index in prev_rares[0]:
-            # print('HIT A DOUBLE',sheet_index,prev_rares[0],prev_rares[1])
+            # Loop while the rare chosen had been chosen recently. Pick a new one unless the "recent" rares aren't recent anymore.
             prev_rares[1] += 1
             if prev_rares[1] > 50:
                 prev_rares = [[], 0]
@@ -106,7 +107,9 @@ def generatepack_c1c2_special(
                 )
             ]
     f_indexes = []
+    # Tracks the indexes of foils within the pack.
     if "f" in distribution.keys():
+        # Grab that many foils from the foil sheets. In the case of multiple foils, rarity is independently selected.
         sheet_index = sheet_index_func(distribution["f"])
         for _ in range(distribution["f"]):
             pack = pack + [
@@ -126,6 +129,7 @@ def generatepack_c1c2_special(
     for key in [
         key for key in distribution.keys() if key not in ["c", "u", "r", "f", "drops"]
     ]:
+        # Catch special sheets.
         sheet_index = sheet_index_func(distribution[key])
         for n in range(distribution[key]):
             pack = pack + [
@@ -141,6 +145,7 @@ def generatepack_c1c2_special(
                     setJSON["extras_sheets_odds"][key][2],
                 )
             ]
+    # Reverse the pack and pivot the foil indexes. This hides the rare at the bottom of the card stack in TTS.
     return pack[::-1], [(r + (len(pack) - r) * 2) % len(pack) for r in f_indexes]
 
 
