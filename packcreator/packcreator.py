@@ -1,4 +1,3 @@
-"""GENERALIZED"""
 import random
 import pickle
 
