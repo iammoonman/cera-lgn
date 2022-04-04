@@ -14,75 +14,80 @@
                     "count": 1
                 }
             ],
-            "rarity": 0.2
+            "freq": 0.2
         }
     ],
-    "c": {
-        "options": [
-            {
-                "struct": {
-                    "a": 2,
-                    "b": 2,
-                    "c": 6
-                },
-                "rarity": 1
-            }
-        ],
-        "sheets": {
-            "a": []
-        }
-    },
-    "f": {
-        "options": [
-            {
-                "struct": {
-                    "a": 1
-                },
-                "rarity": 0.9
-            },
-            {
-                "struct": {
-                    "b": 1
-                },
-                "rarity": 0.1
-            }
-        ],
-        "sheets": {
-            "a": [
-                [
-                    "132",
-                    "aer"
-                ],
-                [
-                    "133",
-                    "aer"
-                ],
-                [
-                    "134",
-                    "aer"
-                ]
+    "slots": {
+        "c": {
+            "foiled": false,
+            "options": [
+                {
+                    "struct": {
+                        "a": 2,
+                        "b": 2,
+                        "c": 6
+                    },
+                    "freq": 1
+                }
             ],
-            "b": []
-        }
-    },
-    "dfc": {
-        "options": [
-            {
-                "struct": {
-                    "a": 1
-                },
-                "rarity": 0.9
-            },
-            {
-                "struct": {
-                    "b": 1
-                },
-                "rarity": 0.1
+            "sheets": {
+                "a": []
             }
-        ],
-        "sheets": {
-            "a": [],
-            "b": []
+        },
+        "f": {
+            "foiled": true,
+            "options": [
+                {
+                    "struct": {
+                        "a": 1
+                    },
+                    "freq": 0.9
+                },
+                {
+                    "struct": {
+                        "b": 1
+                    },
+                    "freq": 0.1
+                }
+            ],
+            "sheets": {
+                "a": [
+                    [
+                        "132",
+                        "aer"
+                    ],
+                    [
+                        "133",
+                        "aer"
+                    ],
+                    [
+                        "134",
+                        "aer"
+                    ]
+                ],
+                "b": []
+            }
+        },
+        "dfc": {
+            "foiled": false,
+            "options": [
+                {
+                    "struct": {
+                        "a": 1
+                    },
+                    "freq": 0.9
+                },
+                {
+                    "struct": {
+                        "b": 1
+                    },
+                    "freq": 0.1
+                }
+            ],
+            "sheets": {
+                "a": [],
+                "b": []
+            }
         }
     }
 }
