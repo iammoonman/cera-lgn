@@ -19,7 +19,9 @@
     ],
     "slots": {
         "c": {
-            "foiled": false,
+            "flags": [
+                "duplicate_control"
+            ],
             "options": [
                 {
                     "struct": {
@@ -35,7 +37,9 @@
             }
         },
         "f": {
-            "foiled": true,
+            "flags": [
+                "foil"
+            ],
             "options": [
                 {
                     "struct": {
@@ -69,7 +73,7 @@
             }
         },
         "dfc": {
-            "foiled": false,
+            "flags": [],
             "options": [
                 {
                     "struct": {
