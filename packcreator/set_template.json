@@ -9,7 +9,7 @@
             },
             "drops": [
                 {
-                    "sheet": "c",
+                    "slot": "c",
                     "key": "b",
                     "count": 1
                 }

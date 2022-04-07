@@ -157,3 +157,25 @@ if __name__ == "__main__":
                 sheet_index_func=lambda a: point_slicer.get_number(a),
             )
             print(w, n)
+
+
+def pack_gen_v3(set=None, func=lambda a: random.randint(0, 256), d_c=[]):
+    """
+    Takes a JSON dict object, parsed in the V3 format.
+
+    Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
+
+    Returns indexes of the list which indicate foiled cards.
+    """
+    # Choose a distro based on distro[freq]
+    # For each slot key in the distro['slots'].keys()
+    #  Choose a slot[option] based on option[freq]
+    #  For each key in slot[option]['struct']
+    #   If "duplicate_control" in slot['flags'], pop number from d_c
+    #   Otherwise, generate starting number using func
+    #   If distro[drops] contains object['slot'] == slot key and object['key'] == key, reduce value by object['count']
+    #   For x in range(value)
+    #    Take a card from slot['sheets'][key] according to the number plus x
+    #    If "foil" in slot['flags'], add that index to the foil array
+    # Return the pack in reverse, return the foil array pivoted around the center
+    return [], []
