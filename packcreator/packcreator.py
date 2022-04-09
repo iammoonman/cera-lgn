@@ -159,9 +159,13 @@ if __name__ == "__main__":
             print(w, n)
 
 
-def pack_gen_v3(set=None, func=lambda a: random.randint(0, 256), d_c=[]):
+def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[]):
     """
     Takes a JSON dict object, parsed in the V3 format.
+
+    Takes a function with inputs length_of_sheet, count_taken which returns an index within the range of length_of_sheet. Use count_taken for slight duplicate control.
+
+    Takes a duplicate_control list of indexes for choosing rarity controlled cards.
 
     Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
 
