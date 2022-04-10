@@ -51,7 +51,7 @@ async def btn0_response(ctx):
         embeds=[starting_embed(drafts[str(ctx.message.id)])],
         components=starting_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -63,16 +63,15 @@ button1 = interactions.Button(
 
 
 @bot.component(button1)
-async def btn1_response(ctx):
+async def btn1_response(ctx: interactions.ComponentContext):
     """Drop from the draft before it begins"""
     print(ctx.message.id, "DROP_PRE")
-    # Check if the user is the host
     drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
     await ctx.edit(
         embeds=[starting_embed(drafts[str(ctx.message.id)])],
         components=starting_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -84,20 +83,18 @@ async def btn1_response(ctx):
 )
 async def dropkick(ctx: interactions.CommandContext):
     """Kick all from the draft"""
-    # ctx.message.id should be replaced with a check to make sure it's on a message, not a user
-    print(ctx.message.id, "DROP_KICK")
-    if str(ctx.message.id) in drafts.keys():
-        if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
-            drafts[str(ctx.message.id)].players = [
-                p
-                for p in drafts[str(ctx.message.id)]
-                if int(p.player_id) == drafts[str(ctx.message.id)].host
-            ]
-            await ctx.edit(
-                embeds=[starting_embed(drafts[str(ctx.message.id)])],
-                components=starting_buttons,
-            )
-    return
+    print(ctx.target.id, "DROP_KICK")
+    if type(ctx.target) == interactions.Message:
+        if str(ctx.target.id) in drafts.keys():
+            if int(ctx.author.user.id) == drafts[str(ctx.target.id)].host:
+                # 'Draft' object is not iterable
+                for p in drafts[str(ctx.target.id)].players:
+                    drafts[str(ctx.target.id)].drop_player(int(p.player_id))
+                await ctx.edit(
+                    embeds=[starting_embed(drafts[str(ctx.target.id)])],
+                    components=starting_buttons,
+                )
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -109,12 +106,13 @@ async def dropkick(ctx: interactions.CommandContext):
 )
 async def cancel(ctx):
     """Cancel the draft"""
-    print(ctx.message.id, "CANCEL")
-    if str(ctx.message.id) in drafts.keys():
-        if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
-            del drafts[str(ctx.message.id)]
-            await ctx.delete()
-    return
+    print(ctx.target.id, "CANCEL")
+    if type(ctx.target) == interactions.Message:
+        if str(ctx.target.id) in drafts.keys():
+            if int(ctx.author.user.id) == drafts[str(ctx.target.id)].host:
+                del drafts[str(ctx.target.id)]
+                await ctx.delete()
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -146,7 +144,7 @@ async def btn4_response(ctx):
             ],
             components=in_draft_buttons,
         )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -208,7 +206,7 @@ async def btn5_response(ctx):
                 ],
                 components=in_draft_buttons,
             )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -275,7 +273,7 @@ async def sel0_response(ctx):
         ],
         components=in_draft_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -301,7 +299,7 @@ async def btn6_response(ctx):
         ],
         components=in_draft_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -377,7 +375,7 @@ def end_embed(draft):
         title=draft.name + " | FINAL",
         fields=[interactions.EmbedField(name="SCORES", value=playerlist)],
     )
-    return
+    return embed
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -439,8 +437,7 @@ async def draft(ctx: interactions.CommandContext, tag, title, description):
         components=starting_buttons,
         content="",
     )
-    print(drafts[str(msg.id)].players)
-    return
+    return await ctx.send("Interaction recieved.",ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#

@@ -245,6 +245,9 @@ class Draft:
 
     def drop_player(self, p_id):
         """Toggles the drop status of a player. Can be called mid-draft. Does not finalize their drop."""
+        # Does not allow the host to drop.
+        if self.host == p_id:
+            return
         # If there are no rounds, delete player
         if len(self.rounds) == 0:
             hold = None
