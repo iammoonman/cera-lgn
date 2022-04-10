@@ -40,6 +40,7 @@ async def btn0_response(ctx):
     """Join the draft"""
     print(ctx.message.id, "JOIN")
     drafts[str(ctx.message.id)].add_player(ctx.author.nick, int(ctx.author.user.id))
+    # TypeError: 'list' object is not callable
     await ctx.edit(
         embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
     )
