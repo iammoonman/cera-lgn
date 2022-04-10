@@ -22,6 +22,13 @@ async def on_ready():
     # print(bot.user.name)
     # print(bot.user.id)
     print("------")
+    # print("Deleting old commands.")
+    # commands = await bot._http.get_application_commands(application_id=bot.me.id)
+    # for c in commands:
+    #     await bot._http.delete_application_command(
+    #         application_id=bot.me.id, command_id=c["id"]
+    #     )
+    # print("Commands deleted.")
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -40,9 +47,9 @@ async def btn0_response(ctx):
     """Join the draft"""
     print(ctx.message.id, "JOIN")
     drafts[str(ctx.message.id)].add_player(ctx.author.nick, int(ctx.author.user.id))
-    # TypeError: 'list' object is not callable
     await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
+        embeds=[starting_embed(drafts[str(ctx.message.id)])],
+        components=starting_buttons,
     )
     return
 
@@ -60,9 +67,10 @@ async def btn1_response(ctx):
     """Drop from the draft before it begins"""
     print(ctx.message.id, "DROP_PRE")
     # Check if the user is the host
-    drafts[str(ctx.message.id)].drop_player(int(ctx.user.id))
+    drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
     await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
+        embeds=[starting_embed(drafts[str(ctx.message.id)])],
+        components=starting_buttons,
     )
     return
 
@@ -70,46 +78,42 @@ async def btn1_response(ctx):
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-button2 = interactions.Button(
-    style=interactions.ButtonStyle.SECONDARY, label="DROPKICK", custom_id="DROPKICK"
+
+@bot.message_command(
+    name="DROPKICK",
 )
-
-
-@bot.component(button2)
-async def btn2_response(ctx):
+async def dropkick(ctx: interactions.CommandContext):
     """Kick all from the draft"""
+    # ctx.message.id should be replaced with a check to make sure it's on a message, not a user
     print(ctx.message.id, "DROP_KICK")
-    # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
-        drafts[str(ctx.message.id)].players = [
-            p
-            for p in drafts[str(ctx.message.id)]
-            if int(p.player_id) == drafts[str(ctx.message.id)].host
-        ]
-    await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
-    )
+    if str(ctx.message.id) in drafts.keys():
+        if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
+            drafts[str(ctx.message.id)].players = [
+                p
+                for p in drafts[str(ctx.message.id)]
+                if int(p.player_id) == drafts[str(ctx.message.id)].host
+            ]
+            await ctx.edit(
+                embeds=[starting_embed(drafts[str(ctx.message.id)])],
+                components=starting_buttons,
+            )
     return
 
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-button3 = interactions.Button(
-    style=interactions.ButtonStyle.DANGER, label="CANCEL", custom_id="CANCEL"
+
+@bot.message_command(
+    name="CANCEL",
 )
-
-
-@bot.component(button3)
-async def btn3_response(ctx: interactions.context.ComponentContext):
+async def cancel(ctx):
     """Cancel the draft"""
     print(ctx.message.id, "CANCEL")
-    print(ctx.author.user.id, "HOST")
-    print(drafts[str(ctx.message.id)].host, "HOST 2")
-    # Check if the user is the host
-    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
-        del drafts[str(ctx.message.id)]
-        await ctx.delete()
+    if str(ctx.message.id) in drafts.keys():
+        if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
+            del drafts[str(ctx.message.id)]
+            await ctx.delete()
     return
 
 
@@ -126,17 +130,21 @@ async def btn4_response(ctx):
     """Begin the draft"""
     print(ctx.message.id, "BEGIN")
     # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
+    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
         drafts[str(ctx.message.id)].do_pairings()
         timekeep[str(ctx.message.id)] = datetime.now() + datetime.timedelta(minutes=50)
         # Edit the message so that it shows the pairings and the score buttons
         await ctx.edit(
-            embed=ig_embed(
-                drafts[str(ctx.message.id)].name,
-                [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-                round_end=timekeep[str(ctx.message.id)],
-            ),
-            components=in_draft_buttons(),
+            embeds=[
+                ig_embed(
+                    drafts[str(ctx.message.id)].name,
+                    [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][
+                        0
+                    ],
+                    round_end=timekeep[str(ctx.message.id)],
+                )
+            ],
+            components=in_draft_buttons,
         )
     return
 
@@ -144,7 +152,7 @@ async def btn4_response(ctx):
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-starting_buttons = [button0, button1, button2, button3, button4]
+starting_buttons = [button0, button1, button4]
 
 
 button5 = interactions.Button(
@@ -157,7 +165,7 @@ async def btn5_response(ctx):
     """Advance to the next round"""
     print(ctx.message.id, "NEXT_ROUND")
     # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
+    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
         timekeep[str(ctx.message.id)] = datetime.now() + datetime.timedelta(minutes=50)
         # Add a check to see if the third round has been played, then swap to posting the final results and send the json to dm.
         if drafts[str(ctx.message.id)].finish_round():
@@ -166,11 +174,13 @@ async def btn5_response(ctx):
             ]
             if len(roundsearch) > 0:
                 await ctx.edit(
-                    embed=ig_embed(
-                        drafts[str(ctx.message.id)].name,
-                        roundsearch[0],
-                        round_end=timekeep[str(ctx.message.id)],
-                    ),
+                    embeds=[
+                        ig_embed(
+                            drafts[str(ctx.message.id)].name,
+                            roundsearch[0],
+                            round_end=timekeep[str(ctx.message.id)],
+                        )
+                    ],
                     components=in_draft_buttons(),
                 )
             else:
@@ -185,14 +195,18 @@ async def btn5_response(ctx):
         else:
             await ctx.edit(
                 content="Not all results reported.",
-                embed=ig_embed(
-                    drafts[str(ctx.message.id)].name,
-                    [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][
-                        0
-                    ],
-                    round_end=timekeep[str(ctx.message.id)],
-                ),
-                components=in_draft_buttons(),
+                embeds=[
+                    ig_embed(
+                        drafts[str(ctx.message.id)].name,
+                        [
+                            r
+                            for r in drafts[str(ctx.message.id)].rounds
+                            if not r.completed
+                        ][0],
+                        round_end=timekeep[str(ctx.message.id)],
+                    )
+                ],
+                components=in_draft_buttons,
             )
     return
 
@@ -250,14 +264,16 @@ select0 = interactions.SelectMenu(
 async def sel0_response(ctx):
     """Select the winners of the author's match"""
     print(ctx.message.id, "WINNINGS")
-    drafts[str(ctx.message.id)].parse_match(int(ctx.user.id), ctx.data.values[0])
+    drafts[str(ctx.message.id)].parse_match(int(ctx.author.user.id), ctx.data.values[0])
     await ctx.edit(
-        embed=ig_embed(
-            drafts[str(ctx.message.id)].name,
-            [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-            round_end=timekeep[str(ctx.message.id)],
-        ),
-        components=in_draft_buttons(),
+        embeds=[
+            ig_embed(
+                drafts[str(ctx.message.id)].name,
+                [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
+                round_end=timekeep[str(ctx.message.id)],
+            )
+        ],
+        components=in_draft_buttons,
     )
     return
 
@@ -274,14 +290,16 @@ button6 = interactions.Button(
 async def btn6_response(ctx):
     """Drop from the draft while it is running"""
     print(ctx.message.id, "DROP_IG")
-    drafts[str(ctx.message.id)].drop_player(int(ctx.user.id))
+    drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
     await ctx.edit(
-        embed=ig_embed(
-            drafts[str(ctx.message.id)].name,
-            [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-            round_end=timekeep[str(ctx.message.id)],
-        ),
-        components=in_draft_buttons(),
+        embeds=[
+            ig_embed(
+                drafts[str(ctx.message.id)].name,
+                [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
+                round_end=timekeep[str(ctx.message.id)],
+            )
+        ],
+        components=in_draft_buttons,
     )
     return
 
@@ -380,6 +398,7 @@ def end_embed(draft):
             required=False,
             choices=[
                 interactions.Choice(name="omni", value="Omni's Friday Nights"),
+                interactions.Choice(name="ptm", value="Prime Time"),
             ],
         ),
         interactions.Option(
@@ -399,6 +418,7 @@ def end_embed(draft):
 async def draft(ctx: interactions.CommandContext, tag, title, description):
     """Begins the draft command sequence."""
     msg = await ctx.send(content="Setting up your draft.")
+    print(msg.id, "BEGIN")
     drafts[str(msg.id)] = draft_class.Draft(
         draftID=1,
         date=datetime.today().strftime("%Y-%m-%d"),
@@ -416,7 +436,7 @@ async def draft(ctx: interactions.CommandContext, tag, title, description):
     )
     await msg.edit(
         embeds=[starting_embed(drafts[str(msg.id)])],
-        components=[button0, button1, button2, button3, button4],
+        components=starting_buttons,
         content="",
     )
     print(drafts[str(msg.id)].players)
