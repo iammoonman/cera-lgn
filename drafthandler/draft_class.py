@@ -89,7 +89,7 @@ class Draft:
                 self.players = p
                 self.gwinners = []
                 self.drops = [False for i in p]
-                if p[1] == self.Player("Bye", "-1"):
+                if p[1] == Draft.Player("Bye", "-1"):
                     self.gwinners = [0, 0, None]
 
     def do_pairings(self):
@@ -117,7 +117,7 @@ class Draft:
             except IndexError:
                 # Checking it like this will cause more than one bye in certain situations with people dropping.
                 # That is OK
-                player2 = self.Player("BYE", "-1")
+                player2 = Draft.Player("BYE", "-1")
                 # Recommended to just pick someone. In a weird niche situation, ignore the point restriction.
                 if player1.score == max([u.score for u in self.players]):
                     try:
@@ -125,13 +125,13 @@ class Draft:
                             i for i in temp_players if i not in player1.opponents
                         ][0]
                     except IndexError:
-                        player2 = self.Player("BYE", "-1")
+                        player2 = Draft.Player("BYE", "-1")
             temp_pairings.append([player1, player2])
             if player2.player_id != "-1":
                 temp_players.remove(player2)
                 player1.opponents.append(player2)
                 player2.opponents.append(player1)
-        new_round = self.Round(title=len(self.rounds) + 1)
+        new_round = Draft.Round(title=len(self.rounds) + 1)
         new_round.matches = [new_round.Match(p=i) for i in temp_pairings]
         self.rounds.append(new_round)
         return new_round
@@ -270,7 +270,7 @@ class Draft:
         """Adds a player to the draft. Can't be called mid-draft."""
         if len(self.rounds) > 0:
             return
-        p = self.Player(n=p_name, id=p_id)
+        p = Draft.Player(n=p_name, id=p_id)
         if p not in self.players:
             self.players.append(p)
         return
