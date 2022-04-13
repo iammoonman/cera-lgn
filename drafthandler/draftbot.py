@@ -149,16 +149,17 @@ async def btn4_response(ctx):
     print(ctx.message.id, "BEGIN")
     # Check if the user is the host
     if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
+        print(ctx.message.id, "SENDING")
         drafts[str(ctx.message.id)].do_pairings()
         timekeep[str(ctx.message.id)] = datetime.now() + timedelta(minutes=50)
         # Edit the message so that it shows the pairings and the score buttons
-        await ctx.edit(
+        await ctx.message.edit(
             embeds=[
                 ig_embed(
-                    drafts[str(ctx.message.id)].name,
-                    [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][
-                        0
-                    ],
+                    name=drafts[str(ctx.message.id)].name,
+                    round=[
+                        r for r in drafts[str(ctx.message.id)].rounds if not r.completed
+                    ][0],
                     round_end=timekeep[str(ctx.message.id)],
                 )
             ],
@@ -269,12 +270,12 @@ select0 = interactions.SelectMenu(
         interactions.SelectOption(
             label="self - opponent",
             value="6",
-            description="You tied, and won the first game.",
+            description="You tied, winning the first game.",
         ),
         interactions.SelectOption(
             label="opponent - self",
             value="7",
-            description="You tied, and won the second game.",
+            description="You tied, winning the second game.",
         ),
     ],
     placeholder="Choose the games you won.",
@@ -325,6 +326,7 @@ async def btn6_response(ctx):
         return
     print(ctx.message.id, "DROP_IG")
     drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
+    # Returns a 50035 error with no other details.
     await ctx.edit(
         embeds=[
             ig_embed(
@@ -373,7 +375,7 @@ def ig_embed(name, round, round_end):
         fields=[
             interactions.EmbedField(
                 name="GAME",
-                value=f"{i.players[0]} vs {i.players[1]}{bslash}G1: {i.players[i.gwinners[0]]}{bslash}G2: {i.players[i.gwinners[1]]}{bslash+i.players[i.gwinners[2]] if i.gwinners[2] != None else f'{bslash}NONE'}"
+                value=f"@{i.players[0]} vs @{i.players[1]}{bslash}G1 Winner: @{i.players[i.gwinners[0]]}{bslash}G2 Winner: @{i.players[i.gwinners[1]]}{bslash+i.players[i.gwinners[2]] if i.gwinners[2] != None else f'{bslash}NONE'}"
                 if i.gwinners != []
                 else "",
             )
@@ -389,13 +391,9 @@ def ig_embed(name, round, round_end):
 
 
 def end_embed(draft):
-    playerlist = "Name | POINTS | GWP | OGP | OMP"
+    playerlist = "Name | POINTS | GWP | OGP | OMP\n"
     for i, p in enumerate(draft.players):
-        playerlist += p
-        playerlist += " | " + p.score
-        playerlist += " | " + p.gwp
-        playerlist += " | " + p.ogp
-        playerlist += " | " + p.omp
+        playerlist += f"{p.name} | {p.score} | {p.gwp} | {p.ogp} | {p.omp}"
         if i < len(draft.players) - 1:
             playerlist += "\n"
     embed = interactions.Embed(
@@ -418,16 +416,6 @@ def end_embed(draft):
     options=[
         interactions.Option(
             type=interactions.OptionType.STRING,
-            name="tag",
-            description="Choose a tag to organize this draft.",
-            required=False,
-            choices=[
-                interactions.Choice(name="omni", value="Omni's Friday Nights"),
-                interactions.Choice(name="ptm", value="Prime Time"),
-            ],
-        ),
-        interactions.Option(
-            type=interactions.OptionType.STRING,
             name="title",
             description="The name of the draft event.",
             required=False,
@@ -438,10 +426,20 @@ def end_embed(draft):
             description="Write a description for the draft.",
             required=False,
         ),
+        interactions.Option(
+            type=interactions.OptionType.STRING,
+            name="tag",
+            description="Choose a tag to organize this draft.",
+            required=False,
+            choices=[
+                interactions.Choice(name="omni", value="Omni's Friday Nights"),
+                interactions.Choice(name="ptm", value="Prime Time with Moon"),
+            ],
+        ),
     ],
     scope=guild,
 )
-async def draft(ctx: interactions.CommandContext, tag, title, description):
+async def draft(ctx: interactions.CommandContext, title, description, tag=""):
     """Begins the draft command sequence."""
     msg = await ctx.send(content="Setting up your draft.")
     print(msg.id, "DRAFT")
