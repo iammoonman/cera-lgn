@@ -1,4 +1,3 @@
-"""GENERALIZED"""
 import random
 import pickle
 
@@ -7,7 +6,7 @@ def generatepack_c1c2_special(
     sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None
 ):
     """
-    Takes a JSON dict object, parsed.
+    Takes a JSON dict object, parsed in the V2 format.
 
     Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
 
@@ -171,15 +170,55 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[]):
 
     Returns indexes of the list which indicate foiled cards.
     """
+    pack = []
+    foil_indexes = []
     # Choose a distro based on distro[freq]
+    distro: dict = random.choices(
+        set["distros"], [s["freq"] for s in set["distros"]], k=1
+    )[0]
     # For each slot key in the distro['slots'].keys()
-    #  Choose a slot[option] based on option[freq]
-    #  For each key in slot[option]['struct']
-    #   If "duplicate_control" in slot['flags'], pop number from d_c
-    #   Otherwise, generate starting number using func
-    #   If distro[drops] contains object['slot'] == slot key and object['key'] == key, reduce value by object['count']
-    #   For x in range(value)
-    #    Take a card from slot['sheets'][key] according to the number plus x
-    #    If "foil" in slot['flags'], add that index to the foil array
+    for slot_key in distro["slots"].keys():
+        # Choose a slot[option] based on option[freq]
+        struct: dict = random.choices(
+            [o["struct"] for o in set["slots"][slot_key]["options"]],
+            [o["freq"] for o in set["slots"][slot_key]["options"]],
+            k=1,
+        )[0]
+        # For each key in slot[option]['struct']
+        for sheet_key, sheet_take in struct.items():
+            # If "duplicate_control" in slot['flags'], pop number from d_c
+            # Otherwise, generate starting number using func
+            index = (
+                d_c.pop()
+                if "duplicate_control" in set["slots"][slot_key]["flags"]
+                else func(
+                    l_s=len(set["slots"][slot_key]["sheets"][sheet_key]),
+                    c_t=struct[sheet_key],
+                )
+            )
+            # If distro[drops] contains object['slot'] == slot key and object['key'] == key, reduce value by object['count']
+            drop_sheet = 0
+            if "drops" in distro.keys():
+                drop_sheet = next(
+                    (
+                        d["count"]
+                        for d in distro["drops"]
+                        if d["slot"] == slot_key and d["key"] == sheet_key
+                    ),
+                    [0],
+                )
+            # For x in range(value)
+            for c in range(sheet_take - drop_sheet):
+                # Take a card from slot['sheets'][key] according to the number plus x
+                pack += [
+                    set["slots"][slot_key]["sheets"][sheet_key][
+                        (index + c) % len(set["slots"][slot_key]["sheets"][sheet_key])
+                    ][:]
+                ]
+                # If "foil" in slot['flags'], add that index to the foil array
+                if "foil" in set["slots"][slot_key]["flags"]:
+                    foil_indexes.append(len(pack))
     # Return the pack in reverse, return the foil array pivoted around the center
-    return [], []
+    return pack[::-1], [
+        (radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes
+    ]
