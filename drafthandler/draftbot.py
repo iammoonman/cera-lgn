@@ -386,9 +386,9 @@ def ig_embed(name, round, round_end):
             interactions.EmbedField(
                 name="GAME",
                 value=f"{i.players[0]} vs {i.players[1]}{bslash}"
-                + f"G1 Winner: {i.players[i.gwinners[0]] if i.gwinners != [] else 'NONE'}{bslash}"
-                + f"G2 Winner: {i.players[i.gwinners[1]] if len(i.gwinners) == 2 else 'NONE'}{bslash}"
-                + f"G3 Winner: {i.players[i.gwinners[2]] if len(i.gwinners) == 3 else 'NONE'}",
+                + f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
+                + f"G2 Winner: {i.players[i.gwinners[1]] if len(i.gwinners) > 1 else 'NONE'}{bslash}"
+                + f"G3 Winner: {i.players[i.gwinners[2]] if len(i.gwinners) > 2 else 'NONE'}",
             )
             for i in round.matches
         ]
