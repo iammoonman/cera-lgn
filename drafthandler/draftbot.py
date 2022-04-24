@@ -5,6 +5,10 @@ from datetime import timedelta
 import requests
 import re
 
+# import logging
+
+# logging.basicConfig(level=logging.DEBUG)
+
 import pickle
 
 with open("token.pickle", "rb") as f:
@@ -56,7 +60,10 @@ async def btn0_response(ctx: interactions.ComponentContext):
         await ctx.message.delete()
         return
     print(ctx.message.id, "JOIN")
-    drafts[str(ctx.message.id)].add_player(ctx.author.nick, int(ctx.author.user.id))
+    drafts[str(ctx.message.id)].add_player(
+        ctx.author.nick if ctx.author.nick is not None else ctx.author.user.username,
+        int(ctx.author.user.id),
+    )
     await ctx.edit(
         embeds=[starting_embed(drafts[str(ctx.message.id)])],
         components=starting_buttons,
@@ -105,7 +112,7 @@ async def dropkick(ctx: interactions.CommandContext):
                 # 'Draft' object is not iterable
                 for p in drafts[str(ctx.target.id)].players:
                     drafts[str(ctx.target.id)].drop_player(int(p.player_id))
-                await ctx.edit(
+                await ctx.target.edit(
                     embeds=[starting_embed(drafts[str(ctx.target.id)])],
                     components=starting_buttons,
                 )
@@ -140,7 +147,7 @@ button4 = interactions.Button(
 
 
 @bot.component(button4)
-async def btn4_response(ctx):
+async def btn4_response(ctx: interactions.ComponentContext):
     """Begin the draft"""
     # If draft is inactive, delete the message.
     if str(ctx.message.id) not in drafts.keys():
@@ -242,38 +249,38 @@ async def btn5_response(ctx):
 select0 = interactions.SelectMenu(
     options=[
         interactions.SelectOption(
-            label="self - self", value="0", description="You won both games."
+            label="you - you", value="0", description="You won both games."
         ),
         interactions.SelectOption(
-            label="self - opponent - self",
+            label="you - them - you",
             value="1",
             description="You won the first and third games.",
         ),
         interactions.SelectOption(
-            label="opponent - self - self",
+            label="them - you - you",
             value="2",
-            description="You lost the first game, but reverse swept the match.",
+            description="You lost the first game, but won overall.",
         ),
         interactions.SelectOption(
-            label="opponent - self - opponent",
+            label="them - you - them",
             value="3",
             description="You won the second game, but lost the match.",
         ),
         interactions.SelectOption(
-            label="self - opponent - opponent",
+            label="you - them - them",
             value="4",
-            description="You won the first game, but got reverse swept to lose.",
+            description="You won the first game, but lost overall.",
         ),
         interactions.SelectOption(
-            label="opponent - opponent", value="5", description="You lost both games."
+            label="them - them", value="5", description="You lost both games."
         ),
         interactions.SelectOption(
-            label="self - opponent",
+            label="you - them",
             value="6",
             description="You tied, winning the first game.",
         ),
         interactions.SelectOption(
-            label="opponent - self",
+            label="them - you",
             value="7",
             description="You tied, winning the second game.",
         ),
@@ -343,7 +350,10 @@ async def btn6_response(ctx):
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-in_draft_buttons = [button5, select0, button6]
+in_draft_buttons = [
+    interactions.ActionRow(components=[button5, button6]),
+    interactions.ActionRow(components=[select0]),
+]
 """Buttons for round in progress."""
 
 # ---------------------------------------------------------------------------------------------#
@@ -375,15 +385,16 @@ def ig_embed(name, round, round_end):
         fields=[
             interactions.EmbedField(
                 name="GAME",
-                value=f"@{i.players[0]} vs @{i.players[1]}{bslash}G1 Winner: @{i.players[i.gwinners[0]]}{bslash}G2 Winner: @{i.players[i.gwinners[1]]}{bslash+i.players[i.gwinners[2]] if i.gwinners[2] != None else f'{bslash}NONE'}"
-                if i.gwinners != []
-                else "",
+                value=f"{i.players[0]} vs {i.players[1]}{bslash}"
+                + f"G1 Winner: {i.players[i.gwinners[0]] if i.gwinners != [] else 'NONE'}{bslash}"
+                + f"G2 Winner: {i.players[i.gwinners[1]] if len(i.gwinners) == 2 else 'NONE'}{bslash}"
+                + f"G3 Winner: {i.players[i.gwinners[2]] if len(i.gwinners) == 3 else 'NONE'}",
             )
             for i in round.matches
         ]
         + [
             interactions.EmbedField(
-                name="ROUND TIMER", value=f"<t:{round_end.timestamp()}>"
+                name="ROUND TIMER", value=f"<t:{round_end.timestamp()}:t>"
             )
         ],
     )
