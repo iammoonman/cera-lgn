@@ -158,13 +158,18 @@ if __name__ == "__main__":
             print(w, n)
 
 
-def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],seed:int=None):
+def pack_gen_v3(
+    set=None,
+    func=lambda l_s, c_t: random.randint(0, l_s),
+    d_c: dict[str, float] = {},
+    seed: int = None,
+):
     """
     Takes a JSON dict object, parsed in the V3 format.
 
     Takes a function with inputs length_of_sheet, count_taken which returns an index within the range of length_of_sheet. Use count_taken for slight duplicate control.
 
-    Takes a duplicate_control list of indexes for choosing rarity controlled cards.
+    Takes a duplicate_control list of lists of indexes for choosing rarity controlled cards.
 
     Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
 
@@ -173,9 +178,9 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],s
     if seed is not None:
         random.seed(seed)
     else:
-        random.seed(seed:=random.randint(0,2000000))
-    pack = []
-    foil_indexes = []
+        random.seed(seed := random.randint(0, 2000000))
+    pack: list[list[str, str]] = []
+    foil_indexes: list[int] = []
     # Choose a distro based on distro[freq]
     distro: dict = random.choices(
         set["distros"], [s["freq"] for s in set["distros"]], k=1
@@ -192,8 +197,8 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],s
         for sheet_key, sheet_take in struct.items():
             # If "duplicate_control" in slot['flags'], pop number from d_c
             # Otherwise, generate starting number using func
-            index = (
-                d_c.pop()
+            index: int = (
+                d_c[slot_key].pop()
                 if "duplicate_control" in set["slots"][slot_key]["flags"]
                 else func(
                     l_s=len(set["slots"][slot_key]["sheets"][sheet_key]),
@@ -201,7 +206,7 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],s
                 )
             )
             # If distro[drops] contains object['slot'] == slot key and object['key'] == key, reduce value by object['count']
-            drop_sheet = 0
+            drop_sheet: int = 0
             if "drops" in distro.keys():
                 drop_sheet = next(
                     (
@@ -223,6 +228,8 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],s
                 if "foil" in set["slots"][slot_key]["flags"]:
                     foil_indexes.append(len(pack))
     # Return the pack in reverse, return the foil array pivoted around the center
-    return pack[::-1], [
-        (radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes
-    ],seed
+    return (
+        pack[::-1],
+        [(radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes],
+        seed,
+    )

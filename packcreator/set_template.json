@@ -96,8 +96,7 @@
     },
     "flag_data": {
         "duplicate_control": {
-            "slots_using": 1,
-            "max_count": 1
+            "slots_counts": {"c":8}
         }
     }
 }
