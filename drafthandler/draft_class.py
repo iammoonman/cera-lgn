@@ -74,8 +74,8 @@ class Draft:
 
         def __repr__(self):
             return self.name + " (" + str(self.score) + ")"
-        
-        def __eq__(self,other):
+
+        def __eq__(self, other):
             return self.player_id == other.player_id
 
     class Round:
@@ -137,7 +137,7 @@ class Draft:
         return new_round
 
     def parse_match(self, p_id, result_code):
-        """Parses a match result report from a player. Uses numbered codes 0-7 to discern result."""
+        """Parses a match result report from a player. Uses numbered codes 0-9 to discern result."""
         # Get the current round
         # Get p_id's match
         # Parse code into gwinners
@@ -182,6 +182,24 @@ class Draft:
                 match.gwinners = [o_index, None, None]
             elif result_code == "9":
                 match.gwinners = [p_index, None, None]
+        return
+
+    def parse_match_list(self, p_id, result):
+        """Parses a match result report from a player. Uses a list of player ids to reference game results, with None as a tie."""
+        player = [p for p in self.players if p.player_id == p_id][0]
+        round = [r for r in self.rounds if r.completed == False][0]
+        for match in [m for m in round.matches if player in m.players]:
+            if match.players.index(player) == 0:
+                p_index = 0
+                o_index = 1
+            else:
+                p_index = 1
+                o_index = 0
+            # result = [p_id,o_id,None]
+            self.gwinners = [
+                (p_index if i == p_id else o_index) if i is not None else None
+                for i in result
+            ]
         return
 
     def finish_round(self):
