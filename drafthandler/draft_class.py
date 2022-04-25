@@ -317,28 +317,28 @@ class Draft:
         return
 
 
-dr = Draft(1, "TODAY", "ME", "TAG", "NOPE", "THE")
-dr.add_player("A", "1")
-dr.add_player("B", "2", True)
-dr.add_player("C", "3")
-dr.do_pairings()
-print("n2", dr.rounds)
-dr.parse_match("1", "0")
-dr.parse_match("2", "1")
-print("n3", dr.rounds)
-if dr.finish_round():
-    print("n4", dr.rounds)
-else:
-    print("NOT DONE")
-dr.parse_match("1", "0")
-dr.parse_match("2", "1")
-if dr.finish_round():
-    print("n4", dr.rounds)
-else:
-    print("NOT DONE")
-import json
+# dr = Draft(1, "TODAY", "ME", "TAG", "NOPE", "THE")
+# dr.add_player("A", "1")
+# dr.add_player("B", "2", True)
+# dr.add_player("C", "3")
+# dr.do_pairings()
+# print("n2", dr.rounds)
+# dr.parse_match("1", "0")
+# dr.parse_match("2", "1")
+# print("n3", dr.rounds)
+# if dr.finish_round():
+#     print("n4", dr.rounds)
+# else:
+#     print("NOT DONE")
+# dr.parse_match("1", "0")
+# dr.parse_match("2", "1")
+# if dr.finish_round():
+#     print("n4", dr.rounds)
+# else:
+#     print("NOT DONE")
+# import json
 
-print(json.dumps(dr.tojson()))
+# print(json.dumps(dr.tojson()))
 # THE ORDER IS:
 # add_players
 # if finish_round, then continue
