@@ -213,17 +213,17 @@ async def btn5_response(ctx):
                             round_end=timekeep[str(ctx.message.id)],
                         )
                     ],
-                    components=in_draft_buttons(),
+                    components=in_draft_buttons,
                 )
             else:
-                await ctx.edit(embed=end_embed(drafts[str(ctx.message.id)]))
+                await ctx.edit(embeds=[end_embed(drafts[str(ctx.message.id)])],components=[])
                 # Send the json to the owner
                 print(drafts[str(ctx.message.id)].tojson())
-                member = interactions.Member(
-                    **await bot.http.get_member(guild_id=id, member_id=ctx.user.id),
-                    _client=bot.http,
-                )
-                await member.send(drafts[str(ctx.message.id)].tojson())
+                # member = interactions.Member(
+                #     **await bot.http.get_member(guild_id=id, member_id=ctx.user.id),
+                #     _client=bot.http,
+                # )
+                # await member.send(drafts[str(ctx.message.id)].tojson())
         else:
             await ctx.edit(
                 content="Not all results reported.",
@@ -294,7 +294,7 @@ select0 = interactions.SelectMenu(
 
 
 @bot.component(select0)
-async def sel0_response(ctx):
+async def sel0_response(ctx, choices):
     """Select the winners of the author's match"""
     # If draft is inactive, delete the message.
     if str(ctx.message.id) not in drafts.keys():
@@ -332,8 +332,10 @@ async def btn6_response(ctx):
         await ctx.message.delete()
         return
     print(ctx.message.id, "DROP_IG")
-    drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
-    # Returns a 50035 error with no other details.
+    try:
+        drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
+    except IndexError:
+        pass
     await ctx.edit(
         embeds=[
             ig_embed(
@@ -384,17 +386,16 @@ def ig_embed(name, round, round_end):
         title=f"{name} | Round: {round.title}",
         fields=[
             interactions.EmbedField(
-                name="GAME",
-                value=f"{i.players[0]} vs {i.players[1]}{bslash}"
-                + f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
-                + f"G2 Winner: {i.players[i.gwinners[1]] if len(i.gwinners) > 1 else 'NONE'}{bslash}"
-                + f"G3 Winner: {i.players[i.gwinners[2]] if len(i.gwinners) > 2 else 'NONE'}",
+                name=f"GAME: {i.players[0]} vs {i.players[1]}",
+                value=f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
+                + f"G2 Winner: {(i.players[i.gwinners[1]] if i.gwinners[1] is not None else 'NONE') if len(i.gwinners) > 1 else 'NONE'}{bslash}"
+                + f"G3 Winner: {(i.players[i.gwinners[2]] if i.gwinners[2] is not None else 'NONE') if len(i.gwinners) > 2 else 'NONE'}",
             )
             for i in round.matches
         ]
         + [
             interactions.EmbedField(
-                name="ROUND TIMER", value=f"<t:{round_end.timestamp()}:t>"
+                name="ROUND TIMER", value=f"<t:{int(round_end.timestamp())}:R>"
             )
         ],
     )
@@ -402,14 +403,20 @@ def ig_embed(name, round, round_end):
 
 
 def end_embed(draft):
-    playerlist = "Name | POINTS | GWP | OGP | OMP\n"
-    for i, p in enumerate(draft.players):
-        playerlist += f"{p.name} | {p.score} | {p.gwp} | {p.ogp} | {p.omp}"
-        if i < len(draft.players) - 1:
-            playerlist += "\n"
     embed = interactions.Embed(
         title=f"{draft.name} | FINAL",
-        fields=[interactions.EmbedField(name="SCORES", value=playerlist)],
+        fields=[
+            interactions.EmbedField(
+                name=f"{p.name}",
+                value=f"SCORE: {p.score}{bslash}"
+                + f"GWP: {p.gwp}{bslash}"
+                + f"OGP: {p.ogp}{bslash}"
+                + f"OMP: {p.omp}",
+            )
+            for p in sorted(
+                draft.players, key=lambda pl: (pl.score, pl.gwp, pl.ogp, pl.omp), reverse=True
+            )
+        ],
     )
     return embed
 

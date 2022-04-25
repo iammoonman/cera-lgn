@@ -24,13 +24,14 @@ class Draft:
             "rounds": [
                 {
                     "roundNUM": i.title,
-                    "complete": i.complete,
+                    "complete": i.completed,
                     "matches": [
                         {
-                            "players": [u.player_id for u in i.players],
-                            "winners": i.gwinners,
-                            "drops": i.drops,
+                            "players": [u.player_id for u in q.players],
+                            "winners": q.gwinners,
+                            "drops": q.drops,
                         }
+                        for q in i.matches
                     ],
                 }
                 for i in self.rounds
@@ -53,10 +54,15 @@ class Draft:
             self.player_id = id
             self.name = n
             self.score = 0
+            """Final match score. 3 for wins and byes, 1 for tie, 0 for loss."""
             self.gpts = 0
+            """Games won. Does not increment for byes."""
             self.mpts = 0
+            """Match points. Similar to score."""
             self.gcount = 0
+            """Total games played. Does not increment for byes."""
             self.mcount = 0
+            """Total matches played. *Does* increment with byes."""
             self.opponents = []
             self.dropped = False
             self.ogp = None
@@ -216,49 +222,50 @@ class Draft:
                 if match.gwinners == []:
                     return False
             for match in round.matches:
+                wasTie = len(set(match.gwinners)) == len(match.gwinners)
+                wasBye = "-1" in [o.player_id for o in match.players]
                 for ind, player in enumerate(match.players):
                     if (
                         player.player_id == "-1"
                     ):  # Catch fake bye player. Might not be needed, since they aren't in the players list.
                         continue
-                    if (
-                        max(
-                            [
-                                len(
-                                    [
-                                        i
-                                        for i in match.gwinners
-                                        if i == match.players.index(g)
-                                    ]
-                                )
-                                for g in match.players
-                            ]
-                        )
-                        == 1
-                    ):  # Check for ties
-                        player.score += 1
+                    if wasBye:
+                        player.score += 2
                         player.mcount += 1
-                        player.gcount += 2
-                        player.mpts += 1
-                        player.gpts += 1
+                        player.gcount += 0
+                        player.mpts += 3
+                        player.gpts += 0
                         player.dropped = match.drops[ind]
                         continue
-                    player.score += (
-                        3
-                        if (won := (len([i for i in match.gwinners if i == ind]) == 2))
-                        else 0
-                    )
-                    player.mcount += 1
-                    player.gcount += len([i for i in match.gwinners if i is not None])
-                    player.mpts += 3 if won else 0
-                    player.gpts += 3 if won else 0
-                    player.dropped = match.drops[ind]
+                    if wasTie:
+                        player.score += 1
+                        player.mcount += 1
+                        player.gcount += len(
+                            [i for i in match.gwinners if i is not None]
+                        )
+                        player.mpts += 1
+                        player.gpts += len([i for i in match.gwinners if i == ind])
+                        player.dropped = match.drops[ind]
+                    else:
+                        won = len([i for i in match.gwinners if i == ind]) > len(
+                            [i for i in match.gwinners if i != ind]
+                        )
+                        player.score += 3 if won else 0
+                        player.mcount += 1
+                        player.gcount += len(
+                            [i for i in match.gwinners if i is not None]
+                        )
+                        player.mpts += 3 if won else 0
+                        player.gpts += len([i for i in match.gwinners if i == ind])
+                        player.dropped = match.drops[ind]
             round.completed = True
             # Check if it's the max number of rounds
             # Check if it's impossible to make pairings <- may want to just forget about this, easier to force pairings
             # If either of those: somehow signal that the draft is over, dont make pairings
             if len(self.rounds) != self.max_rounds:
                 self.do_pairings()
+            else:
+                self.calculate()
             return True
 
     def drop_player(self, p_id):
@@ -297,6 +304,9 @@ class Draft:
         for player in self.players:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
+            print(
+                player.player_id, player.gpts, player.gcount, player.mpts, player.mcount
+            )
         for player in self.players:
             player.ogp = sum(h := [p.gwp for p in player.opponents]) / (
                 len(h) if len(h) > 0 else 1
@@ -307,37 +317,28 @@ class Draft:
         return
 
 
-# dr = Draft(1,"TODAY","ME","TAG","NOPE","THE")
-# dr.add_player("A","1")
-# dr.add_player("B","2",True)
-# dr.add_player("C","3")
-# dr.add_player("D","4")
-# dr.add_player("E","5")
-# dr.add_player("F","6")
-# dr.add_player("G","7")
-# dr.add_player("H","8")
-# dr.do_pairings()
-# print("n2",dr.rounds)
-# dr.parse_match("1","0")
-# dr.parse_match("2","1")
-# dr.drop_player("1")
-# print("n3",dr.rounds)
-# if dr.finish_round():
-#     print("n4",dr.rounds)
-# else:
-#     print("NOT DONE")
-# dr.parse_match("3","1")
-# dr.parse_match("4","5")
-# dr.parse_match("5","2")
-# print("n5",dr.rounds)
-# dr.parse_match("6","3")
-# dr.parse_match("7","1")
-# if dr.finish_round():
-#     print("n6",dr.rounds)
-# else:
-#     print("NOT DONE")
-# print("n7",dr.rounds)
+dr = Draft(1, "TODAY", "ME", "TAG", "NOPE", "THE")
+dr.add_player("A", "1")
+dr.add_player("B", "2", True)
+dr.add_player("C", "3")
+dr.do_pairings()
+print("n2", dr.rounds)
+dr.parse_match("1", "0")
+dr.parse_match("2", "1")
+print("n3", dr.rounds)
+if dr.finish_round():
+    print("n4", dr.rounds)
+else:
+    print("NOT DONE")
+dr.parse_match("1", "0")
+dr.parse_match("2", "1")
+if dr.finish_round():
+    print("n4", dr.rounds)
+else:
+    print("NOT DONE")
+import json
 
+print(json.dumps(dr.tojson()))
 # THE ORDER IS:
 # add_players
 # if finish_round, then continue
