@@ -31,13 +31,6 @@ async def on_ready():
     # print(bot.user.name)
     # print(bot.user.id)
     print("------")
-    # print("Deleting old commands.")
-    # commands = await bot._http.get_application_commands(application_id=bot.me.id)
-    # for c in commands:
-    #     await bot._http.delete_application_command(
-    #         application_id=bot.me.id, command_id=c["id"]
-    #     )
-    # print("Commands deleted.")
 
 
 # ---------------------------------------------------------------------------------------------#
