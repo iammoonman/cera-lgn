@@ -19,7 +19,9 @@ class Pack:
         "scaleY": 1.0,
         "scaleZ": 1.0,
     }
+    """Required for TTS."""
     colorAttrs = {"r": 0.0, "g": 0.0, "b": 0.0}
+    """Required for TTS."""
     StarFoil = {
         "CustomDecal": {
             "Name": "StarFoil",
@@ -95,6 +97,7 @@ class Pack:
             random.choice([Pack.StarFoil, Pack.SetSpiralFoil, Pack.VoronoiFoil])
         ]
         self.Counter = 0
+        """Uniquely identifies each card in the pack."""
 
     class CardBlob:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
