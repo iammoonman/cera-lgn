@@ -1,6 +1,3 @@
-import random
-
-
 class Draft:
     def __init__(self, draftID, date, host, tag, description, name, max_rounds=3):
         self.draftID = draftID
@@ -76,7 +73,7 @@ class Draft:
             elif self.gpts != other.gpts:
                 return self.gpts < other.gpts
             else:
-                return random.random() > 0.5
+                return self.name < other.name
 
         def __repr__(self):
             return self.name + " (" + str(self.score) + ")"

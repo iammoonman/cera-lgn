@@ -209,7 +209,9 @@ async def btn5_response(ctx):
                     components=in_draft_buttons,
                 )
             else:
-                await ctx.edit(embeds=[end_embed(drafts[str(ctx.message.id)])],components=[])
+                await ctx.edit(
+                    embeds=[end_embed(drafts[str(ctx.message.id)])], components=[]
+                )
                 # Send the json to the owner
                 print(drafts[str(ctx.message.id)].tojson())
                 # member = interactions.Member(
@@ -388,7 +390,8 @@ def ig_embed(name, round, round_end):
         ]
         + [
             interactions.EmbedField(
-                name="ROUND TIMER", value=f"<t:{int(round_end.timestamp())}:R>"
+                name="ROUND TIMER",
+                value=f"The round ends <t:{int(round_end.timestamp())}:R>.",
             )
         ],
     )
@@ -407,7 +410,9 @@ def end_embed(draft):
                 + f"OMP: {p.omp}",
             )
             for p in sorted(
-                draft.players, key=lambda pl: (pl.score, pl.gwp, pl.ogp, pl.omp), reverse=True
+                draft.players,
+                key=lambda pl: (pl.score, pl.gwp, pl.ogp, pl.omp),
+                reverse=True,
             )
         ],
     )
@@ -429,13 +434,13 @@ def end_embed(draft):
             type=interactions.OptionType.STRING,
             name="title",
             description="The name of the draft event.",
-            required=False,
+            required=True,
         ),
         interactions.Option(
             type=interactions.OptionType.STRING,
             name="description",
             description="Write a description for the draft.",
-            required=False,
+            required=True,
         ),
         interactions.Option(
             type=interactions.OptionType.STRING,
@@ -447,10 +452,18 @@ def end_embed(draft):
                 interactions.Choice(name="ptm", value="Prime Time with Moon"),
             ],
         ),
+        interactions.Option(
+            type=interactions.OptionType.INTEGER,
+            name="rounds",
+            description="The maximum number of rounds for the draft. Default is 3.",
+            min_value=1,
+            max_value=5,
+            required=False,
+        ),
     ],
     scope=guild,
 )
-async def draft(ctx: interactions.CommandContext, title, description, tag=""):
+async def draft(ctx: interactions.CommandContext, title, description, tag="", rounds=3):
     """Begins the draft command sequence."""
     msg = await ctx.send(content="Setting up your draft.")
     print(msg.id, "DRAFT")
@@ -461,6 +474,7 @@ async def draft(ctx: interactions.CommandContext, title, description, tag=""):
         tag=tag,
         description=description,
         name=title,
+        max_rounds=rounds,
     )
     drafts[str(msg.id)].add_player(
         p_name=ctx.author.nick
