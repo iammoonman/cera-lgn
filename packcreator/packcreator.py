@@ -158,7 +158,7 @@ if __name__ == "__main__":
             print(w, n)
 
 
-def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[]):
+def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[],seed:int=None):
     """
     Takes a JSON dict object, parsed in the V3 format.
 
@@ -170,6 +170,10 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[]):
 
     Returns indexes of the list which indicate foiled cards.
     """
+    if seed is not None:
+        random.seed(seed)
+    else:
+        random.seed(seed:=random.randint(0,2000000))
     pack = []
     foil_indexes = []
     # Choose a distro based on distro[freq]
@@ -221,4 +225,4 @@ def pack_gen_v3(set=None, func=lambda l_s, c_t: random.randint(0, l_s), d_c=[]):
     # Return the pack in reverse, return the foil array pivoted around the center
     return pack[::-1], [
         (radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes
-    ]
+    ],seed
