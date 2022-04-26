@@ -70,3 +70,11 @@ def get_number(num_to_take):
         pickle.dump([n for n in list_nums if n not in out], f)
     return random.choice(out)
 
+def get_sampled_numbers(n_packs, n_rares):
+    """Returns a randomly sampled list of numbers range(0,n_rares) with reduced chance of repeats."""
+    out = []
+    while len(out) < n_packs:
+        out += random.sample(
+            range(n_rares), k=(min([max([(n_packs * 41 // 43) - len(n_rares), 1]), n_rares]))
+        )
+    return out
