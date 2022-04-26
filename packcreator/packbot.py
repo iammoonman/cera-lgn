@@ -135,7 +135,7 @@ async def create_pack(
 
 
 @bot.autocomplete(command="pack", name="set")
-async def set_autocomplete(ctx, set=""):
+async def set_autocomplete(ctx, set="A"):
     to_send = [
         interactions.Choice(name=i[0], value=i[1])
         for i in set_choices
@@ -157,7 +157,7 @@ async def set_autocomplete(ctx, set=""):
     ],
     scope=guild,
 )
-async def post_rule(ctx: interactions.CommandContext, rule=""):
+async def post_rule(ctx: interactions.CommandContext, rule="1"):
     with open("rules.pickle", "rb") as f:
         rules: list[dict] = pickle.load(f)
     r = next((d for d in rules if d["refer"] == rule), "Not found.")
