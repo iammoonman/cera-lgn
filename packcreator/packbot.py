@@ -1,9 +1,7 @@
 import json
 import interactions
 import pickle
-import logging
 
-logging.basicConfig(level=logging.DEBUG)
 
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
