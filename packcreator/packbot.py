@@ -138,6 +138,34 @@ async def create_pack(
     return
 
 
+@bot.command(
+    name="cube",
+    description="Import a cube from CubeCobra.",
+    options=[
+        interactions.Option(
+            name="id",
+            description="The cube's Cube ID, as shown on its Overview page.",
+            type=interactions.OptionType.STRING,
+            required=True,
+        )
+    ],
+)
+async def create_cube(ctx: interactions.CommandContext, id: str):
+    import tts_output
+
+    raw = tts_output.get_cube(id)
+    if raw is None:
+        return await ctx.send("That cube could not be found.", ephemeral=True)
+    with open("packs.json", "w") as f:
+        json.dump(raw, f)
+    await ctx.send(
+        content=f"Here's your cube.",
+        files=[interactions.File("packs.json")],
+        ephemeral=True,
+    )
+    return
+
+
 # @bot.autocomplete(command="pack", name="set")
 # async def set_autocomplete(ctx, set="A"):
 #     to_send = [
