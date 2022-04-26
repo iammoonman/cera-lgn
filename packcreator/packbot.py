@@ -1,12 +1,13 @@
 import json
 import interactions
 import pickle
-
+import interactions.ext.enhanced
 
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
 
 bot = interactions.Client(token=token)
+bot.load("interactions.ext.enhanced")
 
 with open("guild.pickle", "rb") as f:
     guild = pickle.load(f)
@@ -129,8 +130,11 @@ async def create_pack(
     raw = tts_output.get_packs(set, number, lands == "Y")
     with open("packs.json", "w") as f:
         json.dump(raw, f)
-    m = await ctx.send("Creating your packs.")
-    await m.edit(content="", files=[interactions.File("packs.json")])
+    await ctx.send(
+        content=f"Here are your {number} packs of {set}.",
+        files=[interactions.File("packs.json")],
+        ephemeral=True,
+    )
     return
 
 
