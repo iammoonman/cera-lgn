@@ -161,7 +161,7 @@ async def set_autocomplete(ctx, set="A"):
     ],
     scope=guild,
 )
-async def post_rule(ctx: interactions.CommandContext, rule="1"):
+async def post_rule(ctx: interactions.CommandContext, rule=""):
     with open("rules.pickle", "rb") as f:
         rules: list[dict] = pickle.load(f)
     r = next((d for d in rules if d["refer"] == rule), "Not found.")
@@ -169,7 +169,9 @@ async def post_rule(ctx: interactions.CommandContext, rule="1"):
 
 
 @bot.autocomplete(command="rule", name="rule")
-async def do_autocomplete(ctx, rule=""):
+async def do_autocomplete(ctx: interactions.CommandContext, rule="1"):
+    # Not being called at all.
+    print("IM RIGHT HERE")
     # rules = [{"text":"","refer":""}]
     with open("rules.pickle", "rb") as f:
         rules = pickle.load(f)
