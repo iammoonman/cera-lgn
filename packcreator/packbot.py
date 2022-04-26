@@ -138,52 +138,52 @@ async def create_pack(
     return
 
 
-@bot.autocomplete(command="pack", name="set")
-async def set_autocomplete(ctx, set="A"):
-    to_send = [
-        interactions.Choice(name=i[0], value=i[1])
-        for i in set_choices
-        if i[0][: len(set)] == set
-    ]
-    return await ctx.populate(to_send)
+# @bot.autocomplete(command="pack", name="set")
+# async def set_autocomplete(ctx, set="A"):
+#     to_send = [
+#         interactions.Choice(name=i[0], value=i[1])
+#         for i in set_choices
+#         if i[0][: len(set)] == set
+#     ]
+#     return await ctx.populate(to_send)
 
 
-@bot.command(
-    name="rule",
-    description="Reference a specific Magic rule.",
-    options=[
-        interactions.Option(
-            name="start_typing",
-            type=interactions.OptionType.STRING,
-            description="Start typing to find your rule, beginning with its rule number.",
-            required=True,
-            autocomplete=True,
-        )
-    ],
-    scope=guild,
-)
-async def post_rule(ctx: interactions.CommandContext, start_typing=""):
-    with open("rules.pickle", "rb") as f:
-        rules: list[dict] = pickle.load(f)
-    r = next((d for d in rules if d["refer"] == start_typing), "Not found.")
-    return await ctx.send(r["text"])
+# @bot.command(
+#     name="rule",
+#     description="Reference a specific Magic rule.",
+#     options=[
+#         interactions.Option(
+#             name="start_typing",
+#             type=interactions.OptionType.STRING,
+#             description="Start typing to find your rule, beginning with its rule number.",
+#             required=True,
+#             autocomplete=True,
+#         )
+#     ],
+#     scope=guild,
+# )
+# async def post_rule(ctx: interactions.CommandContext, start_typing=""):
+#     with open("rules.pickle", "rb") as f:
+#         rules: list[dict] = pickle.load(f)
+#     r = next((d for d in rules if d["refer"] == start_typing), "Not found.")
+#     return await ctx.send(r["text"])
 
 
-@bot.autocomplete(command="rule", name="start_typing")
-async def do_autocomplete(ctx, start_typing=""):
-    # rules = [{"text":"","refer":""}]
-    with open("rules.pickle", "rb") as f:
-        rules = pickle.load(f)
-    choices = [
-        interactions.Choice(
-            name=r["text"][:80] + ("..." if len(r["text"]) > 80 else ""),
-            value=r["refer"],
-        )
-        for r in rules
-        if r["text"][: len(start_typing)] == start_typing
-    ]
-    to_send = choices[: min(len(choices), 15)]
-    return await ctx.populate(to_send)
+# @bot.autocomplete(command="rule", name="start_typing")
+# async def do_autocomplete(ctx, start_typing=""):
+#     # rules = [{"text":"","refer":""}]
+#     with open("rules.pickle", "rb") as f:
+#         rules = pickle.load(f)
+#     choices = [
+#         interactions.Choice(
+#             name=r["text"][:80] + ("..." if len(r["text"]) > 80 else ""),
+#             value=r["refer"],
+#         )
+#         for r in rules
+#         if r["text"][: len(start_typing)] == start_typing
+#     ]
+#     to_send = choices[: min(len(choices), 15)]
+#     return await ctx.populate(to_send)
 
 
 bot.start()
