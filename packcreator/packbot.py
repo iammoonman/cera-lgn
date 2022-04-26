@@ -1,6 +1,9 @@
 import json
 import interactions
 import pickle
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
@@ -32,7 +35,58 @@ def getSeqID():
     return str(e + 1)
 
 
-set_choices = []
+set_choices = [
+    ["Fifth Edition", "5ed"],
+    ["Aether Revolt", "aer"],
+    ["Adventures in the Forgotten Realms", "afr"],
+    ["Amonkhet", "akh"],
+    ["Battlebond", "bbd"],
+    ["Battle for Zendikar", "bfz"],
+    ["Born of the Gods", "bng"],
+    ["Dragon's Maze", "dgm"],
+    ["Dark Ascension", "dka"],
+    ["Dominaria", "dom"],
+    ["Dragons of Tarkir", "dtk"],
+    ["Throne of Eldraine", "eld"],
+    ["Eternal Masters", "ema"],
+    ["Eldrich Moon", "emn"],
+    ["Fate Reforged", "frf"],
+    ["FUN", "fun"],
+    ["Guilds of Ravnica", "grn"],
+    ["Gatecrash", "gtc"],
+    ["Hour of Devastation", "hou"],
+    ["Ikoria: Lair of Behemoths", "iko"],
+    ["Journey into Nyx", "jou"],
+    ["Kaldheim", "khm"],
+    ["Kaladesh", "kld"],
+    ["Khans of Tarkir", "ktk"],
+    ["Magic 2014", "m14"],
+    ["Magic 2015", "m15"],
+    ["Core Set 2019", "m19"],
+    ["Core Set 2020", "m20"],
+    ["Core Set 2021", "m21"],
+    ["Modern Horizons 1", "mh1"],
+    ["Modern Horizons 2", "mh2"],
+    ["Midnight Hunt", "mid"],
+    ["Mirage", "mir"],
+    ["Kamigawa: Neon Dynasty", "neo"],
+    ["Oath of the Gatewatch", "ogw"],
+    ["Magic Origins", "ori"],
+    ["Rivals of Ixalan", "rix"],
+    ["Ravnica Allegaince", "rna"],
+    ["Rise of the Eldrazi", "roe"],
+    ["Return to Ravnica", "rtr"],
+    ["Shadows over Innistrad", "soi"],
+    ["Strixhaven: School of Mages", "stx"],
+    ["Theros Beyond Death", "thb"],
+    ["Theros", "ths"],
+    ["Urza's Destiny", "uds"],
+    ["Visions", "vis"],
+    ["Crimson Vow", "vow"],
+    ["War of the Spark", "war"],
+    ["Ixalan", "xln"],
+    ["Zendikar Rising", "znr"],
+]
 
 
 @bot.command(
@@ -44,7 +98,7 @@ set_choices = []
             description="Should be obvious.",
             type=interactions.OptionType.STRING,
             required=True,
-            choices=[interactions.Choice(name=i[0], value=i[1]) for i in set_choices],
+            autocomplete=True,
         ),
         interactions.Option(
             name="number",
@@ -60,20 +114,36 @@ set_choices = []
             type=interactions.OptionType.STRING,
             required=False,
             choices=[
-                interactions.Choice(name="Yes", value=True),
-                interactions.Choice(name="No", value=False),
+                interactions.Choice(name="Yes", value="Y"),
+                interactions.Choice(name="No", value="N"),
             ],
         ),
     ],
+    scope=guild,
 )
 async def create_pack(
-    ctx: interactions.CommandContext, set: str, number: int, lands: bool
+    ctx: interactions.CommandContext, set: str, number: int, lands: str = "N"
 ):
     # Attachments aren't implemented yet
     # Instead of DM, use an ephemeral message in the channel.
-    m = await ctx.send("hello")
-    await m.edit(files=[interactions.File("packs.json")])
+    import tts_output
+
+    raw = tts_output.get_packs(set, number, lands == "Y")
+    with open("packs.json", "w") as f:
+        json.dump(raw, f)
+    m = await ctx.send("Creating your packs.")
+    await m.edit(content="", files=[interactions.File("packs.json")])
     return
+
+
+@bot.autocomplete(command="pack", name="set")
+async def set_autocomplete(ctx, set=""):
+    to_send = [
+        interactions.Choice(name=i[0], value=i[1])
+        for i in set_choices
+        if i[0][: len(set)] == set
+    ]
+    return await ctx.populate(to_send)
 
 
 @bot.command(
