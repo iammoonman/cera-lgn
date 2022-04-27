@@ -157,7 +157,7 @@ async def set_autocomplete(ctx, set="A"):
     to_send = [
         interactions.Choice(name=i[0], value=i[1])
         for i in set_choices
-        if i[0][: len(set)] == set
+        if set in i[0]
     ]
     return await ctx.populate(to_send[:25])
 
