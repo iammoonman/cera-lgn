@@ -2,6 +2,7 @@ import json
 import interactions
 import pickle
 import interactions.ext.enhanced
+import io
 
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
@@ -123,16 +124,13 @@ set_choices = [
 async def create_pack(
     ctx: interactions.CommandContext, set: str, number: int, lands: str = "N"
 ):
-    # Attachments aren't implemented yet
-    # Instead of DM, use an ephemeral message in the channel.
     import tts_output
 
     raw = tts_output.get_packs(set, number, lands == "Y")
-    with open("packs.json", "w") as f:
-        json.dump(raw, f)
+    packs = io.StringIO(json.dumps(raw))
     await ctx.send(
         content=f"Here are your {number} packs of {set}.",
-        files=[interactions.File("packs.json")],
+        files=[interactions.File(filename=f"{number} packs of {set}", fp=packs)],
         ephemeral=True,
     )
     return
@@ -156,11 +154,10 @@ async def create_cube(ctx: interactions.CommandContext, id: str):
     raw = tts_output.get_cube(id)
     if raw is None:
         return await ctx.send("That cube could not be found.", ephemeral=True)
-    with open("packs.json", "w") as f:
-        json.dump(raw, f)
+    packs = io.StringIO(json.dumps(raw))
     await ctx.send(
         content=f"Here's your cube.",
-        files=[interactions.File("packs.json")],
+        files=[interactions.File(filename=f"{id}", fp=packs)],
         ephemeral=True,
     )
     return
