@@ -22,19 +22,6 @@ async def on_ready():
     print("------")
 
 
-def getSeqID():
-    try:
-        with open("counter.pickle", "rb") as f:
-            e = pickle.load(f)
-    except:
-        with open("counter.pickle", "wb") as f:
-            pickle.dump(0, f)
-        e = 0
-    with open("counter.pickle", "wb") as f:
-        pickle.dump(e + 1, f)
-    return str(e + 1)
-
-
 set_choices = [
     ["Fifth Edition", "5ed"],
     ["Aether Revolt", "aer"],
