@@ -20,6 +20,8 @@ async def on_ready():
     # print(bot.user.name)
     # print(bot.user.id)
     print("------")
+    # for c in await bot._http.get_application_commands(bot.me.id):
+    #     await bot._http.delete_application_command(bot.me.id,c['id'])
 
 
 set_choices = [
