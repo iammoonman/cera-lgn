@@ -130,7 +130,7 @@ async def create_pack(
     packs = io.StringIO(json.dumps(raw))
     await ctx.send(
         content=f"Here are your {number} packs of {set}.",
-        files=[interactions.File(filename=f"{number} packs of {set}", fp=packs)],
+        files=[interactions.File(filename=f"{number}_of_{set}.json", fp=packs)],
         ephemeral=True,
     )
     return
@@ -147,17 +147,19 @@ async def create_pack(
             required=True,
         )
     ],
+    scope=guild
 )
 async def create_cube(ctx: interactions.CommandContext, id: str):
+    return await ctx.send("This command isn't ready yet.")
     import tts_output
-
+    await ctx.defer(ephemeral=True)
     raw = tts_output.get_cube(id)
     if raw is None:
         return await ctx.send("That cube could not be found.", ephemeral=True)
     packs = io.StringIO(json.dumps(raw))
     await ctx.send(
         content=f"Here's your cube.",
-        files=[interactions.File(filename=f"{id}", fp=packs)],
+        files=[interactions.File(filename=f"cube_{id}.json", fp=packs)],
         ephemeral=True,
     )
     return
