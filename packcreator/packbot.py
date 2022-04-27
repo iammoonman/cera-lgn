@@ -163,14 +163,14 @@ async def create_cube(ctx: interactions.CommandContext, id: str):
     return
 
 
-# @bot.autocomplete(command="pack", name="set")
-# async def set_autocomplete(ctx, set="A"):
-#     to_send = [
-#         interactions.Choice(name=i[0], value=i[1])
-#         for i in set_choices
-#         if i[0][: len(set)] == set
-#     ]
-#     return await ctx.populate(to_send)
+@bot.autocomplete(command="pack", name="set")
+async def set_autocomplete(ctx, set="A"):
+    to_send = [
+        interactions.Choice(name=i[0], value=i[1])
+        for i in set_choices
+        if i[0][: len(set)] == set
+    ]
+    return await ctx.populate(to_send[:25])
 
 
 # @bot.command(
@@ -207,7 +207,7 @@ async def create_cube(ctx: interactions.CommandContext, id: str):
 #         for r in rules
 #         if r["text"][: len(start_typing)] == start_typing
 #     ]
-#     to_send = choices[: min(len(choices), 15)]
+#     to_send = choices[: min(len(choices), 25)]
 #     return await ctx.populate(to_send)
 
 
