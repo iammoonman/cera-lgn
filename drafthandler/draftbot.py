@@ -93,9 +93,7 @@ async def btn1_response(ctx: interactions.ComponentContext):
 # ---------------------------------------------------------------------------------------------#
 
 
-@bot.message_command(
-    name="DROPKICK",
-)
+@bot.message_command(name="DROPKICK", scope=guild)
 async def dropkick(ctx: interactions.CommandContext):
     """Kick all from the draft"""
     print(ctx.target.id, "DROP_KICK")
@@ -116,17 +114,15 @@ async def dropkick(ctx: interactions.CommandContext):
 # ---------------------------------------------------------------------------------------------#
 
 
-@bot.message_command(
-    name="CANCEL",
-)
-async def cancel(ctx):
+@bot.message_command(name="CANCEL", scope=guild)
+async def cancel(ctx: interactions.CommandContext):
     """Cancel the draft"""
     print(ctx.target.id, "CANCEL")
     if type(ctx.target) == interactions.Message:
         if str(ctx.target.id) in drafts.keys():
             if int(ctx.author.user.id) == drafts[str(ctx.target.id)].host:
                 del drafts[str(ctx.target.id)]
-                await ctx.delete()
+                await ctx.target.delete()
     return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
