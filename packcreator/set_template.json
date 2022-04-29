@@ -73,7 +73,9 @@
             }
         },
         "dfc": {
-            "flags": [],
+            "flags": [
+                "sequenced"
+            ],
             "options": [
                 {
                     "struct": {
@@ -101,6 +103,24 @@
                     "count": 8,
                     "max_length": 4
                 }
+            }
+        },
+        "sequenced": {
+            "dfc": {
+                "seq": [
+                    "a",
+                    "b",
+                    "a",
+                    "a",
+                    "b",
+                    "b",
+                    "a",
+                    "a",
+                    "a",
+                    "b",
+                    "b",
+                    "b"
+                ]
             }
         }
     }
