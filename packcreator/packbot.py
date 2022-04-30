@@ -24,6 +24,19 @@ async def on_ready():
     #     await bot._http.delete_application_command(bot.me.id,c['id'])
 
 
+def getSeqID():
+    try:
+        with open("counter.pickle", "rb") as f:
+            e = pickle.load(f)
+    except:
+        with open("counter.pickle", "wb") as f:
+            pickle.dump(0, f)
+        e = 0
+    with open("counter.pickle", "wb") as f:
+        pickle.dump(e + 1, f)
+    return str(e + 1)
+
+
 set_choices = [
     ["Fifth Edition", "5ed"],
     ["Aether Revolt", "aer"],
@@ -119,7 +132,9 @@ async def create_pack(
     packs = io.StringIO(json.dumps(raw))
     await ctx.send(
         content=f"Here are your {number} packs of {set}.",
-        files=[interactions.File(filename=f"{number}_of_{set}.json", fp=packs)],
+        files=[
+            interactions.File(filename=f"{number}_of_{set}_{getSeqID()}.json", fp=packs)
+        ],  # Put the number back on the end
         ephemeral=True,
     )
     return
@@ -136,11 +151,12 @@ async def create_pack(
             required=True,
         )
     ],
-    scope=guild
+    scope=guild,
 )
 async def create_cube(ctx: interactions.CommandContext, id: str):
     return await ctx.send("This command isn't ready yet.")
     import tts_output
+
     await ctx.defer(ephemeral=True)
     raw = tts_output.get_cube(id)
     if raw is None:
@@ -157,9 +173,7 @@ async def create_cube(ctx: interactions.CommandContext, id: str):
 @bot.autocomplete(command="pack", name="set")
 async def set_autocomplete(ctx, set="A"):
     to_send = [
-        interactions.Choice(name=i[0], value=i[1])
-        for i in set_choices
-        if set in i[0]
+        interactions.Choice(name=i[0], value=i[1]) for i in set_choices if set in i[0]
     ]
     return await ctx.populate(to_send[:25])
 
