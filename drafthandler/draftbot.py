@@ -401,9 +401,9 @@ def end_embed(draft):
             interactions.EmbedField(
                 name=f"{p.name}",
                 value=f"SCORE: {p.score}{bslash}"
-                + f"GWP: {p.gwp}{bslash}"
-                + f"OGP: {p.ogp}{bslash}"
-                + f"OMP: {p.omp}",
+                + f"GWP: {round(p.gwp,2)}{bslash}"
+                + f"OGP: {round(p.ogp,2)}{bslash}"
+                + f"OMP: {round(p.omp,2)}",
             )
             for p in sorted(
                 draft.players,

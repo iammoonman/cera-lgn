@@ -227,7 +227,7 @@ class Draft:
                     ):  # Catch fake bye player. Might not be needed, since they aren't in the players list.
                         continue
                     if wasBye:
-                        player.score += 2
+                        player.score += 3
                         player.mcount += 1
                         player.gcount += 0
                         player.mpts += 3
@@ -318,11 +318,16 @@ class Draft:
 # dr.add_player("A", "1")
 # dr.add_player("B", "2", True)
 # dr.add_player("C", "3")
+# dr.add_player("D", "4")
 # dr.do_pairings()
-# print("n2", dr.rounds)
+# dr.parse_match("1", "0")
+# dr.parse_match("3", "1")
+# if dr.finish_round():
+#     print("n4", dr.rounds)
+# else:
+#     print("NOT DONE")
 # dr.parse_match("1", "0")
 # dr.parse_match("2", "1")
-# print("n3", dr.rounds)
 # if dr.finish_round():
 #     print("n4", dr.rounds)
 # else:
