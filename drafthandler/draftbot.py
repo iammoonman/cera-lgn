@@ -205,9 +205,6 @@ async def btn5_response(ctx):
                     components=in_draft_buttons,
                 )
             else:
-                await ctx.edit(
-                    embeds=[end_embed(drafts[str(ctx.message.id)])], components=[]
-                )
                 # Send the json to the owner
                 print(drafts[str(ctx.message.id)].tojson())
                 # member = interactions.Member(
@@ -215,6 +212,9 @@ async def btn5_response(ctx):
                 #     _client=bot.http,
                 # )
                 # await member.send(drafts[str(ctx.message.id)].tojson())
+                await ctx.edit(
+                    embeds=[end_embed(drafts[str(ctx.message.id)])], components=[]
+                )
         else:
             await ctx.edit(
                 content="Not all results reported.",
@@ -276,7 +276,7 @@ select0 = interactions.SelectMenu(
             description="You tied, winning the second game.",
         ),
     ],
-    placeholder="Choose the games you won.",
+    placeholder="Report the games you won.",
     custom_id="WINSELECT",
     min_values=1,
     max_values=1,
