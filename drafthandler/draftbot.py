@@ -190,7 +190,7 @@ async def btn5_response(ctx):
         timekeep[str(ctx.message.id)] = datetime.now() + timedelta(minutes=50)
         # Add a check to see if the third round has been played, then swap to posting the final results and send the json to dm.
         if drafts[str(ctx.message.id)].finish_round():
-            roundsearch = [
+            roundsearch: list[draft_class.Draft.Round] = [
                 r for r in drafts[str(ctx.message.id)].rounds if not r.completed
             ]
             if len(roundsearch) > 0:
@@ -285,7 +285,7 @@ select0 = interactions.SelectMenu(
 
 
 @bot.component(select0)
-async def sel0_response(ctx, choices):
+async def sel0_response(ctx: interactions.ComponentContext, choices):
     """Select the winners of the author's match"""
     # If draft is inactive, delete the message.
     if str(ctx.message.id) not in drafts.keys():
@@ -316,7 +316,7 @@ button6 = interactions.Button(
 
 
 @bot.component(button6)
-async def btn6_response(ctx):
+async def btn6_response(ctx: interactions.ComponentContext):
     """Drop from the draft while it is running"""
     # If draft is inactive, delete the message.
     if str(ctx.message.id) not in drafts.keys():
@@ -356,7 +356,7 @@ in_draft_buttons = [
 # ---------------------------------------------------------------------------------------------#
 
 
-def starting_embed(draft):
+def starting_embed(draft: draft_class.Draft):
     longtext = [p.name for p in draft.players]
     embed = interactions.Embed(
         title=f"{draft.name} | {draft.tag}",
@@ -372,11 +372,12 @@ def starting_embed(draft):
     return embed
 
 
-def ig_embed(name, round, round_end):
+def ig_embed(name, round: draft_class.Draft.Round, round_end):
     embed = interactions.Embed(
         title=f"{name} | Round: {round.title}",
         fields=[
             interactions.EmbedField(
+                inline=True,
                 name=f"GAME: {i.players[0]} vs {i.players[1]}",
                 value=f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
                 + f"G2 Winner: {(i.players[i.gwinners[1]] if i.gwinners[1] is not None else 'NONE') if len(i.gwinners) > 1 else 'NONE'}{bslash}"
@@ -394,11 +395,13 @@ def ig_embed(name, round, round_end):
     return embed
 
 
-def end_embed(draft):
+def end_embed(draft: draft_class.Draft):
     embed = interactions.Embed(
         title=f"{draft.name} | FINAL",
+        description=draft.description,
         fields=[
             interactions.EmbedField(
+                inline=True,
                 name=f"{p.name}",
                 value=f"SCORE: {p.score}{bslash}"
                 + f"GWP: {round(p.gwp,2)}{bslash}"
