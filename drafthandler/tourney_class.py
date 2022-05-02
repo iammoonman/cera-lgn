@@ -83,25 +83,16 @@ class T:
     def buildBracket(self):
         """Builds the nodes needed to form a bracket out of the player list."""
         tempnodes: list[T.N] = []
-        # Change this to finding the min and max seed instead
-        # Help the top player get the bye by removing them at the beginning
-        # Also break the players down into is_pow()
-        # Works well when the number of players is just over a power of two,
-        # but terribly when its just under a power of two.
-        # Gives the top player a bye and puts every other
-        # player into a match with the next closest seed.
-        # Not exactly sure how to solve.
-        feeders = []
         tempplayers = self.players[:]
         tempplayers.sort(key=lambda n: n.seed, reverse=True)
-        while not is_pow(len(tempplayers) + len(feeders)):
-            p1 = tempplayers.pop()
-            p2 = tempplayers.pop()
-            feeders.append(T.N(p1=p1, p2=p2, r=-1, maxSeed=max(p1.seed, p2.seed)))
-        self.nodes += feeders
-        print(len(self.nodes))
-        tempplayers += feeders
+        # Sort the players by their seed.
+        # Add bogus players AKA byes until there are 4, 8, 16, 32, etc players
+        # Makes the bracket evenly distributed
+        while not is_pow(len(tempplayers)):
+            tempplayers.append(T.P(id="0", seed=-999))
         tempplayers.sort(key=lambda x: x.seed if type(x) == T.P else x.max_seed)
+        # Pair the highest seed with the lowest seed
+        # The lowest can be a bye. Each of the highest ranked players get byes when possible
         while len(tempplayers) > 0:
             maxplayer = tempplayers.pop()
             minplayer = tempplayers.pop(0)
@@ -121,49 +112,83 @@ class T:
                 minplayer.feeds.append(holdnode.bnid)
         for t in tempnodes:
             self.nodes.append(t)
-        print(len(self.nodes))
-        # Trying to give byes properly
-        # Each round must have a 2^n matches
-        # While there arent 2^n matches in tempnodes + len(playoffs):
-        #  Pair off a match from tempnodes, add it to playoffs
-        # Then, readd the playoffs to the tempnodes
         ror = 1
+        # Start pairing off all the node pairs into the next round
         while True:
             tempnodes2 = tempnodes[:]
             if len(tempnodes2) > 1:
-                # Find the highest max_seed
-                # Pair it with the lowest max_seed
-                # pop both
-
-                # Make sure the top seed has the bye if able
-                # If tempnodes2 is odd,
-                #  check the holding var
-                #  if its none, put the top seed into the var
-                #  else, put the holding var into tempnodes2
-
+                # Pair the worst player available with the best player available
+                # If both of the nodes have byes, combine them into a new node without byes
+                # If one of the nodes has a bye,
+                # delete the bye node and just put that player into the new node
+                # Otherwise, feed the two nodes into a new node
                 tempnodes2.sort(key=lambda n: n.max_seed)
                 while len(tempnodes2) > 0:
                     maxnode: T.N = tempnodes2.pop()
                     minnode: T.N = tempnodes2.pop(0)
-                    nd = T.N(
-                        r=ror,
-                        maxSeed=max(
-                            [
-                                maxnode.max_seed,
-                                minnode.max_seed,
-                            ]
-                        ),
-                    )
-                    maxnode.feeds.append(nd.bnid)
-                    tempnodes.remove(maxnode)
-                    minnode.feeds.append(nd.bnid)
-                    tempnodes.remove(minnode)
-                    self.nodes.append(nd)
-                    tempnodes.append(nd)
+                    if (
+                        T.P(id="0", seed=-999) in maxnode.match.players
+                        and T.P(id="0", seed=-999) in minnode.match.players
+                    ):
+                        p1 = [i for i in maxnode.match.players if i.id != "0"][0]
+                        p2 = [i for i in minnode.match.players if i.id != "0"][0]
+                        nd = T.N(
+                            p1=p1,
+                            p2=p2,
+                            r=ror,
+                            maxSeed=max([p1.seed, p2.seed]),
+                        )
+                        self.nodes.remove(maxnode)
+                        self.nodes.remove(minnode)
+                        self.nodes.append(nd)
+                        tempnodes.append(nd)
+                        tempnodes.remove(maxnode)
+                        tempnodes.remove(minnode)
+                    elif T.P(id="0", seed=-999) in maxnode.match.players:
+                        p1 = [i for i in maxnode.match.players if i.id != "0"][0]
+                        nd = T.N(
+                            p1=p1,
+                            r=ror,
+                            maxSeed=max([p1.seed, minnode.max_seed]),
+                        )
+                        self.nodes.remove(maxnode)
+                        self.nodes.append(nd)
+                        tempnodes.append(nd)
+                        tempnodes.remove(maxnode)
+                        tempnodes.remove(minnode)
+                        minnode.feeds.append(nd.bnid)
+                    elif T.P(id="0", seed=-999) in minnode.match.players:
+                        p2 = [i for i in minnode.match.players if i.id != "0"][0]
+                        nd = T.N(
+                            p2=p2,
+                            r=ror,
+                            maxSeed=max([p2.seed, maxnode.max_seed]),
+                        )
+                        self.nodes.remove(minnode)
+                        self.nodes.append(nd)
+                        tempnodes.append(nd)
+                        tempnodes.remove(maxnode)
+                        tempnodes.remove(minnode)
+                        maxnode.feeds.append(nd.bnid)
+                    else:
+                        nd = T.N(
+                            r=ror,
+                            maxSeed=max(
+                                [
+                                    maxnode.max_seed,
+                                    minnode.max_seed,
+                                ]
+                            ),
+                        )
+                        self.nodes.append(nd)
+                        tempnodes.append(nd)
+                        tempnodes.remove(minnode)
+                        tempnodes.remove(maxnode)
+                        maxnode.feeds.append(nd.bnid)
+                        minnode.feeds.append(nd.bnid)
                 ror += 1
             else:
                 break
-        print(len(self.nodes))
         for n in self.nodes:
             n.round += 1
         return
