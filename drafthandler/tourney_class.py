@@ -195,6 +195,9 @@ class T:
 
     def buildDoubleElimBracket(self):
         # buildBracket() first
+        # If the players list isn't a power of 2, this will explode
+        if not is_pow(len(self.players)):
+            return
         # For each round,
         #  If there's a previous round,
         #   Look at round NL
@@ -202,6 +205,60 @@ class T:
         #   Pair those nodes into round (N+1)L
         #  If there's no previous round,
         #   Pair off nodes into loser nodes in round (N+1)L
+        rounds = []
+        for n in self.nodes:
+            if n.round not in rounds:
+                rounds.append(n.round)
+        print(rounds)
+        rounds.sort()
+        for r in rounds:
+            tempnodes = [n for n in self.nodes if n.round == r and not n.loser]
+            templosernodes = [n for n in self.nodes if n.round == r and n.loser]
+            print("w", tempnodes)
+            print("l", templosernodes)
+            if len(templosernodes) > 0:
+                # Pair off this round's loser nodes with the losers from this round
+                tempnodes += templosernodes
+                tempnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                halfagainnodes = []
+                while len(tempnodes) > 1:
+                    minnode: T.N = tempnodes.pop()
+                    maxnode: T.N = tempnodes.pop(0)
+                    nd = T.N(
+                        r=r + 0.5,
+                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        loser=True,
+                    )
+                    self.nodes.append(nd)
+                    halfagainnodes.append(nd)
+                    minnode.feeds.append(nd.bnid)
+                    maxnode.feeds.append(nd.bnid)
+                halfagainnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                while len(halfagainnodes) > 1:
+                    print('hello')
+                    minnode: T.N = halfagainnodes.pop()
+                    maxnode: T.N = halfagainnodes.pop(0)
+                    nd = T.N(
+                        r=r + 1,
+                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        loser=True,
+                    )
+                    self.nodes.append(nd)
+                    minnode.feeds.append(nd.bnid)
+                    maxnode.feeds.append(nd.bnid)
+            else:
+                while len(tempnodes) > 1:
+                    tempnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                    minnode: T.N = tempnodes.pop()
+                    maxnode: T.N = tempnodes.pop(0)
+                    nd = T.N(
+                        r=r + 1,
+                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        loser=True,
+                    )
+                    self.nodes.append(nd)
+                    minnode.feeds.append(nd.bnid)
+                    maxnode.feeds.append(nd.bnid)
         return
 
     class N:
@@ -234,6 +291,7 @@ class T:
                     "players": [str(p) for p in self.match.players],
                     "scores": self.match.scores,
                 },
+                "loser": self.loser,
             }
 
     class M:
