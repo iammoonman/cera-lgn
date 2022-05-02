@@ -83,59 +83,54 @@ class T:
     def buildBracket(self):
         """Builds the nodes needed to form a bracket out of the player list."""
         tempnodes: list[T.N] = []
-        tempPairs = []
-        ll = None
         # Change this to finding the min and max seed instead
         # Help the top player get the bye by removing them at the beginning
-        for p in self.players:
-            leftover = True
-            for h in [q for q in self.players if q != p]:
-                if h.seed + p.seed == len(self.players) - 1:
-                    if [h, p] not in tempPairs and [p, h] not in tempPairs:
-                        tempPairs.append([h, p])
-                    leftover = False
-            if leftover:
-                ll = p
-        for pp in tempPairs:
-            nd = T.N(p1=pp[0], p2=pp[1], r=0)
-            self.nodes.append(nd)
-            tempnodes.append(nd)
-        extranode2 = None
-        if ll is not None:
-            extranode = T.N(p1=ll, r=0)
-            self.nodes.append(extranode)
-            tempnodes.append(extranode)
+        # Also break the players down into is_pow()
+        # Works well when the number of players is just over a power of two,
+        # but terribly when its just under a power of two.
+        # Gives the top player a bye and puts every other
+        # player into a match with the next closest seed.
+        # Not exactly sure how to solve.
+        feeders = []
+        tempplayers = self.players[:]
+        tempplayers.sort(key=lambda n: n.seed, reverse=True)
+        while not is_pow(len(tempplayers) + len(feeders)):
+            p1 = tempplayers.pop()
+            p2 = tempplayers.pop()
+            feeders.append(T.N(p1=p1, p2=p2, r=-1, maxSeed=max(p1.seed, p2.seed)))
+        self.nodes += feeders
+        print(len(self.nodes))
+        tempplayers += feeders
+        tempplayers.sort(key=lambda x: x.seed if type(x) == T.P else x.max_seed)
+        while len(tempplayers) > 0:
+            maxplayer = tempplayers.pop()
+            minplayer = tempplayers.pop(0)
+            holdnode = T.N(
+                p1=maxplayer if type(maxplayer) == T.P else None,
+                p2=minplayer if type(minplayer) == T.P else None,
+                r=0,
+                maxSeed=max(
+                    maxplayer.seed if type(maxplayer) == T.P else maxplayer.max_seed,
+                    minplayer.seed if type(minplayer) == T.P else minplayer.max_seed,
+                ),
+            )
+            tempnodes.append(holdnode)
+            if type(maxplayer) == T.N:
+                maxplayer.feeds.append(holdnode.bnid)
+            if type(minplayer) == T.N:
+                minplayer.feeds.append(holdnode.bnid)
+        for t in tempnodes:
+            self.nodes.append(t)
+        print(len(self.nodes))
         # Trying to give byes properly
         # Each round must have a 2^n matches
         # While there arent 2^n matches in tempnodes + len(playoffs):
         #  Pair off a match from tempnodes, add it to playoffs
         # Then, readd the playoffs to the tempnodes
-        playoffs = []
-        while not is_pow(len(tempnodes) + len(playoffs)):
-            tempnodes.sort(key=lambda n: n.max_seed, reverse=True)
-            maxnode: T.N = tempnodes.pop()
-            minnode: T.N = tempnodes.pop()
-            minnode.round -= 1
-            maxnode.round -= 1
-            nd = T.N(
-                r=0,
-                maxSeed=max(
-                    [
-                        maxnode.max_seed,
-                        minnode.max_seed,
-                    ]
-                ),
-            )
-            maxnode.feeds.append(nd.bnid)
-            minnode.feeds.append(nd.bnid)
-            self.nodes.append(nd)
-            playoffs.append(nd)
-        tempnodes += playoffs
         ror = 1
-        single = True
         while True:
             tempnodes2 = tempnodes[:]
-            if len(tempnodes) > 1:
+            if len(tempnodes2) > 1:
                 # Find the highest max_seed
                 # Pair it with the lowest max_seed
                 # pop both
@@ -149,26 +144,26 @@ class T:
                 tempnodes2.sort(key=lambda n: n.max_seed)
                 while len(tempnodes2) > 0:
                     maxnode: T.N = tempnodes2.pop()
-                    minnode: T.N = tempnodes2.pop(-1) if len(tempnodes2) > 0 else None
+                    minnode: T.N = tempnodes2.pop(0)
                     nd = T.N(
                         r=ror,
                         maxSeed=max(
                             [
                                 maxnode.max_seed,
-                                minnode.max_seed if minnode is not None else 0,
+                                minnode.max_seed,
                             ]
                         ),
                     )
                     maxnode.feeds.append(nd.bnid)
                     tempnodes.remove(maxnode)
-                    if minnode is not None:
-                        minnode.feeds.append(nd.bnid)
-                        tempnodes.remove(minnode)
+                    minnode.feeds.append(nd.bnid)
+                    tempnodes.remove(minnode)
                     self.nodes.append(nd)
                     tempnodes.append(nd)
                 ror += 1
             else:
                 break
+        print(len(self.nodes))
         for n in self.nodes:
             n.round += 1
         return
@@ -193,7 +188,7 @@ class T:
             self.match: T.M = (
                 T.M(p1, p2) if p2 is not None else T.M(p1) if p1 is not None else T.M()
             )
-            self.max_seed = (
+            self.max_seed: int = (
                 (
                     (max(p1.seed, p2.seed) if p2 is not None else p1.seed)
                     if p1 is not None
@@ -204,9 +199,6 @@ class T:
             )
             T.bracket_id += 1
             return
-
-        def __repr__(self):
-            return f"|p={self.match.players} bnid={self.bnid} feed={self.feeds} round={self.round}|"
 
         def __json__(self):
             return {
@@ -222,7 +214,13 @@ class T:
     class M:
         def __init__(self, p1=None, p2=None):
             self.players: list[T.P] = (
-                [p1, p2] if p2 is not None else [p1] if p1 is not None else []
+                [p1, p2]
+                if p1 is not None and p2 is not None
+                else [p1]
+                if p1 is not None and p2 is None
+                else [p2]
+                if p1 is None and p2 is not None
+                else []
             )
             self.scores = []
 
@@ -235,7 +233,7 @@ class T:
             return [self.players[w], self.players[l]]
 
     class P:
-        def __init__(self, id=None, seed=0):
+        def __init__(self, id, seed=0):
             self.id = id
             self.seed = seed
             self.rank = 0
