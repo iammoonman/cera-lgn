@@ -80,7 +80,7 @@ class T:
             "nodes": [b.__json__() for b in self.nodes],
         }
 
-    def buildBracket(self):
+    def buildBracket(self, dropByes=True):
         """Builds the nodes needed to form a bracket out of the player list."""
         tempnodes: list[T.N] = []
         tempplayers = self.players[:]
@@ -90,19 +90,19 @@ class T:
         # Makes the bracket evenly distributed
         while not is_pow(len(tempplayers)):
             tempplayers.append(T.P(id="0", seed=-999))
-        tempplayers.sort(key=lambda x: x.seed if type(x) == T.P else x.max_seed)
+        tempplayers.sort(key=lambda x: x.seed)
         # Pair the highest seed with the lowest seed
         # The lowest can be a bye. Each of the highest ranked players get byes when possible
         while len(tempplayers) > 0:
             maxplayer = tempplayers.pop()
             minplayer = tempplayers.pop(0)
             holdnode = T.N(
-                p1=maxplayer if type(maxplayer) == T.P else None,
-                p2=minplayer if type(minplayer) == T.P else None,
+                p1=maxplayer,
+                p2=minplayer,
                 r=0,
                 maxSeed=max(
-                    maxplayer.seed if type(maxplayer) == T.P else maxplayer.max_seed,
-                    minplayer.seed if type(minplayer) == T.P else minplayer.max_seed,
+                    maxplayer.seed,
+                    minplayer.seed,
                 ),
             )
             tempnodes.append(holdnode)
@@ -129,7 +129,7 @@ class T:
                     if (
                         T.P(id="0", seed=-999) in maxnode.match.players
                         and T.P(id="0", seed=-999) in minnode.match.players
-                    ):
+                    ) and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
                         nd = T.N(
@@ -144,7 +144,7 @@ class T:
                         tempnodes.append(nd)
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
-                    elif T.P(id="0", seed=-999) in maxnode.match.players:
+                    elif T.P(id="0", seed=-999) in maxnode.match.players and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         nd = T.N(
                             p1=p1,
@@ -157,7 +157,7 @@ class T:
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
                         minnode.feeds.append(nd.bnid)
-                    elif T.P(id="0", seed=-999) in minnode.match.players:
+                    elif T.P(id="0", seed=-999) in minnode.match.players and dropByes:
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
                         nd = T.N(
                             p2=p2,
@@ -196,8 +196,8 @@ class T:
     def buildDoubleElimBracket(self):
         # buildBracket() first
         # If the players list isn't a power of 2, this will explode
-        if not is_pow(len(self.players)):
-            return
+        # if not is_pow(len(self.players)):
+        #     return
         # For each round,
         #  If there's a previous round,
         #   Look at round NL
@@ -235,7 +235,6 @@ class T:
                     maxnode.feeds.append(nd.bnid)
                 halfagainnodes.sort(key=lambda x: (x.loser, x.max_seed))
                 while len(halfagainnodes) > 1:
-                    print('hello')
                     minnode: T.N = halfagainnodes.pop()
                     maxnode: T.N = halfagainnodes.pop(0)
                     nd = T.N(
