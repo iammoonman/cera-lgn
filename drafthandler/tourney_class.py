@@ -80,6 +80,41 @@ class T:
             "nodes": [b.__json__() for b in self.nodes],
         }
 
+    def cutByes(self):
+        # For each node which doesn't have anything feeding into it,
+        # If it's a bye,
+        # Choose its winner feed
+        # Put its players into that node
+        # Delete the previous node
+        # For each loser node,
+        # If only one node feeds into it,
+        # instead have that node feed into the node that the loser feeds
+        # Finally, if any loser node is an entry node, delete it
+        secondarynodes = sum([u.feeds for u in self.nodes], [])
+        entrynodes = [u for u in self.nodes if u.bnid not in secondarynodes]
+        while len(entrynodes) > 0:
+            e = entrynodes.pop()
+            if T.P(id="0", seed=-999) in e.match.players:
+                print("dropping a node")
+                e.match.players.remove(T.P(id="0", seed=-999))
+                theplayer = e.match.players.pop()
+                winnode = next(
+                    q for q in self.nodes if q.bnid in e.feeds and not q.loser
+                )
+                winnode.match.players.append(theplayer)
+                self.nodes.remove(e)
+        for losernode in [l for l in self.nodes if l.loser]:
+            if len((feeder:=[y for y in self.nodes if losernode.bnid in y.feeds])) == 1:
+                feeder[0].feeds.remove(losernode.bnid)
+                feeder[0].feeds.append(losernode.feeds[0])
+                self.nodes.remove(losernode)
+        secondarynodes = sum([u.feeds for u in self.nodes], [])
+        entrynodes = [u for u in self.nodes if u.bnid not in secondarynodes]
+        for n in entrynodes:
+            if n.loser:
+                self.nodes.remove(n)
+        return
+
     def buildBracket(self, dropByes=True):
         """Builds the nodes needed to form a bracket out of the player list."""
         tempnodes: list[T.N] = []
@@ -205,6 +240,7 @@ class T:
         #   Pair those nodes into round (N+1)L
         #  If there's no previous round,
         #   Pair off nodes into loser nodes in round (N+1)L
+        # Finally, pair the final winner with the last loser
         rounds = []
         for n in self.nodes:
             if n.round not in rounds:
@@ -258,6 +294,14 @@ class T:
                     self.nodes.append(nd)
                     minnode.feeds.append(nd.bnid)
                     maxnode.feeds.append(nd.bnid)
+        self.nodes.sort(key=lambda x: x.round)
+        biground = max([x.round for x in self.nodes])
+        n1 = self.nodes[-1]
+        n2 = self.nodes[-3]
+        nd = T.N(r=biground, maxSeed=max([x.max_seed for x in [n1, n2]]))
+        n1.feeds.append(nd.bnid)
+        n2.feeds.append(nd.bnid)
+        self.nodes.append(nd)
         return
 
     class N:
