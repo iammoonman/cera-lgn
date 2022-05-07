@@ -1,14 +1,15 @@
 import json
 import interactions
 import pickle
-import interactions.ext.enhanced
+
+# import interactions.ext.enhanced
 import io
 
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
 
 bot = interactions.Client(token=token)
-bot.load("interactions.ext.enhanced")
+# bot.load("interactions.ext.enhanced")
 
 with open("guild.pickle", "rb") as f:
     guild = pickle.load(f)
@@ -128,14 +129,21 @@ async def create_pack(
 ):
     import tts_output
 
+    await ctx.defer()
+
     raw = tts_output.get_packs(set, number, lands == "Y")
     packs = io.StringIO(json.dumps(raw))
-    await ctx.send(
+    m = await ctx.send(
         content=f"Here are your {number} packs of {set}.",
+        # files=[
+        #     interactions.File(filename=f"{number}_of_{set}_{getSeqID()}.json", fp=packs)
+        # ],  # Put the number back on the end
+        # ephemeral=True,
+    )
+    await m.edit(
         files=[
             interactions.File(filename=f"{number}_of_{set}_{getSeqID()}.json", fp=packs)
-        ],  # Put the number back on the end
-        ephemeral=True,
+        ]
     )
     return
 
@@ -154,26 +162,28 @@ async def create_pack(
     scope=guild,
 )
 async def create_cube(ctx: interactions.CommandContext, id: str):
-    return await ctx.send("This command isn't ready yet.")
+    # return await ctx.send("This command isn't ready yet.")
     import tts_output
 
-    await ctx.defer(ephemeral=True)
+    await ctx.defer()
     raw = tts_output.get_cube(id)
     if raw is None:
         return await ctx.send("That cube could not be found.", ephemeral=True)
     packs = io.StringIO(json.dumps(raw))
-    await ctx.send(
+    m = await ctx.send(
         content=f"Here's your cube.",
-        files=[interactions.File(filename=f"cube_{id}.json", fp=packs)],
-        ephemeral=True,
+        # files=[interactions.File(filename=f"cube_{id}.json", fp=packs)],
+        # ephemeral=True,
     )
+    m.edit(files=[interactions.File(filename=f"cube_{id}.json", fp=packs)])
     return
 
 
 @bot.autocomplete(command="pack", name="set")
-async def set_autocomplete(ctx, set="A"):
+async def set_autocomplete(ctx, set=""):
+    set_choices.sort(key=lambda x: set.lower() in x[0].lower(), reverse=True)
     to_send = [
-        interactions.Choice(name=i[0], value=i[1]) for i in set_choices if set in i[0]
+        interactions.Choice(name=i[0], value=i[1]) for i in set_choices
     ]
     return await ctx.populate(to_send[:25])
 
