@@ -20,6 +20,17 @@ class T:
         self.nodes: list[T.N] = []
         return
 
+    def reportScore(self, pl, scr):
+        # Search through rounds in reverse to find last one with the player in it
+        # Replace scores in node
+        rounds = list(set([o.round for o in self.nodes]))
+        print(rounds)
+        for r in rounds:
+            roundnodes = [n for n in self.nodes if n.round == r]
+            mynode = [p for p in roundnodes if pl in p.match.players][0]
+            mynode.match.setScoreP(pl,scr[0])
+        return self
+
     def calcRanks(self):
         # Sort nodes by round then is_loser
         # For node:
@@ -44,6 +55,7 @@ class T:
         self.players.append(P)
 
     def __json__(self):
+        self.calcRanks()
         return {
             "eventID": self.eventID,
             "tag": self.tag,
@@ -53,27 +65,14 @@ class T:
                 {
                     "playerID": p.id,
                     "rank": p.rank,
-                    "wins": sum(
-                        [
-                            1
-                            # if n.match.scores[n.match.players.index(p)]
-                            # == max(n.match.scores)
-                            # and min(n.match.scores) != max(n.match.scores)
-                            # else 0
-                            for n in self.nodes
-                            if p in n.match.players
-                        ]
-                    ),
-                    "losses": sum(
-                        [
-                            1
-                            # if n.match.scores[n.match.players.index(p)]
-                            # < max(n.match.scores)
-                            # else 0
-                            for n in self.nodes
-                            if p in n.match.players
-                        ]
-                    ),
+                    # "wins": sum([n.match.getScore(p) for n in self.nodes]),
+                    # "losses": sum(
+                    #     [
+                    #         1#n.match.getScore([o for o in n.match.players if o is not p][0])
+                    #         for n in self.nodes
+                    #         if p in n.match.players
+                    #     ]
+                    # ),
                 }  # Remember to iterate through each bracket if able.
                 for p in self.players
             ],
@@ -95,7 +94,7 @@ class T:
         while len(entrynodes) > 0:
             e = entrynodes.pop()
             if T.P(id="0", seed=-999) in e.match.players:
-                print("dropping a node")
+                # print("dropping a node")
                 e.match.players.remove(T.P(id="0", seed=-999))
                 theplayer = e.match.players.pop()
                 winnode = next(
@@ -104,7 +103,10 @@ class T:
                 winnode.match.players.append(theplayer)
                 self.nodes.remove(e)
         for losernode in [l for l in self.nodes if l.loser]:
-            if len((feeder:=[y for y in self.nodes if losernode.bnid in y.feeds])) == 1:
+            if (
+                len((feeder := [y for y in self.nodes if losernode.bnid in y.feeds]))
+                == 1
+            ):
                 feeder[0].feeds.remove(losernode.bnid)
                 feeder[0].feeds.append(losernode.feeds[0])
                 self.nodes.remove(losernode)
@@ -245,13 +247,13 @@ class T:
         for n in self.nodes:
             if n.round not in rounds:
                 rounds.append(n.round)
-        print(rounds)
+        # print(rounds)
         rounds.sort()
         for r in rounds:
             tempnodes = [n for n in self.nodes if n.round == r and not n.loser]
             templosernodes = [n for n in self.nodes if n.round == r and n.loser]
-            print("w", tempnodes)
-            print("l", templosernodes)
+            # print("w", tempnodes)
+            # print("l", templosernodes)
             if len(templosernodes) > 0:
                 # Pair off this round's loser nodes with the losers from this round
                 tempnodes += templosernodes
@@ -348,15 +350,28 @@ class T:
                 if p1 is None and p2 is not None
                 else []
             )
-            self.scores = []
+            self.scores = [0, 0]  # [0 for _ in range(len(self.players))]
 
         def setScores(self, scoreA, scoreB):
             self.scores = [scoreA, scoreB]
 
+        def setScoreP(self,player,score):
+            self.scores[self.players.index(player)] == score
+            return
+
         def getWinnerLoser(self):
+            if self.players == []:
+                return []
             w = self.scores.index(max(self.scores))
             l = 0 if w == 1 else 1
+            if len(self.players) == 1:
+                return [self.players[0]]
             return [self.players[w], self.players[l]]
+
+        def getScore(self, pl):
+            if pl not in self.players:
+                return 0
+            return self.scores[self.players.index(pl)]
 
     class P:
         def __init__(self, id, seed=0):
