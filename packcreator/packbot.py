@@ -91,6 +91,16 @@ set_choices = [
     ["Zendikar Rising", "znr"],
 ]
 
+button0 = interactions.Button(
+    style=interactions.ButtonStyle.DANGER, label="DONE", custom_id="DONE"
+)
+
+
+@bot.component(button0)
+async def delet_this(ctx: interactions.ComponentContext):
+    await ctx.message.delete()
+    return
+
 
 @bot.command(
     name="pack",
@@ -109,7 +119,7 @@ set_choices = [
             type=interactions.OptionType.INTEGER,
             required=True,
             min_value=1,
-            max_value=72,
+            max_value=48,
         ),
         interactions.Option(
             name="lands",
@@ -143,7 +153,8 @@ async def create_pack(
     await m.edit(
         files=[
             interactions.File(filename=f"{number}_of_{set}_{getSeqID()}.json", fp=packs)
-        ]
+        ],
+        components=[button0],
     )
     return
 
@@ -175,16 +186,17 @@ async def create_cube(ctx: interactions.CommandContext, id: str):
         # files=[interactions.File(filename=f"cube_{id}.json", fp=packs)],
         # ephemeral=True,
     )
-    m.edit(files=[interactions.File(filename=f"cube_{id}.json", fp=packs)])
+    m.edit(
+        files=[interactions.File(filename=f"cube_{id}.json", fp=packs)],
+        components=[button0],
+    )
     return
 
 
 @bot.autocomplete(command="pack", name="set")
 async def set_autocomplete(ctx, set=""):
     set_choices.sort(key=lambda x: set.lower() in x[0].lower(), reverse=True)
-    to_send = [
-        interactions.Choice(name=i[0], value=i[1]) for i in set_choices
-    ]
+    to_send = [interactions.Choice(name=i[0], value=i[1]) for i in set_choices]
     return await ctx.populate(to_send[:25])
 
 
