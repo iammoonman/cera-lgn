@@ -20,18 +20,45 @@ class T:
         self.nodes: list[T.N] = []
         return
 
-    def reportScore(self, pl, scr):
+    def node_from_bnid(self, bnid: str):
+        for n in self.nodes:
+            if n.bnid == bnid:
+                return n
+        return False
+
+    def reportScore(self, pl: str, scr: str):
+        """Reports a score identifier to the last game the player played."""
         # Search through rounds in reverse to find last one with the player in it
         # Replace scores in node
+        theplayer = [i for i in self.players if i.p_id == pl][0]
         rounds = list(set([o.round for o in self.nodes]))
-        print(rounds)
+        rounds.sort(key=lambda x: float(x), reverse = False)
         for r in rounds:
             roundnodes = [n for n in self.nodes if n.round == r]
-            mynode = [p for p in roundnodes if pl in p.match.players][0]
-            mynode.match.setScoreP(pl,scr[0])
+            mynode = [p for p in roundnodes if theplayer in p.match.players]
+            if len(mynode) > 0:
+                mynode[0].match.setScores(theplayer, scr)
         return self
 
+    def push_matches(self):
+        """For each match with results, send the players to the appropriate nodes."""
+        # For each node,
+        # If match.scores is not empty,
+        # Push winner into the first node in the feeds list
+        # If len(feeds) > 1, push loser into the second node
+        for n in self.nodes:
+            if (w := n.match.getWinnerLoser()):
+                if w == [None]:
+                    continue
+                for i, b in enumerate(n.feeds):
+                    nd = self.node_from_bnid(b)
+                    if None in nd.match.players and w[i] not in nd.match.players:
+                        nd.match.players.remove(None)
+                        nd.match.players.append(w[i])
+        return
+
     def calcRanks(self):
+        """Gives each player a numerical ranking based on their position in the bracket."""
         # Sort nodes by round then is_loser
         # For node:
         #  For player in node, sorted winner then loser:
@@ -44,7 +71,7 @@ class T:
         nds.sort(key=lambda x: (x.round, x.loser), reverse=True)
         for n in nds:
             for player in n.match.getWinnerLoser():
-                if player not in rankedlist:
+                if player not in rankedlist and player is not None:
                     player.lastround = n.round
                     rankedlist.append(player)
         for p in rankedlist:
@@ -63,7 +90,7 @@ class T:
             "title": self.title,
             "players": [
                 {
-                    "playerID": p.id,
+                    "playerID": p.p_id,
                     "rank": p.rank,
                     # "wins": sum([n.match.getScore(p) for n in self.nodes]),
                     # "losses": sum(
@@ -80,6 +107,7 @@ class T:
         }
 
     def cutByes(self):
+        """Removes extraneous bye and empty nodes from the nodes list."""
         # For each node which doesn't have anything feeding into it,
         # If it's a bye,
         # Choose its winner feed
@@ -100,7 +128,9 @@ class T:
                 winnode = next(
                     q for q in self.nodes if q.bnid in e.feeds and not q.loser
                 )
-                winnode.match.players.append(theplayer)
+                if len(winnode.match.players) == 2:
+                    winnode.match.players.remove(None)
+                winnode.match.players.insert(0, theplayer)
                 self.nodes.remove(e)
         for losernode in [l for l in self.nodes if l.loser]:
             if (
@@ -312,9 +342,7 @@ class T:
             self.loser = loser
             self.round = r
             self.feeds = []
-            self.match: T.M = (
-                T.M(p1, p2) if p2 is not None else T.M(p1) if p1 is not None else T.M()
-            )
+            self.match: T.M = T.M(p1, p2)
             self.max_seed: int = (
                 (
                     (max(p1.seed, p2.seed) if p2 is not None else p1.seed)
@@ -341,41 +369,72 @@ class T:
 
     class M:
         def __init__(self, p1=None, p2=None):
-            self.players: list[T.P] = (
-                [p1, p2]
-                if p1 is not None and p2 is not None
-                else [p1]
-                if p1 is not None and p2 is None
-                else [p2]
-                if p1 is None and p2 is not None
-                else []
-            )
-            self.scores = [0, 0]  # [0 for _ in range(len(self.players))]
+            # self.players: list[T.P] = (
+            #     [p1, p2]
+            #     if p1 is not None and p2 is not None
+            #     else [p1]
+            #     if p1 is not None and p2 is None
+            #     else [p2]
+            #     if p1 is None and p2 is not None
+            #     else []
+            # )
+            self.players = [p1, p2]
+            self.scores = []  # [0 for _ in range(len(self.players))]
 
-        def setScores(self, scoreA, scoreB):
-            self.scores = [scoreA, scoreB]
+        def setScores(self, player, result_code: str):
+            """Sets the score for the match from the perspective of the player."""
+            if self.players.index(player) == 0:
+                p_index = 0
+                o_index = 1
+            else:
+                p_index = 1
+                o_index = 0
+            # result codes
+            # 0 means the player won both of their games
+            # 1 means the player won game 1 and game 3
+            # 2 means the player won game 2 and game 3
+            # 3 means the player won game 2
+            # 4 means the player won game 1
+            # 5 means the player didnt win any games
+            # 6 means it was a tie, with the player winning first
+            # 7 means it was a tie, with the opponent winning first
+            if result_code == "0":
+                self.scores = [p_index, p_index]
+            elif result_code == "1":
+                self.scores = [p_index, o_index, p_index]
+            elif result_code == "2":
+                self.scores = [o_index, p_index, p_index]
+            elif result_code == "3":
+                self.scores = [o_index, p_index, o_index]
+            elif result_code == "4":
+                self.scores = [p_index, o_index, o_index]
+            elif result_code == "5":
+                self.scores = [o_index, o_index]
+            elif result_code == "6":
+                self.scores = [p_index, o_index]
+            elif result_code == "7":
+                self.scores = [o_index, p_index]
 
-        def setScoreP(self,player,score):
-            self.scores[self.players.index(player)] == score
-            return
+        # def setScoreP(self, player, score):
+        #     self.scores[self.players.index(player)] == score
+        #     return
 
         def getWinnerLoser(self):
-            if self.players == []:
-                return []
-            w = self.scores.index(max(self.scores))
-            l = 0 if w == 1 else 1
-            if len(self.players) == 1:
-                return [self.players[0]]
-            return [self.players[w], self.players[l]]
+            if self.scores.count(0) > self.scores.count(1):
+                return [self.players[0], self.players[1]]
+            elif self.scores.count(0) < self.scores.count(1):
+                return [self.players[1], self.players[0]]
+            else:
+                return [None]
 
         def getScore(self, pl):
             if pl not in self.players:
                 return 0
-            return self.scores[self.players.index(pl)]
+            return self.scores.count(self.players.index(pl))
 
     class P:
-        def __init__(self, id, seed=0):
-            self.id = id
+        def __init__(self, id: str, seed: int=0):
+            self.p_id = id
             self.seed = seed
             self.rank = 0
             self.lastround = 0
@@ -384,7 +443,7 @@ class T:
             return self.seed > other.seed
 
         def __str__(self):
-            return self.id
+            return self.p_id
 
         def __eq__(self, other):
-            return self.id == other.id
+            return self.p_id == other.p_id if other is not None else False
