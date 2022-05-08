@@ -1,5 +1,14 @@
 class Draft:
-    def __init__(self, draftID, date, host, tag, description, name, max_rounds=3):
+    def __init__(
+        self,
+        draftID: int,
+        date: str,
+        host: int,
+        tag: str,
+        description: str,
+        name: str,
+        max_rounds: int = 3,
+    ):
         self.draftID = draftID
         self.date = date
         self.host = host
@@ -37,9 +46,9 @@ class Draft:
                 {
                     "playerID": i.player_id,
                     "score": i.score,
-                    "gwp": i.gwp,
-                    "ogp": i.ogp,
-                    "omp": i.omp,
+                    "gwp": round(i.gwp,2),
+                    "ogp": round(i.ogp,2),
+                    "omp": round(i.omp,2),
                 }
                 for i in self.players
             ],
@@ -165,6 +174,7 @@ class Draft:
             # 7 means it was a tie, with the opponent winning first
             # 8 means the opponent won game 1 and game 2 didn't happen
             # 9 means the player won game 1 and game 2 didn't happen
+            # -1 means the player's opponent dropped late
             if result_code == "0":
                 match.gwinners = [p_index, p_index, None]
             elif result_code == "1":
@@ -185,6 +195,10 @@ class Draft:
                 match.gwinners = [o_index, None, None]
             elif result_code == "9":
                 match.gwinners = [p_index, None, None]
+            elif result_code == "-1" and match.drops[o_index] == True:
+                match.players[o_index].dropped = True
+                match.players[o_index] = Draft.Player("Bye", "-1")
+                match.gwinners = [p_index, p_index, None]
         return
 
     def parse_match_list(self, p_id, result):
