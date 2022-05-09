@@ -1,4 +1,5 @@
 def is_pow(n):
+    """Returns whether a number is a power of two."""
     if n % 2 == 1:
         return False
     r = n
@@ -21,6 +22,7 @@ class T:
         return
 
     def node_from_bnid(self, bnid: str):
+        """Retrieves a node from the bracket matching the id, or False."""
         for n in self.nodes:
             if n.bnid == bnid:
                 return n
@@ -261,6 +263,7 @@ class T:
         return
 
     def buildDoubleElimBracket(self):
+        """Adds loser bracket nodes from the normal bracket nodes in the nodes list."""
         # buildBracket() first
         # If the players list isn't a power of 2, this will explode
         # if not is_pow(len(self.players)):
@@ -420,6 +423,7 @@ class T:
         #     return
 
         def getWinnerLoser(self):
+            """Returns the winning player and losing player in that order, or [None]."""
             if self.scores.count(0) > self.scores.count(1):
                 return [self.players[0], self.players[1]]
             elif self.scores.count(0) < self.scores.count(1):
