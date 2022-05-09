@@ -15,7 +15,9 @@ class T:
     def __init__(self):
         self.eventID = "0"
         self.tag = ""
-        self.date = ""
+        """Three character code to categorize this event."""
+        self.date: str = ""
+        """String representation of the date of the event."""
         self.title = ""
         self.players: list[T.P] = []
         self.nodes: list[T.N] = []
@@ -34,7 +36,7 @@ class T:
         # Replace scores in node
         theplayer = [i for i in self.players if i.p_id == pl][0]
         rounds = list(set([o.round for o in self.nodes]))
-        rounds.sort(key=lambda x: float(x), reverse = False)
+        rounds.sort(key=lambda x: float(x), reverse=False)
         for r in rounds:
             roundnodes = [n for n in self.nodes if n.round == r]
             mynode = [p for p in roundnodes if theplayer in p.match.players]
@@ -49,7 +51,7 @@ class T:
         # Push winner into the first node in the feeds list
         # If len(feeds) > 1, push loser into the second node
         for n in self.nodes:
-            if (w := n.match.getWinnerLoser()):
+            if w := n.match.getWinnerLoser():
                 if w == [None]:
                     continue
                 for i, b in enumerate(n.feeds):
@@ -169,7 +171,7 @@ class T:
                 p1=maxplayer,
                 p2=minplayer,
                 r=0,
-                maxSeed=max(
+                max_seed=max(
                     maxplayer.seed,
                     minplayer.seed,
                 ),
@@ -205,7 +207,7 @@ class T:
                             p1=p1,
                             p2=p2,
                             r=ror,
-                            maxSeed=max([p1.seed, p2.seed]),
+                            max_seed=max([p1.seed, p2.seed]),
                         )
                         self.nodes.remove(maxnode)
                         self.nodes.remove(minnode)
@@ -218,7 +220,7 @@ class T:
                         nd = T.N(
                             p1=p1,
                             r=ror,
-                            maxSeed=max([p1.seed, minnode.max_seed]),
+                            max_seed=max([p1.seed, minnode.max_seed]),
                         )
                         self.nodes.remove(maxnode)
                         self.nodes.append(nd)
@@ -231,7 +233,7 @@ class T:
                         nd = T.N(
                             p2=p2,
                             r=ror,
-                            maxSeed=max([p2.seed, maxnode.max_seed]),
+                            max_seed=max([p2.seed, maxnode.max_seed]),
                         )
                         self.nodes.remove(minnode)
                         self.nodes.append(nd)
@@ -242,7 +244,7 @@ class T:
                     else:
                         nd = T.N(
                             r=ror,
-                            maxSeed=max(
+                            max_seed=max(
                                 [
                                     maxnode.max_seed,
                                     minnode.max_seed,
@@ -297,7 +299,7 @@ class T:
                     maxnode: T.N = tempnodes.pop(0)
                     nd = T.N(
                         r=r + 0.5,
-                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
@@ -310,7 +312,7 @@ class T:
                     maxnode: T.N = halfagainnodes.pop(0)
                     nd = T.N(
                         r=r + 1,
-                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
@@ -323,7 +325,7 @@ class T:
                     maxnode: T.N = tempnodes.pop(0)
                     nd = T.N(
                         r=r + 1,
-                        maxSeed=max([minnode.max_seed, maxnode.max_seed]),
+                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
@@ -333,27 +335,24 @@ class T:
         biground = max([x.round for x in self.nodes])
         n1 = self.nodes[-1]
         n2 = self.nodes[-3]
-        nd = T.N(r=biground, maxSeed=max([x.max_seed for x in [n1, n2]]))
+        nd = T.N(r=biground, max_seed=max([x.max_seed for x in [n1, n2]]))
         n1.feeds.append(nd.bnid)
         n2.feeds.append(nd.bnid)
         self.nodes.append(nd)
         return
 
     class N:
-        def __init__(self, p1=None, p2=None, r=0, maxSeed=None, loser=False):
+        def __init__(self, p1=None, p2=None, r=0, max_seed=None, loser=False):
             self.bnid = T.bracket_id
             self.loser = loser
             self.round = r
             self.feeds = []
+            """BNID pointers to the nodes that this node will feed its winner and loser respectively."""
             self.match: T.M = T.M(p1, p2)
-            self.max_seed: int = (
-                (
-                    (max(p1.seed, p2.seed) if p2 is not None else p1.seed)
-                    if p1 is not None
-                    else -999
-                )
-                if maxSeed is None
-                else maxSeed
+            self.max_seed: int = max(
+                p1.seed if p1 is not None else -999,
+                p2.seed if p2 is not None else -999,
+                max_seed if max_seed is not None else -999,
             )
             T.bracket_id += 1
             return
@@ -372,17 +371,8 @@ class T:
 
     class M:
         def __init__(self, p1=None, p2=None):
-            # self.players: list[T.P] = (
-            #     [p1, p2]
-            #     if p1 is not None and p2 is not None
-            #     else [p1]
-            #     if p1 is not None and p2 is None
-            #     else [p2]
-            #     if p1 is None and p2 is not None
-            #     else []
-            # )
             self.players = [p1, p2]
-            self.scores = []  # [0 for _ in range(len(self.players))]
+            self.scores = []
 
         def setScores(self, player, result_code: str):
             """Sets the score for the match from the perspective of the player."""
@@ -418,10 +408,6 @@ class T:
             elif result_code == "7":
                 self.scores = [o_index, p_index]
 
-        # def setScoreP(self, player, score):
-        #     self.scores[self.players.index(player)] == score
-        #     return
-
         def getWinnerLoser(self):
             """Returns the winning player and losing player in that order, or [None]."""
             if self.scores.count(0) > self.scores.count(1):
@@ -437,9 +423,12 @@ class T:
             return self.scores.count(self.players.index(pl))
 
     class P:
-        def __init__(self, id: str, seed: int=0):
+        def __init__(self, id: str, seed: int = 0):
             self.p_id = id
             self.seed = seed
+            """Although not behaviorally different, a seed of 1 is the worst, and a high seed is the best.
+            
+            These should be unique to each player."""
             self.rank = 0
             self.lastround = 0
 
