@@ -96,14 +96,14 @@ class T:
                 {
                     "playerID": p.p_id,
                     "rank": p.rank,
-                    # "wins": sum([n.match.getScore(p) for n in self.nodes]),
-                    # "losses": sum(
-                    #     [
-                    #         1#n.match.getScore([o for o in n.match.players if o is not p][0])
-                    #         for n in self.nodes
-                    #         if p in n.match.players
-                    #     ]
-                    # ),
+                    "wins": sum([n.match.getScore(p) for n in self.nodes]),
+                    "losses": sum(
+                        [
+                            n.match.getScore([o for o in n.match.players if o is not p][0])
+                            for n in self.nodes
+                            if p in n.match.players
+                        ]
+                    ),
                 }  # Remember to iterate through each bracket if able.
                 for p in self.players
             ],
