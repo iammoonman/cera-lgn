@@ -8,17 +8,20 @@ def is_pow(n):
     return r == 1
 
 
+import datetime
+
+
 class T:
     bracket_id = 0
     """Each node has a unique id within this tournament."""
 
-    def __init__(self):
+    def __init__(self, title: str = "", tag: str = ""):
         self.eventID = "0"
-        self.tag = ""
+        self.tag = tag
         """Three character code to categorize this event."""
-        self.date: str = ""
+        self.date: str = datetime.datetime.today().isoformat()
         """String representation of the date of the event."""
-        self.title = ""
+        self.title = title
         self.players: list[T.P] = []
         self.nodes: list[T.N] = []
         return
@@ -96,10 +99,13 @@ class T:
                 {
                     "playerID": p.p_id,
                     "rank": p.rank,
+                    "seed": p.seed,
                     "wins": sum([n.match.getScore(p) for n in self.nodes]),
                     "losses": sum(
                         [
-                            n.match.getScore([o for o in n.match.players if o is not p][0])
+                            n.match.getScore(
+                                [o for o in n.match.players if o is not p][0]
+                            )
                             for n in self.nodes
                             if p in n.match.players
                         ]
@@ -346,7 +352,7 @@ class T:
             self.bnid = T.bracket_id
             self.loser = loser
             self.round = r
-            self.feeds = []
+            self.feeds: list[int] = []
             """BNID pointers to the nodes that this node will feed its winner and loser respectively.
             
             The winner will go to the first feed, the second place will go to the second feed, and so on."""
@@ -373,8 +379,11 @@ class T:
 
     class M:
         def __init__(self, p1=None, p2=None):
-            self.players = [p1, p2]
-            self.scores = []
+            self.players: list[T.P] = [p1, p2]
+            self.scores: list[int] = []
+            """Indices of the players who won the Nth game of the match.
+            
+            [0, 0] means that players[0] won twice. [1, 0, 1] means that players[0] won once, and players[1] won twice."""
 
         def setScores(self, player, result_code: str):
             """Sets the score for the match from the perspective of the player."""
@@ -427,10 +436,13 @@ class T:
     class P:
         def __init__(self, id: str, seed: int = 0):
             self.p_id = id
+            """Generally the player's Discord user id."""
             self.seed = seed
             """Seeds should be unique to each player."""
             self.rank = 0
+            """Ranks are based on the player's overall position in the bracket. Not unique."""
             self.lastround = 0
+            """The latest round in which the player participated. Used to calculate rank."""
 
         def __lt__(self, other):
             return self.seed < other.seed
