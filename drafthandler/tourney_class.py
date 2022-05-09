@@ -160,7 +160,7 @@ class T:
         # Add bogus players AKA byes until there are 4, 8, 16, 32, etc players
         # Makes the bracket evenly distributed
         while not is_pow(len(tempplayers)):
-            tempplayers.append(T.P(id="0", seed=-999))
+            tempplayers.append(T.P(id="0", seed=999))
         tempplayers.sort(key=lambda x: x.seed)
         # Pair the highest seed with the lowest seed
         # The lowest can be a bye. Each of the highest ranked players get byes when possible
@@ -171,7 +171,7 @@ class T:
                 p1=maxplayer,
                 p2=minplayer,
                 r=0,
-                max_seed=max(
+                min_seed=min(
                     maxplayer.seed,
                     minplayer.seed,
                 ),
@@ -193,13 +193,13 @@ class T:
                 # If one of the nodes has a bye,
                 # delete the bye node and just put that player into the new node
                 # Otherwise, feed the two nodes into a new node
-                tempnodes2.sort(key=lambda n: n.max_seed)
+                tempnodes2.sort(key=lambda n: n.min_seed)
                 while len(tempnodes2) > 0:
                     maxnode: T.N = tempnodes2.pop()
                     minnode: T.N = tempnodes2.pop(0)
                     if (
-                        T.P(id="0", seed=-999) in maxnode.match.players
-                        and T.P(id="0", seed=-999) in minnode.match.players
+                        T.P(id="0", seed=999) in maxnode.match.players
+                        and T.P(id="0", seed=999) in minnode.match.players
                     ) and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
@@ -207,7 +207,7 @@ class T:
                             p1=p1,
                             p2=p2,
                             r=ror,
-                            max_seed=max([p1.seed, p2.seed]),
+                            min_seed=min([p1.seed, p2.seed]),
                         )
                         self.nodes.remove(maxnode)
                         self.nodes.remove(minnode)
@@ -215,12 +215,12 @@ class T:
                         tempnodes.append(nd)
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
-                    elif T.P(id="0", seed=-999) in maxnode.match.players and dropByes:
+                    elif T.P(id="0", seed=999) in maxnode.match.players and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         nd = T.N(
                             p1=p1,
                             r=ror,
-                            max_seed=max([p1.seed, minnode.max_seed]),
+                            min_seed=min([p1.seed, minnode.min_seed]),
                         )
                         self.nodes.remove(maxnode)
                         self.nodes.append(nd)
@@ -228,12 +228,12 @@ class T:
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
                         minnode.feeds.append(nd.bnid)
-                    elif T.P(id="0", seed=-999) in minnode.match.players and dropByes:
+                    elif T.P(id="0", seed=999) in minnode.match.players and dropByes:
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
                         nd = T.N(
                             p2=p2,
                             r=ror,
-                            max_seed=max([p2.seed, maxnode.max_seed]),
+                            min_seed=min([p2.seed, maxnode.min_seed]),
                         )
                         self.nodes.remove(minnode)
                         self.nodes.append(nd)
@@ -244,10 +244,10 @@ class T:
                     else:
                         nd = T.N(
                             r=ror,
-                            max_seed=max(
+                            min_seed=min(
                                 [
-                                    maxnode.max_seed,
-                                    minnode.max_seed,
+                                    maxnode.min_seed,
+                                    minnode.min_seed,
                                 ]
                             ),
                         )
@@ -292,27 +292,27 @@ class T:
             if len(templosernodes) > 0:
                 # Pair off this round's loser nodes with the losers from this round
                 tempnodes += templosernodes
-                tempnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                tempnodes.sort(key=lambda x: (x.loser, x.min_seed))
                 halfagainnodes = []
                 while len(tempnodes) > 1:
                     minnode: T.N = tempnodes.pop()
                     maxnode: T.N = tempnodes.pop(0)
                     nd = T.N(
                         r=r + 0.5,
-                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
+                        min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
                     halfagainnodes.append(nd)
                     minnode.feeds.append(nd.bnid)
                     maxnode.feeds.append(nd.bnid)
-                halfagainnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                halfagainnodes.sort(key=lambda x: (x.loser, x.min_seed))
                 while len(halfagainnodes) > 1:
                     minnode: T.N = halfagainnodes.pop()
                     maxnode: T.N = halfagainnodes.pop(0)
                     nd = T.N(
                         r=r + 1,
-                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
+                        min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
@@ -320,12 +320,12 @@ class T:
                     maxnode.feeds.append(nd.bnid)
             else:
                 while len(tempnodes) > 1:
-                    tempnodes.sort(key=lambda x: (x.loser, x.max_seed))
+                    tempnodes.sort(key=lambda x: (x.loser, x.min_seed))
                     minnode: T.N = tempnodes.pop()
                     maxnode: T.N = tempnodes.pop(0)
                     nd = T.N(
                         r=r + 1,
-                        max_seed=max([minnode.max_seed, maxnode.max_seed]),
+                        min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
                     )
                     self.nodes.append(nd)
@@ -335,24 +335,26 @@ class T:
         biground = max([x.round for x in self.nodes])
         n1 = self.nodes[-1]
         n2 = self.nodes[-3]
-        nd = T.N(r=biground, max_seed=max([x.max_seed for x in [n1, n2]]))
+        nd = T.N(r=biground, min_seed=min([x.min_seed for x in [n1, n2]]))
         n1.feeds.append(nd.bnid)
         n2.feeds.append(nd.bnid)
         self.nodes.append(nd)
         return
 
     class N:
-        def __init__(self, p1=None, p2=None, r=0, max_seed=None, loser=False):
+        def __init__(self, p1=None, p2=None, r=0, min_seed=None, loser=False):
             self.bnid = T.bracket_id
             self.loser = loser
             self.round = r
             self.feeds = []
-            """BNID pointers to the nodes that this node will feed its winner and loser respectively."""
+            """BNID pointers to the nodes that this node will feed its winner and loser respectively.
+            
+            The winner will go to the first feed, the second place will go to the second feed, and so on."""
             self.match: T.M = T.M(p1, p2)
-            self.max_seed: int = max(
-                p1.seed if p1 is not None else -999,
-                p2.seed if p2 is not None else -999,
-                max_seed if max_seed is not None else -999,
+            self.min_seed: int = min(
+                p1.seed if p1 is not None else 999,
+                p2.seed if p2 is not None else 999,
+                min_seed if min_seed is not None else 999,
             )
             T.bracket_id += 1
             return
@@ -426,14 +428,12 @@ class T:
         def __init__(self, id: str, seed: int = 0):
             self.p_id = id
             self.seed = seed
-            """Although not behaviorally different, a seed of 1 is the worst, and a high seed is the best.
-            
-            These should be unique to each player."""
+            """Seeds should be unique to each player."""
             self.rank = 0
             self.lastround = 0
 
         def __lt__(self, other):
-            return self.seed > other.seed
+            return self.seed < other.seed
 
         def __str__(self):
             return self.p_id
