@@ -143,21 +143,6 @@ def generatepack_c1c2_special(
     return pack[::-1], [(r + (len(pack) - r) * 2) % len(pack) for r in f_indexes]
 
 
-if __name__ == "__main__":
-    import json
-    import point_slicer
-
-    with open("packcreator/setjson/mid.json", "rb") as f:
-        ooo = json.load(f)
-        for n in range(24):
-            w, n = generatepack_c1c2_special(
-                sheet_index=0,
-                setJSON=ooo,
-                sheet_index_func=lambda a: point_slicer.get_number(a),
-            )
-            print(w, n)
-
-
 def pack_gen_v3(
     set=None,
     func=lambda l_s, c_t: random.randint(0, l_s),
@@ -214,7 +199,7 @@ def pack_gen_v3(
                         for d in distro["drops"]
                         if d["slot"] == slot_key and d["key"] == sheet_key
                     ),
-                    [0],
+                    0,
                 )
             # For x in range(value)
             for c in range(sheet_take - drop_sheet):
@@ -227,9 +212,41 @@ def pack_gen_v3(
                 # If "foil" in slot['flags'], add that index to the foil array
                 if "foil" in set["slots"][slot_key]["flags"]:
                     foil_indexes.append(len(pack))
+    for i in range(len(pack)):
+        if type(pack[i]) is not list:
+            pack[i] = [pack[i], set["default_set"]]
     # Return the pack in reverse, return the foil array pivoted around the center
     return (
         pack[::-1],
         [(radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes],
         seed,
     )
+
+
+if __name__ == "__main__":
+    import json
+    import point_slicer
+
+    with open("packcreator/afr_2.json", "rb") as f:
+        ooo = json.load(f)
+        d_c = {}
+        if "flag_data" in ooo.keys():
+            if "duplicate_control" in ooo["flag_data"].keys():
+                d_c = {
+                    k: point_slicer.get_sampled_numbers(
+                        24,
+                        ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
+                            "max_length"
+                        ]
+                        * ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
+                            "count"
+                        ],
+                    )
+                    for k in ooo["flag_data"]["duplicate_control"][
+                        "slots_counts"
+                    ].keys()
+                }
+                print(d_c)
+        for n in range(24):
+            w, n, s = pack_gen_v3(set=ooo, d_c=d_c)
+            print(w, n, s)
