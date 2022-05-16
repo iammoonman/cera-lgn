@@ -10,7 +10,6 @@ def is_pow(n):
 
 import datetime
 
-
 class T:
     bracket_id = 0
     """Each node has a unique id within this tournament."""
@@ -34,7 +33,10 @@ class T:
         return False
 
     def reportScore(self, pl: str, scr: str):
-        """Reports a score identifier to the last game the player played."""
+        """Reports a score identifier to the last game the player played. Automatically pushes results.
+
+        To run a tournament, have the object call this method in the order that the results were reported.
+        """
         # Search through rounds in reverse to find last one with the player in it
         # Replace scores in node
         theplayer = [i for i in self.players if i.p_id == pl][0]
@@ -44,8 +46,7 @@ class T:
             roundnodes = [n for n in self.nodes if n.round == r]
             mynode = [p for p in roundnodes if theplayer in p.match.players]
             if len(mynode) > 0:
-                if mynode[0].match.getWinnerLoser() != [None]:
-                    mynode[0].match.setScores(theplayer, scr)
+                mynode[0].match.setScores(theplayer, scr)
         self.push_matches()
         return self
 
@@ -69,10 +70,7 @@ class T:
     def calcRanks(self):
         """Gives each player a numerical ranking based on their position in the bracket."""
         # Sort nodes by round then is_loser
-        # For node:
-        #  For player in node, sorted winner then loser:
-        #   If player not in rank list:
-        #    Push to rank list with round num
+        # Push players into rank list by the latest round num they participated
         # For player in rank list:
         #  rank = len(players with greater round num) + 1
         rankedlist = []
@@ -105,17 +103,21 @@ class T:
                     "playerID": p.p_id,
                     "rank": p.rank,
                     "seed": p.seed,
-                    "wins": sum([n.match.getScore(p) for n in self.nodes]),
-                    "losses": sum(
+                    "wins": sum(
                         [
-                            n.match.getScore(
-                                [o for o in n.match.players if o is not p][0]
-                            )
+                            1 if n.match.getWinnerLoser()[0] == p else 0
                             for n in self.nodes
-                            if p in n.match.players
+                            if None not in n.match.players
                         ]
                     ),
-                }  # Remember to iterate through each bracket if able.
+                    "losses": sum(
+                        [
+                            1 if n.match.getWinnerLoser()[1] == p else 0
+                            for n in self.nodes
+                            if p in n.match.players and None not in n.match.players
+                        ]
+                    ),
+                }
                 for p in self.players
             ],
             "nodes": [b.__json__() for b in self.nodes],
@@ -279,16 +281,8 @@ class T:
         """Adds loser bracket nodes from the normal bracket nodes in the nodes list."""
         # buildBracket() first
         # If the players list isn't a power of 2, this will explode
-        # if not is_pow(len(self.players)):
-        #     return
-        # For each round,
-        #  If there's a previous round,
-        #   Look at round NL
-        #   Pair off losers from NW with those nodes as round (N+0.5)L
-        #   Pair those nodes into round (N+1)L
-        #  If there's no previous round,
-        #   Pair off nodes into loser nodes in round (N+1)L
-        # Finally, pair the final winner with the last loser
+        # For each round, find all of its nodes and pair them into a loser match
+        # Have those nodes play off and feed into the next round's losers
         rounds = []
         for n in self.nodes:
             if n.round not in rounds:
@@ -360,7 +354,7 @@ class T:
             self.feeds: list[int] = []
             """BNID pointers to the nodes that this node will feed its winner and loser respectively.
             
-            The winner will go to the first feed, the second place will go to the second feed, and so on."""
+            The winner will go to the first feed and the second place will go to the second feed."""
             self.match: T.M = T.M(p1, p2)
             self.min_seed: int = min(
                 p1.seed if p1 is not None else 999,
@@ -391,7 +385,9 @@ class T:
             [0, 0] means that players[0] won twice. [1, 0, 1] means that players[0] won once, and players[1] won twice."""
 
         def setScores(self, player, result_code: str):
-            """Sets the score for the match from the perspective of the player. No ties."""
+            """Sets the score for the match from the perspective of the player. No ties.
+
+            Try not to run this method by itself. Tournament results determine the next round."""
             if self.players.index(player) == 0:
                 p_index = 0
                 o_index = 1
@@ -425,11 +421,15 @@ class T:
             elif self.scores.count(0) < self.scores.count(1):
                 return [self.players[1], self.players[0]]
             else:
-                return [None]
+                return [None, None]
 
         def getScore(self, pl):
             if pl not in self.players:
                 return 0
+            if pl is not None:
+                print(pl.p_id, self.scores.count(self.players.index(pl)))
+            if self.scores == []:
+                return 3
             return self.scores.count(self.players.index(pl))
 
     class P:
