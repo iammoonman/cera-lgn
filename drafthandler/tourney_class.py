@@ -19,7 +19,7 @@ class T:
         self.eventID = "0"
         self.tag = tag
         """Three character code to categorize this event."""
-        self.date: str = datetime.datetime.today().isoformat()
+        self.date: str = datetime.datetime.today().isoformat(timespec="hours")
         """String representation of the date of the event."""
         self.title = title
         self.players: list[T.P] = []
@@ -44,7 +44,9 @@ class T:
             roundnodes = [n for n in self.nodes if n.round == r]
             mynode = [p for p in roundnodes if theplayer in p.match.players]
             if len(mynode) > 0:
-                mynode[0].match.setScores(theplayer, scr)
+                if mynode[0].match.getWinnerLoser() != [None]:
+                    mynode[0].match.setScores(theplayer, scr)
+        self.push_matches()
         return self
 
     def push_matches(self):
@@ -83,6 +85,9 @@ class T:
                     rankedlist.append(player)
         for p in rankedlist:
             p.rank = len([q for q in rankedlist if q.lastround > p.lastround]) + 1
+        for p in self.players:
+            if p.rank == 0:
+                p.rank = 999
         return
 
     def addPlayer(self, P):
@@ -386,7 +391,7 @@ class T:
             [0, 0] means that players[0] won twice. [1, 0, 1] means that players[0] won once, and players[1] won twice."""
 
         def setScores(self, player, result_code: str):
-            """Sets the score for the match from the perspective of the player."""
+            """Sets the score for the match from the perspective of the player. No ties."""
             if self.players.index(player) == 0:
                 p_index = 0
                 o_index = 1
@@ -400,8 +405,6 @@ class T:
             # 3 means the player won game 2
             # 4 means the player won game 1
             # 5 means the player didnt win any games
-            # 6 means it was a tie, with the player winning first
-            # 7 means it was a tie, with the opponent winning first
             if result_code == "0":
                 self.scores = [p_index, p_index]
             elif result_code == "1":
@@ -414,10 +417,6 @@ class T:
                 self.scores = [p_index, o_index, o_index]
             elif result_code == "5":
                 self.scores = [o_index, o_index]
-            elif result_code == "6":
-                self.scores = [p_index, o_index]
-            elif result_code == "7":
-                self.scores = [o_index, p_index]
 
         def getWinnerLoser(self):
             """Returns the winning player and losing player in that order, or [None]."""
