@@ -159,3 +159,4 @@ cython_debug/
 **/boxtesting.py
 **/out.json
 **/packs.json
+drafthandler/t_testing.py

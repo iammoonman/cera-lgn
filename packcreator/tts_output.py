@@ -20,7 +20,9 @@ class Pack:
         "scaleY": 1.0,
         "scaleZ": 1.0,
     }
+    """Required for TTS."""
     colorAttrs = {"r": 0.0, "g": 0.0, "b": 0.0}
+    """Required for TTS."""
     StarFoil = {
         "CustomDecal": {
             "Name": "StarFoil",
@@ -96,6 +98,7 @@ class Pack:
             random.choice([Pack.StarFoil, Pack.SetSpiralFoil, Pack.VoronoiFoil])
         ]
         self.Counter = 0
+        """Uniquely identifies each card in the pack."""
 
     class CardBlob:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
@@ -252,6 +255,8 @@ def get_packs(setcode, num_packs, land_pack=False):
             sheet_index_func=lambda a: point_slicer.get_number(a),
             setJSON=setJSON,
         )
+        # Find the scryfall set data for the cards in the pack. Could be varied.
+        # Grabs the entire set to reduce queries. Watch for memory usage.
         for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
             set_info += scryfall_set(new_setcode[1])
             codes.append(new_setcode[1])
@@ -269,19 +274,17 @@ def get_packs(setcode, num_packs, land_pack=False):
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     if land_pack:
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            [
-                list(
-                    filter(
-                        lambda x: x["name"]
-                        in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                        set_info,
-                    )
-                )
-            ]
+        basicslist = list(
+            filter(
+                lambda x: x["name"]
+                in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                set_info,
+            )
         )
-        save["ContainedObjects"].append(pack_to_add.toDict())
+        if len(basicslist) >= 5:
+            pack_to_add = Pack()
+            pack_to_add.import_cards(basicslist)
+            save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     return save
 
 
@@ -407,12 +410,13 @@ def get_cube(cc_id):
         },
     )
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
-    if "Name" not in reader.fieldnames:
+    if "Name" not in reader.fieldnames: # Catching 404 errors in CubeCobra is much harder than it should be.
         return None
     templist = []
     the_cube = Pack()
     for row in reader:
-        if len(templist) == 10:
+        if len(templist) == 10: # Buffering to serve query length has an impact on sorting.
+            # CubeCobra data is always fundamentally based on data from Scryfall. The query will not fail.
             response = requests.get(
                 "https://api.scryfall.com/cards/search?q="
                 + "".join(
@@ -427,10 +431,11 @@ def get_cube(cc_id):
                 },
             )
             holdhold = response.json()
-            """Catch duplicates."""
             cards_to_import = []
             foil_indexes = []
             for i, n in enumerate(templist):
+                # Convert the CubeCobra csv information to the Scryfall data used by the Pack class.
+                # This will also catch duplicate cards.
                 card_data = copy.deepcopy(
                     [
                         j
@@ -439,7 +444,7 @@ def get_cube(cc_id):
                         and j["set"] == n["Set"]
                     ][0]
                 )
-                if n["Image URL"]:
+                if n["Image URL"]: # Catch whether the CubeCobra card has custom images.
                     if (
                         "card_faces" in card_data.keys()
                         and "Adventure" not in card_data["type_line"]
@@ -454,16 +459,16 @@ def get_cube(cc_id):
                     else:
                         card_data["image_uris"]["png"] = n["Image URL"]
                 cards_to_import.append(card_data)
-                if n["Finish"] == "Foil":
+                if n["Finish"] == "Foil": # Catch the CubeCobra card being foiled.
                     foil_indexes.append(i)
             the_cube.import_cards(cards_to_import, foil_indexes)
-            """End catch duplicates"""
             templist = []
             foil_indexes = []
             time.sleep(0.25)
-        if row["Maybeboard"] == "false":
+        if row["Maybeboard"] == "false": # Maybeboarded cards are included in the csv.
             templist.append(row)
     if len(templist) > 0:
+        # Catch an uneven number of cards.
         response = requests.get(
             "https://api.scryfall.com/cards/search?q="
             + "".join(
@@ -478,7 +483,6 @@ def get_cube(cc_id):
             },
         )
         holdhold = response.json()
-        """Catch duplicates."""
         cards_to_import = []
         foil_indexes = []
         for i, n in enumerate(templist):
@@ -509,7 +513,6 @@ def get_cube(cc_id):
             if n["Finish"] == "Foil":
                 foil_indexes.append(i)
         the_cube.import_cards(cards_to_import, foil_indexes)
-        """End catch duplicates"""
         templist = []
         foil_indexes = []
     save["ObjectStates"][0]["ContainedObjects"] = [the_cube.toDict()]
