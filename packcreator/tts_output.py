@@ -272,20 +272,18 @@ def get_packs(setcode, num_packs, land_pack=False):
             foil_indexes,
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
-    if land_pack: # Adds a stack of basic lands to an additional pack to add to the save.
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            [
-                list(
-                    filter(
-                        lambda x: x["name"]
-                        in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                        set_info,
-                    )
-                )
-            ]
+    if land_pack:
+        basicslist = list(
+            filter(
+                lambda x: x["name"]
+                in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                set_info,
+            )
         )
-        save["ContainedObjects"].append(pack_to_add.toDict())
+        if len(basicslist) >= 5:
+            pack_to_add = Pack()
+            pack_to_add.import_cards(basicslist)
+            save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     return save
 
 
