@@ -7,7 +7,7 @@ import io
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
 
-with open('guild.pickle', 'rb') as f:
+with open("guild.pickle", "rb") as f:
     guild = pickle.load(f)
 
 bot = discord.Bot()
@@ -84,7 +84,7 @@ async def get_sets(ctx: discord.AutocompleteContext):
 
 
 @bot.slash_command(guild_ids=[guild])
-@discord.default_permissions(manage_roles=True)
+@discord.default_permissions(manage_roles=True, description="Create packs.")
 @discord.option(
     name="set",
     description="Choose the set.",
@@ -101,9 +101,13 @@ async def get_sets(ctx: discord.AutocompleteContext):
     type=int,
 )
 @discord.option(
-    name="lands", description="Include a land pack?", type=bool, default=False
+    name="lands",
+    description="Include a basic land pack from this set?",
+    type=bool,
+    default=False,
 )
 async def pack(ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
+    await ctx.defer(ephemeral=True)
     raw = tts_output.get_packs(set, num, lands)
     packs = discord.File(
         io.StringIO(json.dumps(raw)), filename=f"{set}_{getSeqID()}.json"
@@ -113,7 +117,7 @@ async def pack(ctx: discord.ApplicationContext, set: str, num: int, lands: bool)
     )
 
 
-@bot.slash_command(guild_ids=[guild])
+@bot.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
 @discord.default_permissions(manage_roles=True)
 @discord.option(name="cc_id", description="CubeCobra ID.")
 async def cube(ctx: discord.ApplicationContext, cc_id: str):
