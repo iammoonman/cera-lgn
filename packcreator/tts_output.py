@@ -268,19 +268,17 @@ def get_packs(setcode, num_packs, land_pack=False):
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     if land_pack:
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            [
-                list(
-                    filter(
-                        lambda x: x["name"]
-                        in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                        set_info,
-                    )
-                )
-            ]
+        basicslist = list(
+            filter(
+                lambda x: x["name"]
+                in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                set_info,
+            )
         )
-        save["ContainedObjects"].append(pack_to_add.toDict())
+        if len(basicslist) >= 5:
+            pack_to_add = Pack()
+            pack_to_add.import_cards(basicslist)
+            save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     return save
 
 
