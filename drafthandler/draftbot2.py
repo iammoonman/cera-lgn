@@ -312,17 +312,17 @@ class IG_View(discord.ui.View):
 def setup(bot):
     bot.add_cog(DraftEventBot(bot))
 
+if __name__ == "__main__":
+    with open("token.pickle", "rb") as f:
+        token = pickle.load(f)
 
-with open("token.pickle", "rb") as f:
-    token = pickle.load(f)
-
-bot = discord.Bot()
-bot.add_cog(DraftEventBot(bot))
-
-
-@bot.event
-async def on_ready():
-    print("hello world")
+    bot = discord.Bot()
+    bot.add_cog(DraftEventBot(bot))
 
 
-bot.run(token)
+    @bot.event
+    async def on_ready():
+        print("hello world")
+
+
+    bot.run(token)
