@@ -64,6 +64,7 @@ set_choices = [
     ["Return to Ravnica", "rtr"],
     ["Shadows over Innistrad", "soi"],
     ["Strixhaven: School of Mages", "stx"],
+    ["Stronghold", "sth"],
     ["Theros Beyond Death", "thb"],
     ["Theros", "ths"],
     ["Urza's Destiny", "uds"],
@@ -83,8 +84,8 @@ async def get_sets(ctx: discord.AutocompleteContext):
     ][:20]
 
 
-@bot.slash_command(guild_ids=[guild])
-@discord.default_permissions(manage_roles=True, description="Create packs.")
+@bot.slash_command(guild_ids=[guild], description="Create packs.")
+@discord.default_permissions(manage_roles=True)
 @discord.option(
     name="set",
     description="Choose the set.",
