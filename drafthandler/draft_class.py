@@ -46,9 +46,9 @@ class Draft:
                 {
                     "playerID": i.player_id,
                     "score": i.score,
-                    "gwp": round(i.gwp,2),
-                    "ogp": round(i.ogp,2),
-                    "omp": round(i.omp,2),
+                    "gwp": round(i.gwp, 2),
+                    "ogp": round(i.ogp, 2),
+                    "omp": round(i.omp, 2),
                 }
                 for i in self.players
             ],
@@ -121,11 +121,9 @@ class Draft:
         while temp_players:
             player1 = temp_players.pop(0)
             try:
-                player2 = [
-                    i
-                    for i in temp_players
-                    if i not in player1.opponents and abs(i.score - player1.score) <= 3
-                ][0]
+                player2 = [i for i in temp_players if i not in player1.opponents and abs(i.score - player1.score) <= 3][
+                    0
+                ]
             except IndexError:
                 # Checking it like this will cause more than one bye in certain situations with people dropping.
                 # That is OK
@@ -133,9 +131,7 @@ class Draft:
                 # Recommended to just pick someone. In a weird niche situation, ignore the point restriction.
                 if player1.score == max([u.score for u in self.players]):
                     try:
-                        player2 = [
-                            i for i in temp_players if i not in player1.opponents
-                        ][0]
+                        player2 = [i for i in temp_players if i not in player1.opponents][0]
                     except IndexError:
                         player2 = Draft.Player("BYE", "-1")
             temp_pairings.append([player1, player2])
@@ -213,10 +209,7 @@ class Draft:
                 p_index = 1
                 o_index = 0
             # result = [p_id,o_id,None]
-            self.gwinners = [
-                (p_index if i == p_id else o_index) if i is not None else None
-                for i in result
-            ]
+            self.gwinners = [(p_index if i == p_id else o_index) if i is not None else None for i in result]
         return
 
     def finish_round(self):
@@ -251,9 +244,7 @@ class Draft:
                     if wasTie:
                         player.score += 1
                         player.mcount += 1
-                        player.gcount += len(
-                            [i for i in match.gwinners if i is not None]
-                        )
+                        player.gcount += len([i for i in match.gwinners if i is not None])
                         player.mpts += 1
                         player.gpts += len([i for i in match.gwinners if i == ind])
                         player.dropped = match.drops[ind]
@@ -263,9 +254,7 @@ class Draft:
                         )
                         player.score += 3 if won else 0
                         player.mcount += 1
-                        player.gcount += len(
-                            [i for i in match.gwinners if i is not None]
-                        )
+                        player.gcount += len([i for i in match.gwinners if i is not None])
                         player.mpts += 3 if won else 0
                         player.gpts += len([i for i in match.gwinners if i == ind])
                         player.dropped = match.drops[ind]
@@ -297,9 +286,7 @@ class Draft:
             player = [p for p in self.players if p.player_id == p_id][0]
             round = [r for r in self.rounds if r.completed == False][0]
             match = [m for m in round.matches if player in m.players][0]
-            match.drops[match.players.index(player)] = not match.drops[
-                match.players.index(player)
-            ]
+            match.drops[match.players.index(player)] = not match.drops[match.players.index(player)]
         return
 
     def add_player(self, p_name, p_id, is_host=False):
@@ -315,16 +302,10 @@ class Draft:
         for player in self.players:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
-            print(
-                player.player_id, player.gpts, player.gcount, player.mpts, player.mcount
-            )
+            print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
         for player in self.players:
-            player.ogp = sum(h := [p.gwp for p in player.opponents]) / (
-                len(h) if len(h) > 0 else 1
-            )
-            player.omp = sum(j := [p.mwp for p in player.opponents]) / (
-                len(j) if len(j) > 0 else 1
-            )
+            player.ogp = sum(h := [p.gwp for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
+            player.omp = sum(j := [p.mwp for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
         return
 
 

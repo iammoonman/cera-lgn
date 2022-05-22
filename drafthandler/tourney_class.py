@@ -10,6 +10,7 @@ def is_pow(n):
 
 import datetime
 
+
 class T:
     bracket_id = 0
     """Each node has a unique id within this tournament."""
@@ -142,18 +143,13 @@ class T:
                 # print("dropping a node")
                 e.match.players.remove(T.P(id="0", seed=-999))
                 theplayer = e.match.players.pop()
-                winnode = next(
-                    q for q in self.nodes if q.bnid in e.feeds and not q.loser
-                )
+                winnode = next(q for q in self.nodes if q.bnid in e.feeds and not q.loser)
                 if len(winnode.match.players) == 2:
                     winnode.match.players.remove(None)
                 winnode.match.players.insert(0, theplayer)
                 self.nodes.remove(e)
         for losernode in [l for l in self.nodes if l.loser]:
-            if (
-                len((feeder := [y for y in self.nodes if losernode.bnid in y.feeds]))
-                == 1
-            ):
+            if len((feeder := [y for y in self.nodes if losernode.bnid in y.feeds])) == 1:
                 feeder[0].feeds.remove(losernode.bnid)
                 feeder[0].feeds.append(losernode.feeds[0])
                 self.nodes.remove(losernode)

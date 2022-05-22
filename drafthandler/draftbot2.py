@@ -10,7 +10,7 @@ import datetime
 taglist = {
     "ptm": "Prime Time With Moon",
     "omn": "Omni's Friday Nights",
-    "wks": "Wacky Metro Sundays",
+    "wks": "Wacky Sundays",
 }
 bslash = "\n"
 
@@ -79,7 +79,7 @@ class DraftEventBot(commands.Cog):
     @discord.option(
         name="tag",
         description="Choose a tag.",
-        options=[discord.OptionChoice(v, k) for k, v in taglist.items()],
+        choices=[discord.OptionChoice(v, k) for k, v in taglist.items()],
     )
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(
@@ -114,6 +114,7 @@ class DraftEventBot(commands.Cog):
             p_id=int(ctx.author.id),
             is_host=True,
         )
+        self.timekeep[vw.id] = datetime.datetime.now()
         await msg.edit_original_message(
             embeds=[self.starting_em(self.drafts[vw.id])], content="", view=vw
         )
