@@ -132,8 +132,8 @@ class StartingView(discord.ui.View):
             return
         print(self.id, "JOIN")
         self.bot.drafts[self.id].add_player(
-            ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
-            int(ctx.author.id),
+            ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
+            int(ctx.user.id),
         )
         await ctx.edit_original_message(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
@@ -147,7 +147,7 @@ class StartingView(discord.ui.View):
             await ctx.delete_original_message()
             return
         print(self.id, "DROP")
-        self.bot.drafts[self.id].drop_player(int(ctx.author.id))
+        self.bot.drafts[self.id].drop_player(int(ctx.user.id))
         await ctx.edit_original_message(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
             view=self,
@@ -243,7 +243,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             await ctx.delete_original_message()
             return
-        self.bot.drafts[self.id].parse_match(int(ctx.author.id), select.values[0])
+        self.bot.drafts[self.id].parse_match(int(ctx.user.id), select.values[0])
         await ctx.edit_original_message(
             embeds=[
                 self.bot.ig_em(
@@ -260,7 +260,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             await ctx.delete_original_message()
             return
-        self.bot.drafts[self.id].drop_player(int(ctx.author.id))
+        self.bot.drafts[self.id].drop_player(int(ctx.user.id))
         await ctx.edit_original_message(
             embeds=[
                 self.bot.ig_em(
@@ -277,7 +277,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             await ctx.delete_original_message()
             return
-        if self.bot.drafts[self.id].host == int(ctx.author.id):
+        if self.bot.drafts[self.id].host == int(ctx.user.id):
             if self.bot.drafts[self.id].finish_round():
                 if len([r for r in self.bot.drafts[self.id].rounds if not r.completed]) > 0:
                     self.bot.timekeep[self.id] = datetime.now() + datetime.timedelta(minutes=50)
