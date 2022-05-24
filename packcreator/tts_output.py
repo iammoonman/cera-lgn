@@ -290,7 +290,7 @@ def get_packs(setcode, num_packs, land_pack=False):
 
 def get_packs_v3(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
-    with open(f"setjson/{setcode}.json", "rb") as f:
+    with open(f"sj3/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [
@@ -373,7 +373,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             ]
         )
         save["ContainedObjects"].append(pack_to_add.toDict())
-    return save, log
+    return save # , log
 
 
 def get_cube(cc_id):
