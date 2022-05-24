@@ -183,6 +183,15 @@ def pack_gen_v3(
             [o["freq"] for o in set["slots"][slot_key]["options"]],
             k=1,
         )[0]
+        # If this slot needs to drop a card from one of its sheets
+        drop_choice: dict = {}
+        if "drops" in distro.keys():
+            if slot_key in distro["drops"].keys():
+                drop_choice = random.choices(
+                    [o for o in distro["drops"][slot_key]],
+                    [o["freq"] for o in distro["drops"][slot_key]],
+                    k=1
+                )[0]
         # For each key in slot[option]['struct']
         for sheet_key, sheet_take in struct.items():
             # If "duplicate_control" in slot['flags'], pop number from d_c
@@ -195,17 +204,11 @@ def pack_gen_v3(
                     c_t=struct[sheet_key],
                 )
             )
-            # If distro[drops] contains object['slot'] == slot key and object['key'] == key, reduce value by object['count']
+            # If this exact sheet was the one chosen to drop a card
             drop_sheet: int = 0
-            if "drops" in distro.keys():
-                drop_sheet = next(
-                    (
-                        d["count"]
-                        for d in distro["drops"]
-                        if d["slot"] == slot_key and d["key"] == sheet_key
-                    ),
-                    0,
-                )
+            if drop_choice != {}:
+                if sheet_key == drop_choice["key"]:
+                    drop_sheet = drop_choice["count"]
             # For x in range(value)
             for c in range(sheet_take - drop_sheet):
                 # Take a card from slot['sheets'][key] according to the number plus x
@@ -254,4 +257,4 @@ if __name__ == "__main__":
                 print(d_c)
         for n in range(24):
             w, n, s = pack_gen_v3(set=ooo, d_c=d_c)
-            print(w, n, s)
+            print(len(w), n, s)
