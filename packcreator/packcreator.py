@@ -6,7 +6,7 @@ def generatepack_c1c2_special(
     sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None
 ):
     """
-    Takes a set_template JSON object, parsed.
+    Takes a JSON dict object, parsed in the V2 format.
 
     Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
 
@@ -148,16 +148,113 @@ def generatepack_c1c2_special(
     return pack[::-1], [(r + (len(pack) - r) * 2) % len(pack) for r in f_indexes]
 
 
+def pack_gen_v3(
+    set=None,
+    func=lambda l_s, c_t: random.randint(0, l_s),
+    d_c: dict[str, float] = {},
+    seed: int = None,
+):
+    """
+    Takes a JSON dict object, parsed in the V3 format.
+
+    Takes a function with inputs length_of_sheet, count_taken which returns an index within the range of length_of_sheet. Use count_taken for slight duplicate control.
+
+    Takes a duplicate_control list of lists of indexes for choosing rarity controlled cards.
+
+    Returns a pack in the btts.py format, [ ('collector_number','set_code'), ... ].
+
+    Returns indexes of the list which indicate foiled cards.
+    """
+    if seed is not None:
+        random.seed(seed)
+    else:
+        random.seed(seed := random.randint(0, 2000000))
+    pack: list[list[str, str]] = []
+    foil_indexes: list[int] = []
+    # Choose a distro based on distro[freq]
+    distro: dict = random.choices(
+        set["distros"], [s["freq"] for s in set["distros"]], k=1
+    )[0]
+    # For each slot key in the distro['slots'].keys()
+    for slot_key in distro["slots"].keys():
+        # Choose a slot[option] based on option[freq]
+        struct: dict = random.choices(
+            [o["struct"] for o in set["slots"][slot_key]["options"]],
+            [o["freq"] for o in set["slots"][slot_key]["options"]],
+            k=1,
+        )[0]
+        # If this slot needs to drop a card from one of its sheets
+        drop_choice: dict = {}
+        if "drops" in distro.keys():
+            if slot_key in distro["drops"].keys():
+                drop_choice = random.choices(
+                    [o for o in distro["drops"][slot_key]],
+                    [o["freq"] for o in distro["drops"][slot_key]],
+                    k=1
+                )[0]
+        # For each key in slot[option]['struct']
+        for sheet_key, sheet_take in struct.items():
+            # If "duplicate_control" in slot['flags'], pop number from d_c
+            # Otherwise, generate starting number using func
+            index: int = (
+                d_c[slot_key].pop()
+                if "duplicate_control" in set["slots"][slot_key]["flags"]
+                else func(
+                    l_s=len(set["slots"][slot_key]["sheets"][sheet_key]),
+                    c_t=struct[sheet_key],
+                )
+            )
+            # If this exact sheet was the one chosen to drop a card
+            drop_sheet: int = 0
+            if drop_choice != {}:
+                if sheet_key == drop_choice["key"]:
+                    drop_sheet = drop_choice["count"]
+            # For x in range(value)
+            for c in range(sheet_take - drop_sheet):
+                # Take a card from slot['sheets'][key] according to the number plus x
+                pack += [
+                    set["slots"][slot_key]["sheets"][sheet_key][
+                        (index + c) % len(set["slots"][slot_key]["sheets"][sheet_key])
+                    ][:]
+                ]
+                # If "foil" in slot['flags'], add that index to the foil array
+                if "foil" in set["slots"][slot_key]["flags"]:
+                    foil_indexes.append(len(pack))
+    for i in range(len(pack)):
+        if type(pack[i]) is not list:
+            pack[i] = [pack[i], set["default_set"]]
+    # Return the pack in reverse, return the foil array pivoted around the center
+    return (
+        pack[::-1],
+        [(radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes],
+        seed,
+    )
+
+
 if __name__ == "__main__":
     import json
     import point_slicer
 
-    with open("packcreator/setjson/mid.json", "rb") as f:
+    with open("packcreator/afr_2.json", "rb") as f:
         ooo = json.load(f)
+        d_c = {}
+        if "flag_data" in ooo.keys():
+            if "duplicate_control" in ooo["flag_data"].keys():
+                d_c = {
+                    k: point_slicer.get_sampled_numbers(
+                        24,
+                        ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
+                            "max_length"
+                        ]
+                        * ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
+                            "count"
+                        ],
+                    )
+                    for k in ooo["flag_data"]["duplicate_control"][
+                        "slots_counts"
+                    ].keys()
+                }
+                print(d_c)
         for n in range(24):
-            w, n = generatepack_c1c2_special(
-                sheet_index=0,
-                setJSON=ooo,
-                sheet_index_func=lambda a: point_slicer.get_number(a),
-            )
-            print(w, n)
+            w, n, s = pack_gen_v3(set=ooo, d_c=d_c)
+            print(len(w), n, s)

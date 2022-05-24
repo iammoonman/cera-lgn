@@ -5,6 +5,7 @@ import json
 import requests
 import time
 import re
+import datetime
 
 
 class Pack:
@@ -285,6 +286,94 @@ def get_packs(setcode, num_packs, land_pack=False):
             pack_to_add.import_cards(basicslist)
             save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     return save
+
+
+def get_packs_v3(setcode, num_packs, land_pack=False):
+    """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
+    with open(f"sj3/{setcode}.json", "rb") as f:
+        setJSON = json.load(f)
+    save = {
+        "ObjectStates": [
+            {
+                "Name": "Bag",
+                "Transform": {
+                    "posX": 0.0,
+                    "posY": 0.0,
+                    "posZ": 0.0,
+                    "rotX": 0.0,
+                    "rotY": 0.0,
+                    "rotZ": 0.0,
+                    "scaleX": 1.0,
+                    "scaleY": 1.0,
+                    "scaleZ": 1.0,
+                },
+                "Nickname": f"{num_packs} Packs of {setcode}",
+                "ColorDiffuse": {"r": 0.0, "g": 0.0, "b": 0.0},
+                "Bag": {"Order": 0},
+                "ContainedObjects": [],
+            }
+        ]
+    }
+    abbr = setJSON["set_code"]
+    set_info = scryfall_set(abbr)
+    codes = [abbr]
+    log = {
+        "seeds": [],
+        "setcode": setcode,
+        "num_p": num_packs,
+        "timestamp": datetime.datetime.now().isoformat(),
+    }
+    # Calculate duplicate control specs
+    duplicate_control_list = {}
+    if "flag_data" in setJSON.keys():
+        if "duplicate_control" in setJSON["flag_data"].keys():
+            duplicate_control_list = {
+                k: point_slicer.get_sampled_numbers(
+                    num_packs * i["count"], i["max_length"]
+                )
+                for k, i in setJSON["flag_data"]["duplicate_control"][
+                    "slots_counts"
+                ].items()
+            }
+            # Log duplicate_control_list
+            log["d_c"] = duplicate_control_list[:]
+    for _ in range(num_packs):
+        raw_cn_cards, foil_indexes, seed = packcreator.pack_gen_v3(
+            set=setJSON, d_c=duplicate_control_list
+        )
+        # Log the seed
+        log["seeds"].append(seed)
+        for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
+            set_info += scryfall_set(new_setcode[1])
+            codes.append(new_setcode[1])
+        pack_to_add = Pack()
+        pack_to_add.import_cards(
+            [
+                next(
+                    c
+                    for c in set_info
+                    if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1]
+                )
+                for cn_pair in raw_cn_cards
+            ],
+            foil_indexes,
+        )
+        save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
+    if land_pack:
+        pack_to_add = Pack()
+        pack_to_add.import_cards(
+            [
+                list(
+                    filter(
+                        lambda x: x["name"]
+                        in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                        set_info,
+                    )
+                )
+            ]
+        )
+        save["ContainedObjects"].append(pack_to_add.toDict())
+    return save # , log
 
 
 def get_cube(cc_id):

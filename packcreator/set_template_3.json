@@ -1,0 +1,49 @@
+{
+	"default_set": "",
+	"full_name": "",
+	"distros": [
+		{
+			"slots": {"c": 9, "u": 3, "r": 1, "f": 1},
+			"drops": {
+				"c": [ {"key": "b", "count": 1, "freq": 1} ]
+			},
+			"freq": 0.2
+		}
+	],
+	"slots": {
+		"c": {
+			"flags": ["duplicate_control"],
+			"options": [
+				{ "struct": {"a": 2, "b": 2, "c": 6}, "freq": 1 }
+			],
+			"sheets": {"a": []}
+		},
+		"f": {
+			"flags": ["foil"],
+			"options": [
+				{ "struct": {"a": 1}, "freq": 0.9 },
+				{ "struct": {"b": 1}, "freq": 0.1 }
+			],
+			"sheets": {
+				"a": [ ["132", "aer"], ["133", "aer"], ["134", "aer"] ],
+				"b": []
+			}
+		},
+		"dfc": {
+			"flags": ["sequenced"],
+			"options": [
+				{ "struct": {"a": 1}, "freq": 0.9 },
+				{ "struct": {"b": 1}, "freq": 0.1 }
+			],
+			"sheets": {"a": [], "b": []}
+		}
+	},
+	"flag_data": {
+		"duplicate_control": {
+			"slots_counts": { "c": {"count": 8, "max_length": 4} }
+		},
+		"sequenced": {
+			"dfc": { "seq": ["a", "b", "a", "a", "b", "b", "a", "a", "a", "b", "b", "b"] }
+		}
+	}
+}

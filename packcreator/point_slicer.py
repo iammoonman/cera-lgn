@@ -1,5 +1,6 @@
 import random
 
+
 def respawn_sections(max_len, min_len=6, size=121):
     """Splits numbers from 0 to the size variable into smaller blocks."""
     sheet = [i for i in range(size)]
@@ -70,3 +71,12 @@ def get_number(num_to_take):
         pickle.dump([n for n in list_nums if n not in out], f)
     return random.choice(out)
 
+
+def get_sampled_numbers(n_packs: int, n_rares: int):
+    """Returns a randomly sampled list of numbers range(0,n_rares) with reduced chance of repeats."""
+    out = []
+    while len(out) < n_packs:
+        out += random.sample(
+            range(n_rares), k=(min([max([(n_packs * 41 // 43) - n_rares, 1]), n_rares]))
+        )
+    return out
