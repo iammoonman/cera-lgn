@@ -94,9 +94,7 @@ class Pack:
             "CustomDeck": {},
             "ContainedObjects": [],
         }
-        self.Decals = [
-            random.choice([Pack.StarFoil, Pack.SetSpiralFoil, Pack.VoronoiFoil])
-        ]
+        self.Decals = [random.choice([Pack.StarFoil, Pack.SetSpiralFoil, Pack.VoronoiFoil])]
         self.Counter = 0
         """Uniquely identifies each card in the pack."""
 
@@ -104,23 +102,32 @@ class Pack:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
             """Represents one card."""
             self.Nickname = (
-                f'{cardData["card_faces"][0]["name"]}\n{cardData["card_faces"][0]["type_line"]} {int(cardData["card_faces"][0]["cmc"]) if "cmc" in cardData["card_faces"][0].keys() else int(cardData["cmc"])}CMC'
+                f'{cardData["card_faces"][0]["name"]}\n{cardData["card_faces"][0]["type_line"]} {round(cardData["card_faces"][0]["cmc"]) if "cmc" in cardData["card_faces"][0].keys() else round(cardData["cmc"])}MV'
                 if "card_faces" in cardData.keys()
-                else f'{cardData["name"]}\n{cardData["type_line"]} {cardData["cmc"]}CMC'
+                else f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
             )
             self.Name = "Card"
             """Default property which identifies the type of this object. \"Card\" only."""
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
+            descriptionHold = ""
             if "oracle_text" not in cardData.keys():
-                descriptionHold = (
-                    ""
-                    if "card_faces" not in cardData.keys()
-                    else cardData["card_faces"][0]["oracle_text"]
+                descriptionHold += (
+                    "" if "card_faces" not in cardData.keys() else cardData["card_faces"][0]["oracle_text"]
                 )
             else:
-                descriptionHold = cardData["oracle_text"]
-            self.Description = f"[b]{descriptionHold}[/b]"
+                descriptionHold += cardData["oracle_text"]
+            descriptionHold += (
+                (f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]" if "power" in cardData.keys() else "")
+                if "card_faces" not in cardData.keys()
+                else (
+                    f"\n[b]{cardData['card_faces'][0]['power']}/{cardData['card_faces'][0]['toughness']}[/b]"
+                    if "power" in cardData["card_faces"][0].keys()
+                    else ""
+                )
+            )
+            descriptionHold += f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty" if "loyalty" in cardData.keys() else ""
+            self.Description = f"{descriptionHold}"
             """Contains oracle text, if any."""
             self.Transform = Pack.transformAttrs
             self.ColorDiffuse = Pack.colorAttrs
@@ -152,17 +159,30 @@ class Pack:
                 and "flip" != cardData["layout"]
             ):
                 backImage = {
-                    "FaceURL": re.sub(
-                        "\?\d+$", "", cardData["card_faces"][1]["image_uris"]["png"]
-                    ),
+                    "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["png"]),
                     "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                     "NumWidth": 1,
                     "NumHeight": 1,
                     "BackIsHidden": True,
                     "UniqueBack": False,
                 }
-                backName = f'{cardData["card_faces"][1]["name"]}\n{cardData["card_faces"][1]["type_line"]} {int(cardData["card_faces"][1]["cmc"]) if "cmc" in cardData["card_faces"][0].keys() else int(cardData["cmc"])}CMC'
-                backDescription = f"[b]{'' if 'oracle_text' in cardData['card_faces'][1].keys() else cardData['card_faces'][1]['oracle_text']}[/b]"
+                backName = f'{cardData["card_faces"][1]["name"]}\n{cardData["card_faces"][1]["type_line"]} {round(cardData["card_faces"][1]["cmc"]) if "cmc" in cardData["card_faces"][1].keys() else round(cardData["cmc"])}MV'
+                backDescription = ""
+                backDescription += (
+                    ""
+                    if "oracle_text" not in cardData["card_faces"][1].keys()
+                    else cardData["card_faces"][1]["oracle_text"]
+                )
+                backDescription += (
+                    f"\n[b]{cardData['card_faces'][1]['power']}/{cardData['card_faces'][1]['toughness']}[/b]"
+                    if "power" in cardData["card_faces"][1].keys()
+                    else ""
+                )
+                backDescription += (
+                    f"\n[b]{cardData['card_faces'][1]['loyalty']}[/b] Starting Loyalty"
+                    if "loyalty" in cardData["card_faces"][1].keys()
+                    else ""
+                )
                 self.States = {
                     "2": {
                         "Name": "Card",
@@ -195,9 +215,7 @@ class Pack:
         """Takes a list of card objects from a Scryfall search."""
         for index, item in enumerate(cardDataList):
             self.ContainedObjects.append(
-                tempCard := self.CardBlob(
-                    item, self.Counter + 1, index in foilIndexes, self.Decals
-                ).toDict()
+                tempCard := self.CardBlob(item, self.Counter + 1, index in foilIndexes, self.Decals).toDict()
             )
             self.DeckIDs.append(int((self.Counter + 1) * 100))
             self.CustomDeck[str((self.Counter + 1) * 100)] = tempCard["CustomDeck"]
@@ -212,9 +230,7 @@ class Pack:
             "ColorDiffuse": self.colorAttrs,
             "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
             "CustomDeck": {
-                str(card["CardID"] // 100): card["CustomDeck"][
-                    str(card["CardID"] // 100)
-                ]
+                str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)]
                 for card in self.ContainedObjects
             },
             "ContainedObjects": self.ContainedObjects,
@@ -263,11 +279,7 @@ def get_packs(setcode, num_packs, land_pack=False):
         pack_to_add = Pack()
         pack_to_add.import_cards(
             [
-                next(
-                    c
-                    for c in set_info
-                    if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1]
-                )
+                next(c for c in set_info if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1])
                 for cn_pair in raw_cn_cards
             ],
             foil_indexes,
@@ -276,8 +288,7 @@ def get_packs(setcode, num_packs, land_pack=False):
     if land_pack:
         basicslist = list(
             filter(
-                lambda x: x["name"]
-                in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
                 set_info,
             )
         )
@@ -314,46 +325,36 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             }
         ]
     }
-    abbr = setJSON["set_code"]
+    abbr = setJSON["default_set"]
     set_info = scryfall_set(abbr)
     codes = [abbr]
-    log = {
-        "seeds": [],
-        "setcode": setcode,
-        "num_p": num_packs,
-        "timestamp": datetime.datetime.now().isoformat(),
-    }
+    # log = {
+    #     "seeds": [],
+    #     "setcode": setcode,
+    #     "num_p": num_packs,
+    #     "timestamp": datetime.datetime.now().isoformat(),
+    # }
     # Calculate duplicate control specs
     duplicate_control_list = {}
     if "flag_data" in setJSON.keys():
         if "duplicate_control" in setJSON["flag_data"].keys():
             duplicate_control_list = {
-                k: point_slicer.get_sampled_numbers(
-                    num_packs * i["count"], i["max_length"]
-                )
-                for k, i in setJSON["flag_data"]["duplicate_control"][
-                    "slots_counts"
-                ].items()
+                k: point_slicer.get_sampled_numbers(num_packs * i["count"], i["max_length"])
+                for k, i in setJSON["flag_data"]["duplicate_control"]["slots_counts"].items()
             }
             # Log duplicate_control_list
-            log["d_c"] = duplicate_control_list[:]
+            # log["d_c"] = duplicate_control_list[:]
     for _ in range(num_packs):
-        raw_cn_cards, foil_indexes, seed = packcreator.pack_gen_v3(
-            set=setJSON, d_c=duplicate_control_list
-        )
+        raw_cn_cards, foil_indexes, seed = packcreator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
         # Log the seed
-        log["seeds"].append(seed)
+        # log["seeds"].append(seed)
         for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
             set_info += scryfall_set(new_setcode[1])
             codes.append(new_setcode[1])
         pack_to_add = Pack()
         pack_to_add.import_cards(
             [
-                next(
-                    c
-                    for c in set_info
-                    if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1]
-                )
+                next(c for c in set_info if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1])
                 for cn_pair in raw_cn_cards
             ],
             foil_indexes,
@@ -365,15 +366,14 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             [
                 list(
                     filter(
-                        lambda x: x["name"]
-                        in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
+                        lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
                         set_info,
                     )
                 )
             ]
         )
         save["ContainedObjects"].append(pack_to_add.toDict())
-    return save # , log
+    return save  # , log
 
 
 def get_cube(cc_id):
@@ -405,17 +405,15 @@ def get_cube(cc_id):
     }
     response = requests.get(
         f"https://cubecobra.com/cube/download/csv/{cc_id}?primary=Color%20Category&secondary=Types-Multicolor&tertiary=Mana%20Value&quaternary=Alphabetical&showother=false",
-        headers={
-            "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
-        },
+        headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
-    if "Name" not in reader.fieldnames: # Catching 404 errors in CubeCobra is much harder than it should be.
+    if "Name" not in reader.fieldnames:  # Catching 404 errors in CubeCobra is much harder than it should be.
         return None
     templist = []
     the_cube = Pack()
     for row in reader:
-        if len(templist) == 10: # Buffering to serve query length has an impact on sorting.
+        if len(templist) == 10:  # Buffering to serve query length has an impact on sorting.
             # CubeCobra data is always fundamentally based on data from Scryfall. The query will not fail.
             response = requests.get(
                 "https://api.scryfall.com/cards/search?q="
@@ -426,9 +424,7 @@ def get_cube(cc_id):
                     ]
                 )
                 + "&unique=prints",
-                headers={
-                    "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
-                },
+                headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
             )
             holdhold = response.json()
             cards_to_import = []
@@ -440,11 +436,10 @@ def get_cube(cc_id):
                     [
                         j
                         for j in holdhold["data"]
-                        if j["collector_number"] == n["Collector Number"]
-                        and j["set"] == n["Set"]
+                        if j["collector_number"] == n["Collector Number"] and j["set"] == n["Set"]
                     ][0]
                 )
-                if n["Image URL"]: # Catch whether the CubeCobra card has custom images.
+                if n["Image URL"]:  # Catch whether the CubeCobra card has custom images.
                     if (
                         "card_faces" in card_data.keys()
                         and "Adventure" not in card_data["type_line"]
@@ -453,19 +448,17 @@ def get_cube(cc_id):
                     ):
                         card_data["card_faces"][0]["image_uris"]["png"] = n["Image URL"]
                         if n["Image Back URL"]:
-                            card_data["card_faces"][1]["image_uris"]["png"] = n[
-                                "Image Back URL"
-                            ]
+                            card_data["card_faces"][1]["image_uris"]["png"] = n["Image Back URL"]
                     else:
                         card_data["image_uris"]["png"] = n["Image URL"]
                 cards_to_import.append(card_data)
-                if n["Finish"] == "Foil": # Catch the CubeCobra card being foiled.
+                if n["Finish"] == "Foil":  # Catch the CubeCobra card being foiled.
                     foil_indexes.append(i)
             the_cube.import_cards(cards_to_import, foil_indexes)
             templist = []
             foil_indexes = []
             time.sleep(0.25)
-        if row["Maybeboard"] == "false": # Maybeboarded cards are included in the csv.
+        if row["Maybeboard"] == "false":  # Maybeboarded cards are included in the csv.
             templist.append(row)
     if len(templist) > 0:
         # Catch an uneven number of cards.
@@ -478,9 +471,7 @@ def get_cube(cc_id):
                 ]
             )
             + "&unique=prints",
-            headers={
-                "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
-            },
+            headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
         )
         holdhold = response.json()
         cards_to_import = []
@@ -490,8 +481,7 @@ def get_cube(cc_id):
                 [
                     j
                     for j in holdhold["data"]
-                    if j["collector_number"] == n["Collector Number"]
-                    and j["set"] == n["Set"]
+                    if j["collector_number"] == n["Collector Number"] and j["set"] == n["Set"]
                 ][0]
             )
             if n["Image URL"]:
@@ -504,9 +494,7 @@ def get_cube(cc_id):
                     print(card_data["name"])
                     card_data["card_faces"][0]["image_uris"]["png"] = n["Image URL"]
                     if n["Image Back URL"]:
-                        card_data["card_faces"][1]["image_uris"]["png"] = n[
-                            "Image Back URL"
-                        ]
+                        card_data["card_faces"][1]["image_uris"]["png"] = n["Image Back URL"]
                 else:
                     card_data["image_uris"]["png"] = n["Image URL"]
             cards_to_import.append(card_data)
@@ -525,18 +513,14 @@ def scryfall_set(setcode):
     time.sleep(0.25)
     response = requests.get(
         f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints",
-        headers={
-            "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
-        },
+        headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
     full_set_json += (resjson := response.json())["data"]
     while resjson["has_more"]:
         time.sleep(0.25)
         response = requests.get(
             resjson["next_page"],
-            headers={
-                "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
-            },
+            headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
         )
         full_set_json += (resjson := response.json())["data"]
     return full_set_json

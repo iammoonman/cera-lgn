@@ -74,18 +74,14 @@ set_choices = [
     ["Visions", "vis"],
     ["Crimson Vow", "vow"],
     ["War of the Spark", "war"],
-    ["Weatherlight", "wth"]
+    ["Weatherlight", "wth"],
     ["Ixalan", "xln"],
     ["Zendikar Rising", "znr"],
 ]
 
 
 async def get_sets(ctx: discord.AutocompleteContext):
-    return [
-        discord.OptionChoice(s[0], s[1])
-        for s in set_choices
-        if ctx.value.lower() in s[0].lower()
-    ][:20]
+    return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
 
 
 @bot.slash_command(guild_ids=[guild], description="Create packs.")
@@ -114,12 +110,8 @@ async def get_sets(ctx: discord.AutocompleteContext):
 async def pack(ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
     await ctx.defer(ephemeral=True)
     raw = tts_output.get_packs(set, num, lands)
-    packs = discord.File(
-        io.StringIO(json.dumps(raw)), filename=f"{set}_{getSeqID()}.json"
-    )
-    await ctx.respond(
-        content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True
-    )
+    packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{getSeqID()}.json")
+    await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
 
 @bot.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
@@ -131,12 +123,45 @@ async def cube(ctx: discord.ApplicationContext, cc_id: str):
         raw = tts_output.get_cube(cc_id)
     except:
         return await ctx.respond("Something went wrong. Contact Moon.", ephemeral=True)
-    cube = discord.File(
-        io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{getSeqID()}.json"
-    )
-    await ctx.respond(
-        content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True
-    )
+    cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{getSeqID()}.json")
+    await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
+
+
+set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"]]
+
+
+async def get_sets_v3(ctx: discord.AutocompleteContext):
+    return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
+
+
+@bot.slash_command(guild_ids=[guild], description="Create packs.")
+@discord.default_permissions(manage_roles=True)
+@discord.option(
+    name="set",
+    description="Choose the set.",
+    options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10],
+    autocomplete=get_sets_v3,
+    type=str,
+)
+@discord.option(
+    name="num",
+    description="Number of packs.",
+    min_value=1,
+    max_value=72,
+    default=36,
+    type=int,
+)
+@discord.option(
+    name="lands",
+    description="Include a basic land pack from this set?",
+    type=bool,
+    default=False,
+)
+async def pack_v3(ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
+    await ctx.defer(ephemeral=True)
+    raw = tts_output.get_packs_v3(set, num, lands)
+    packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{getSeqID()}.json")
+    await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
 
 def getSeqID():
