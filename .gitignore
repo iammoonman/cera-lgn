@@ -157,6 +157,7 @@ cython_debug/
 
 # Testing files and specific things
 **/boxtesting.py
+**/t_testing.py
 **/out.json
 **/packs.json
 drafthandler/t_testing.py

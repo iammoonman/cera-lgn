@@ -1,8 +1,14 @@
 import interactions
 import draft_class
 from datetime import datetime
+from datetime import timedelta
 import requests
 import re
+import json
+
+# import logging
+
+# logging.basicConfig(level=logging.DEBUG)
 
 import pickle
 
@@ -12,8 +18,13 @@ with open("token.pickle", "rb") as f:
 bot = interactions.Client(token=token)
 
 events = []
-drafts = {}
-timekeep = {}
+drafts: dict[str, draft_class.Draft] = {}
+timekeep: dict[str, datetime] = {}
+bslash = "\n"
+guild = 0
+taglist = {"ptm": "Prime Time With Moon", "omn": "Omni's Friday Nights"}
+with open("guild.pickle", "rb") as f:
+    guild = pickle.load(f)
 
 
 @bot.event
@@ -33,17 +44,26 @@ async def on_ready():
 button0 = interactions.Button(
     style=interactions.ButtonStyle.PRIMARY, label="JOIN", custom_id="JOIN"
 )
+"""Join the draft"""
 
 
 @bot.component(button0)
-async def btn0_response(ctx):
+async def btn0_response(ctx: interactions.ComponentContext):
     """Join the draft"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "JOIN")
-    drafts[str(ctx.message.id)].add_player(ctx.author.nick, int(ctx.author.user.id))
-    await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
+    drafts[str(ctx.message.id)].add_player(
+        ctx.author.nick if ctx.author.nick is not None else ctx.author.user.username,
+        int(ctx.author.user.id),
     )
-    return
+    await ctx.edit(
+        embeds=[starting_embed(drafts[str(ctx.message.id)])],
+        components=starting_buttons,
+    )
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -52,64 +72,60 @@ async def btn0_response(ctx):
 button1 = interactions.Button(
     style=interactions.ButtonStyle.DANGER, label="DROP", custom_id="DROP_PRE"
 )
+"""Drop from the draft before it begins"""
 
 
 @bot.component(button1)
-async def btn1_response(ctx):
+async def btn1_response(ctx: interactions.ComponentContext):
     """Drop from the draft before it begins"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "DROP_PRE")
-    # Check if the user is the host
-    drafts[str(ctx.message.id)].drop_player(int(ctx.user.id))
+    drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
     await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
+        embeds=[starting_embed(drafts[str(ctx.message.id)])],
+        components=starting_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-button2 = interactions.Button(
-    style=interactions.ButtonStyle.SECONDARY, label="DROPKICK", custom_id="DROPKICK"
-)
 
-
-@bot.component(button2)
-async def btn2_response(ctx):
-    """Kick all from the draft"""
-    print(ctx.message.id, "DROP_KICK")
-    # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
-        drafts[str(ctx.message.id)].players = [
-            p
-            for p in drafts[str(ctx.message.id)]
-            if int(p.player_id) == drafts[str(ctx.message.id)].host
-        ]
-    await ctx.edit(
-        embed=starting_embed(drafts[str(ctx.message.id)]), components=starting_buttons()
-    )
-    return
+# @bot.message_command(name="DROPKICK", scope=guild)
+# async def dropkick(ctx: interactions.CommandContext):
+#     """Kick all from the draft"""
+#     print(ctx.target.id, "DROP_KICK")
+#     if type(ctx.target) == interactions.Message:
+#         if str(ctx.target.id) in drafts.keys():
+#             if int(ctx.author.user.id) == drafts[str(ctx.target.id)].host:
+#                 # 'Draft' object is not iterable
+#                 for p in drafts[str(ctx.target.id)].players:
+#                     drafts[str(ctx.target.id)].drop_player(int(p.player_id))
+#                 await ctx.target.edit(
+#                     embeds=[starting_embed(drafts[str(ctx.target.id)])],
+#                     components=starting_buttons,
+#                 )
+#     return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-button3 = interactions.Button(
-    style=interactions.ButtonStyle.DANGER, label="CANCEL", custom_id="CANCEL"
-)
 
-
-@bot.component(button3)
-async def btn3_response(ctx: interactions.context.ComponentContext):
-    """Cancel the draft"""
-    print(ctx.message.id, "CANCEL")
-    print(ctx.author.user.id, "HOST")
-    print(drafts[str(ctx.message.id)].host, "HOST 2")
-    # Check if the user is the host
-    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
-        del drafts[str(ctx.message.id)]
-        await ctx.delete()
-    return
+# @bot.message_command(name="CANCEL", scope=guild)
+# async def cancel(ctx: interactions.CommandContext):
+#     """Cancel the draft"""
+#     print(ctx.target.id, "CANCEL")
+#     if type(ctx.target) == interactions.Message:
+#         if str(ctx.target.id) in drafts.keys():
+#             if int(ctx.author.user.id) == drafts[str(ctx.target.id)].host:
+#                 del drafts[str(ctx.target.id)]
+#                 await ctx.target.delete()
+#     return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -118,82 +134,92 @@ async def btn3_response(ctx: interactions.context.ComponentContext):
 button4 = interactions.Button(
     style=interactions.ButtonStyle.SUCCESS, label="BEGIN", custom_id="BEGIN"
 )
+"""Begin the draft"""
 
 
 @bot.component(button4)
-async def btn4_response(ctx):
+async def btn4_response(ctx: interactions.ComponentContext):
     """Begin the draft"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "BEGIN")
     # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
+    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
+        print(ctx.message.id, "SENDING")
         drafts[str(ctx.message.id)].do_pairings()
-        timekeep[str(ctx.message.id)] = datetime.now() + datetime.timedelta(minutes=50)
+        timekeep[str(ctx.message.id)] = datetime.now() + timedelta(minutes=50)
         # Edit the message so that it shows the pairings and the score buttons
-        await ctx.edit(
-            embed=ig_embed(
-                drafts[str(ctx.message.id)].name,
-                [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-                round_end=timekeep[str(ctx.message.id)],
-            ),
-            components=in_draft_buttons(),
+        await ctx.message.edit(
+            embeds=[
+                ig_embed(
+                    name=drafts[str(ctx.message.id)],
+                    round_end=timekeep[str(ctx.message.id)],
+                )
+            ],
+            components=in_draft_buttons,
         )
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-starting_buttons = [button0, button1, button2, button3, button4]
+starting_buttons = [button0, button1, button4]
+"""Buttons for preparing draft."""
 
 
 button5 = interactions.Button(
     style=interactions.ButtonStyle.PRIMARY, label="NEXT_ROUND", custom_id="NEXT_ROUND"
 )
+"""Advance to the next round"""
 
 
 @bot.component(button5)
-async def btn5_response(ctx):
+async def btn5_response(ctx: interactions.ComponentContext):
     """Advance to the next round"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "NEXT_ROUND")
     # Check if the user is the host
-    if int(ctx.user.id) == drafts[str(ctx.message.id)].host:
-        timekeep[str(ctx.message.id)] = datetime.now() + datetime.timedelta(minutes=50)
+    if int(ctx.author.user.id) == drafts[str(ctx.message.id)].host:
+        timekeep[str(ctx.message.id)] = datetime.now() + timedelta(minutes=50)
         # Add a check to see if the third round has been played, then swap to posting the final results and send the json to dm.
         if drafts[str(ctx.message.id)].finish_round():
-            roundsearch = [
+            roundsearch: list[draft_class.Draft.Round] = [
                 r for r in drafts[str(ctx.message.id)].rounds if not r.completed
             ]
             if len(roundsearch) > 0:
                 await ctx.edit(
-                    embed=ig_embed(
-                        drafts[str(ctx.message.id)].name,
-                        roundsearch[0],
-                        round_end=timekeep[str(ctx.message.id)],
-                    ),
-                    components=in_draft_buttons(),
+                    embeds=[
+                        ig_embed(
+                            drafts[str(ctx.message.id)],
+                            round_end=timekeep[str(ctx.message.id)],
+                        )
+                    ],
+                    components=in_draft_buttons,
                 )
             else:
-                await ctx.edit(embed=end_embed(drafts[str(ctx.message.id)]))
                 # Send the json to the owner
-                print(drafts[str(ctx.message.id)].tojson())
-                member = interactions.Member(
-                    **await bot.http.get_member(guild_id=id, member_id=ctx.user.id),
-                    _client=bot.http,
+                print(json.dumps(drafts[str(ctx.message.id)].tojson()))
+                await ctx.edit(
+                    embeds=[end_embed(drafts[str(ctx.message.id)])], components=[]
                 )
-                await member.send(drafts[str(ctx.message.id)].tojson())
         else:
             await ctx.edit(
                 content="Not all results reported.",
-                embed=ig_embed(
-                    drafts[str(ctx.message.id)].name,
-                    [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][
-                        0
-                    ],
-                    round_end=timekeep[str(ctx.message.id)],
-                ),
-                components=in_draft_buttons(),
+                embeds=[
+                    ig_embed(
+                        drafts[str(ctx.message.id)],
+                        round_end=timekeep[str(ctx.message.id)],
+                    )
+                ],
+                components=in_draft_buttons,
             )
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -202,63 +228,84 @@ async def btn5_response(ctx):
 select0 = interactions.SelectMenu(
     options=[
         interactions.SelectOption(
-            label="self - self", value="0", description="You won both games."
+            label="you - you", value="0", description="You won both games."
         ),
         interactions.SelectOption(
-            label="self - opponent - self",
+            label="you - them - you",
             value="1",
             description="You won the first and third games.",
         ),
         interactions.SelectOption(
-            label="opponent - self - self",
+            label="them - you - you",
             value="2",
-            description="You lost the first game, but reverse swept the match.",
+            description="You lost the first game, but won overall.",
         ),
         interactions.SelectOption(
-            label="opponent - self - opponent",
+            label="them - you - them",
             value="3",
             description="You won the second game, but lost the match.",
         ),
         interactions.SelectOption(
-            label="self - opponent - opponent",
+            label="you - them - them",
             value="4",
-            description="You won the first game, but got reverse swept to lose.",
+            description="You won the first game, but lost overall.",
         ),
         interactions.SelectOption(
-            label="opponent - opponent", value="5", description="You lost both games."
+            label="them - them", value="5", description="You lost both games."
         ),
         interactions.SelectOption(
-            label="self - opponent",
+            label="you - them",
             value="6",
-            description="You tied, and won the first game.",
+            description="You tied, winning the first game.",
         ),
         interactions.SelectOption(
-            label="opponent - self",
+            label="them - you",
             value="7",
-            description="You tied, and won the second game.",
+            description="You tied, winning the second game.",
+        ),
+        interactions.SelectOption(
+            label="them",
+            value="8",
+            description="Your opponent won game 1 and the match went to time.",
+        ),
+        interactions.SelectOption(
+            label="you",
+            value="9",
+            description="You won game 1 and the match went to time.",
+        ),
+        interactions.SelectOption(
+            label="LATE BYE",
+            value="-1",
+            description="Your opponent didn't show up or had intended to drop.",
         ),
     ],
-    placeholder="Choose the games you won.",
+    placeholder="Report the games you won.",
     custom_id="WINSELECT",
     min_values=1,
     max_values=1,
 )
+"""Select the winners of the author's match"""
 
 
 @bot.component(select0)
-async def sel0_response(ctx):
+async def sel0_response(ctx: interactions.ComponentContext):
     """Select the winners of the author's match"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "WINNINGS")
-    drafts[str(ctx.message.id)].parse_match(int(ctx.user.id), ctx.data.values[0])
+    drafts[str(ctx.message.id)].parse_match(int(ctx.author.user.id), ctx.data.values[0])
     await ctx.edit(
-        embed=ig_embed(
-            drafts[str(ctx.message.id)].name,
-            [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-            round_end=timekeep[str(ctx.message.id)],
-        ),
-        components=in_draft_buttons(),
+        embeds=[
+            ig_embed(
+                drafts[str(ctx.message.id)],
+                round_end=timekeep[str(ctx.message.id)],
+            )
+        ],
+        components=in_draft_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -267,28 +314,41 @@ async def sel0_response(ctx):
 button6 = interactions.Button(
     style=interactions.ButtonStyle.DANGER, label="DROP", custom_id="DROP_IG"
 )
+"""Drop from the draft while it is running"""
 
 
 @bot.component(button6)
-async def btn6_response(ctx):
+async def btn6_response(ctx: interactions.ComponentContext):
     """Drop from the draft while it is running"""
+    # If draft is inactive, delete the message.
+    if str(ctx.message.id) not in drafts.keys():
+        await ctx.message.delete()
+        return
     print(ctx.message.id, "DROP_IG")
-    drafts[str(ctx.message.id)].drop_player(int(ctx.user.id))
+    try:
+        drafts[str(ctx.message.id)].drop_player(int(ctx.author.user.id))
+    except IndexError:
+        pass
     await ctx.edit(
-        embed=ig_embed(
-            drafts[str(ctx.message.id)].name,
-            [r for r in drafts[str(ctx.message.id)].rounds if not r.completed][0],
-            round_end=timekeep[str(ctx.message.id)],
-        ),
-        components=in_draft_buttons(),
+        embeds=[
+            ig_embed(
+                drafts[str(ctx.message.id)],
+                round_end=timekeep[str(ctx.message.id)],
+            )
+        ],
+        components=in_draft_buttons,
     )
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
 
-in_draft_buttons = [button5, select0, button6]
+in_draft_buttons = [
+    interactions.ActionRow(components=[button5, button6]),
+    interactions.ActionRow(components=[select0]),
+]
+"""Buttons for round in progress."""
 
 # ---------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------#
@@ -297,13 +357,14 @@ in_draft_buttons = [button5, select0, button6]
 # ---------------------------------------------------------------------------------------------#
 
 
-def starting_embed(draft):
+def starting_embed(draft: draft_class.Draft):
+    longtext = [p.name for p in draft.players]
     embed = interactions.Embed(
-        title="{} | {}".format(draft.name, draft.tag),
+        title=f"{draft.name} | {taglist[draft.tag]} | ENTRY",
         fields=[
             interactions.EmbedField(
                 name="PLAYERS",
-                value="{}".format([p.name for p in draft.players]),
+                value=f"{bslash.join(longtext)}",
                 inline=False,
             )
         ],
@@ -312,53 +373,54 @@ def starting_embed(draft):
     return embed
 
 
-def ig_embed(name, round, round_end):
+def ig_embed(draft: draft_class.Draft, round_end: datetime):
+    rnd = [r for r in draft.rounds if not r.completed][0]
     embed = interactions.Embed(
-        title=name + " | Round: " + round.title,
+        title=f"{draft.name} | {taglist[draft.tag]} | Round: {rnd.title}",
         fields=[
             interactions.EmbedField(
-                name="GAME",
-                value=str(i.players[0])
-                + " vs "
-                + str(i.players[1])
-                + "\n"
-                + (
-                    "G1:"
-                    + i.players[i.gwinners[0]]
-                    + "\nG2:"
-                    + i.players[i.gwinners[1]]
-                    + "\nG3:"
-                    + (i.players[i.gwinners[2]] if i.gwinners[2] != None else "NONE")
-                    if i.gwinners != []
-                    else ""
-                ),
+                inline=True,
+                name=f"GAME: {i.players[0]} vs {i.players[1]}",
+                value=f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
+                + f"G2 Winner: {(i.players[i.gwinners[1]] if i.gwinners[1] is not None else 'NONE') if len(i.gwinners) > 1 else 'NONE'}{bslash}"
+                + f"G3 Winner: {(i.players[i.gwinners[2]] if i.gwinners[2] is not None else 'NONE') if len(i.gwinners) > 2 else 'NONE'}{bslash}"
+                + (f"{i.players[0]} has dropped.{bslash}" if i.drops[0] else "")
+                + (f"{i.players[1]} has dropped.{bslash}" if i.drops[1] else ""),
             )
-            for i in round.matches
+            for i in rnd.matches
         ]
         + [
             interactions.EmbedField(
-                name="ROUND TIMER", value="<t:" + round_end.timestamp() + ">"
+                name="ROUND TIMER",
+                value=f"The round ends <t:{int(round_end.timestamp())}:R>.",
             )
         ],
+        description=f"{draft.description}{bslash}{taglist[draft.tag]}",
     )
     return embed
 
 
-def end_embed(draft):
-    playerlist = "Name | POINTS | GWP | OGP | OMP"
-    for i, p in enumerate(draft.players):
-        playerlist += p
-        playerlist += " | " + p.score
-        playerlist += " | " + p.gwp
-        playerlist += " | " + p.ogp
-        playerlist += " | " + p.omp
-        if i < len(draft.players) - 1:
-            playerlist += "\n"
+def end_embed(draft: draft_class.Draft):
     embed = interactions.Embed(
-        title=draft.name + " | FINAL",
-        fields=[interactions.EmbedField(name="SCORES", value=playerlist)],
+        title=f"{draft.name} | {taglist[draft.tag]} | FINAL",
+        description=draft.description,
+        fields=[
+            interactions.EmbedField(
+                inline=True,
+                name=f"{p.name}",
+                value=f"SCORE: {p.score}{bslash}"
+                + f"GWP: {round(p.gwp,2)}{bslash}"
+                + f"OGP: {round(p.ogp,2)}{bslash}"
+                + f"OMP: {round(p.omp,2)}",
+            )
+            for p in sorted(
+                draft.players,
+                key=lambda pl: (pl.score, pl.gwp, pl.ogp, pl.omp),
+                reverse=True,
+            )
+        ],
     )
-    return
+    return embed
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -374,18 +436,9 @@ def end_embed(draft):
     options=[
         interactions.Option(
             type=interactions.OptionType.STRING,
-            name="tag",
-            description="Choose a tag to organize this draft.",
-            required=False,
-            choices=[
-                interactions.Choice(name="omni", value="Omni's Friday Nights"),
-            ],
-        ),
-        interactions.Option(
-            type=interactions.OptionType.STRING,
             name="title",
             description="The name of the draft event.",
-            required=False,
+            required=True,
         ),
         interactions.Option(
             type=interactions.OptionType.STRING,
@@ -393,18 +446,45 @@ def end_embed(draft):
             description="Write a description for the draft.",
             required=False,
         ),
+        interactions.Option(
+            type=interactions.OptionType.STRING,
+            name="tag",
+            description="Choose a tag to organize this draft.",
+            required=False,
+            choices=[
+                interactions.Choice(name="Omni's Friday Nights", value="omn"),
+                interactions.Choice(name="Prime Time with Moon", value="ptm"),
+            ],
+        ),
+        interactions.Option(
+            type=interactions.OptionType.INTEGER,
+            name="rounds",
+            description="The maximum number of rounds for the draft. Default is 3.",
+            min_value=1,
+            max_value=5,
+            required=False,
+        ),
     ],
+    scope=guild,
 )
-async def draft(ctx: interactions.CommandContext, tag, title, description):
+async def draft(
+    ctx: interactions.CommandContext,
+    title: str,
+    description: str = "",
+    tag: str = "",
+    rounds: int = 3,
+):
     """Begins the draft command sequence."""
     msg = await ctx.send(content="Setting up your draft.")
+    print(msg.id, "DRAFT")
     drafts[str(msg.id)] = draft_class.Draft(
-        draftID=1,
+        draftID=int(msg.id),
         date=datetime.today().strftime("%Y-%m-%d"),
         host=int(ctx.author.user.id),
         tag=tag,
         description=description,
         name=title,
+        max_rounds=rounds,
     )
     drafts[str(msg.id)].add_player(
         p_name=ctx.author.nick
@@ -415,11 +495,10 @@ async def draft(ctx: interactions.CommandContext, tag, title, description):
     )
     await msg.edit(
         embeds=[starting_embed(drafts[str(msg.id)])],
-        components=[button0, button1, button2, button3, button4],
+        components=starting_buttons,
         content="",
     )
-    print(drafts[str(msg.id)].players)
-    return
+    return await ctx.send("Interaction recieved.", ephemeral=True)
 
 
 # ---------------------------------------------------------------------------------------------#
