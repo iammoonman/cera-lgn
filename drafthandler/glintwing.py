@@ -18,7 +18,7 @@ with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
 
 
-class DraftEventBot(commands.Cog):
+class Glintwing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.drafts: dict[str, draft_class.Draft] = {}
@@ -120,7 +120,7 @@ class DraftEventBot(commands.Cog):
 
 
 class StartingView(discord.ui.View):
-    def __init__(self, bot: DraftEventBot):
+    def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__()
 
@@ -178,7 +178,7 @@ class StartingView(discord.ui.View):
 
 
 class IG_View(discord.ui.View):
-    def __init__(self, bot: DraftEventBot):
+    def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__()
 
@@ -309,7 +309,7 @@ class IG_View(discord.ui.View):
 
 
 def setup(bot):
-    bot.add_cog(DraftEventBot(bot))
+    bot.add_cog(Glintwing(bot))
 
 
 if __name__ == "__main__":
@@ -317,7 +317,7 @@ if __name__ == "__main__":
         token = pickle.load(f)
 
     bot = discord.Bot()
-    bot.add_cog(DraftEventBot(bot))
+    bot.add_cog(Glintwing(bot))
 
     @bot.event
     async def on_ready():
