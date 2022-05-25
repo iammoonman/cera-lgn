@@ -115,9 +115,7 @@ class DraftEventBot(commands.Cog):
             is_host=True,
         )
         self.timekeep[vw.id] = datetime.datetime.now()
-        await msg.edit_original_message(
-            embeds=[self.starting_em(self.drafts[vw.id])], content="", view=vw
-        )
+        await msg.edit_original_message(embeds=[self.starting_em(self.drafts[vw.id])], content="", view=vw)
         return
 
 
@@ -129,8 +127,9 @@ class StartingView(discord.ui.View):
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
+        print(self.bot.drafts)
         print(self.id, "JOIN")
         self.bot.drafts[self.id].add_player(
             ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
@@ -140,12 +139,12 @@ class StartingView(discord.ui.View):
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
             view=self,
         )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
         print(self.id, "DROP")
         self.bot.drafts[self.id].drop_player(int(ctx.user.id))
@@ -153,21 +152,19 @@ class StartingView(discord.ui.View):
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
             view=self,
         )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
         vw = IG_View(self.bot)
         self.bot.drafts[vw.id] = self.bot.drafts[self.id]
         self.bot.timekeep[vw.id] = self.bot.timekeep[self.id]
-        del self.bot.drafts[self.id]
-        del self.bot.drafts[self.id]
-        print(vw.id, "BEGIN")
+        print(self.id, vw.id, "BEGIN")
         self.bot.drafts[vw.id].do_pairings()
-        self.bot.timekeep[vw.id] = datetime.now() + datetime.timedelta(minutes=60)
+        self.bot.timekeep[vw.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
         await ctx.message.edit(
             embeds=[
                 self.bot.ig_em(
@@ -177,7 +174,7 @@ class StartingView(discord.ui.View):
             ],
             view=vw,
         )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
 class IG_View(discord.ui.View):
@@ -242,8 +239,9 @@ class IG_View(discord.ui.View):
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
+        print("REPORT", self.id)
         self.bot.drafts[self.id].parse_match(int(ctx.user.id), select.values[0])
         await ctx.message.edit(
             embeds=[
@@ -254,13 +252,14 @@ class IG_View(discord.ui.View):
             ],
             view=self,
         )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
+        print("DROP", self.id)
         self.bot.drafts[self.id].drop_player(int(ctx.user.id))
         await ctx.message.edit(
             embeds=[
@@ -271,17 +270,18 @@ class IG_View(discord.ui.View):
             ],
             view=self,
         )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            #await ctx.delete_original_message()
+            # await ctx.delete_original_message()
             return
+        print("NEXT", self.id)
         if self.bot.drafts[self.id].host == int(ctx.user.id):
             if self.bot.drafts[self.id].finish_round():
                 if len([r for r in self.bot.drafts[self.id].rounds if not r.completed]) > 0:
-                    self.bot.timekeep[self.id] = datetime.now() + datetime.timedelta(minutes=50)
+                    self.bot.timekeep[self.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
                     await ctx.message.edit(
                         embeds=[
                             self.bot.ig_em(
@@ -291,11 +291,9 @@ class IG_View(discord.ui.View):
                         ],
                         view=self,
                     )
-                    del self.bot.timekeep[self.id]
-                    del self.bot.drafts[self.id]
                 else:
                     print(json.dumps(self.bot.drafts[self.id].tojson()))
-                    await ctx.message.edit(embeds=[self.bot.end_em(self.bot.drafts[self.id])])
+                    await ctx.message.edit(embeds=[self.bot.end_em(self.bot.drafts[self.id])], view=None)
             else:
                 await ctx.message.edit(
                     content="Not all results reported.",
@@ -307,11 +305,12 @@ class IG_View(discord.ui.View):
                     ],
                     view=self,
                 )
-        return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
 def setup(bot):
     bot.add_cog(DraftEventBot(bot))
+
 
 if __name__ == "__main__":
     with open("token.pickle", "rb") as f:
@@ -320,10 +319,8 @@ if __name__ == "__main__":
     bot = discord.Bot()
     bot.add_cog(DraftEventBot(bot))
 
-
     @bot.event
     async def on_ready():
         print("hello world")
-
 
     bot.run(token)
