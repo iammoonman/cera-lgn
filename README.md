@@ -1,8 +1,8 @@
 # cera
 
 ## Blurb
-The packcreator project recreates Magic: The Gathering draft booster pack generation to the highest fidelity possible with current information. It outputs these packs through Discord to a format usable by Tabletop Simulator.</br>
-The drafthandler project is an event manager, using Discord to handle pairings for Magic: The Gathering draft events. The data is output to a somewhat human-readable JSON format intended to be usable by other projects.</br>
+The Starlight / packcreator project recreates Magic: The Gathering draft booster pack generation to the highest fidelity possible with current information. It outputs these packs through Discord to a format usable by Tabletop Simulator.</br>
+The Glintwing / drafthandler project is an event manager, using Discord to handle pairings for Magic: The Gathering draft events. The data is output to a somewhat human-readable JSON format intended to be usable by other projects.</br>
 
 ## Additional Notes
 Nearly all rare sheets are randomly generated on JSON. These cannot realistically be reverse engineered.</br>
