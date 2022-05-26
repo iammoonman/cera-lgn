@@ -1,7 +1,7 @@
 import json
 import discord
 import pickle
-import tts_output
+from . import tts_output
 import io
 from discord.ext import commands
 
@@ -10,7 +10,7 @@ set_choices = [
     ["Aether Revolt", "aer"],
     ["Adventures in the Forgotten Realms", "afr"],
     ["Amonkhet", "akh"],
-    ["Battlebond", "bbd"],
+    # ["Battlebond", "bbd"], # Not ready. V3 candidate.
     ["Battle for Zendikar", "bfz"],
     ["Born of the Gods", "bng"],
     ["Dragon's Maze", "dgm"],

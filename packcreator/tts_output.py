@@ -1,6 +1,6 @@
 import random
-import packcreator
-import point_slicer
+from . import packcreator
+from . import point_slicer
 import json
 import requests
 import time
@@ -239,7 +239,7 @@ class Pack:
 
 def get_packs(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator."""
-    with open(f"setjson/{setcode}.json", "rb") as f:
+    with open(f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [
@@ -301,7 +301,7 @@ def get_packs(setcode, num_packs, land_pack=False):
 
 def get_packs_v3(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
-    with open(f"sj3/{setcode}.json", "rb") as f:
+    with open(f"sj3/{setcode}.json" if __name__ == "__main__" else f"packcreator/sj3/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [

@@ -2,8 +2,7 @@ import asyncio
 import json
 import discord
 from discord.ext import commands
-import draft_class
-from draft_class import Draft
+from .draft_class import Draft
 import pickle
 import datetime
 
@@ -21,7 +20,7 @@ with open("guild.pickle", "rb") as f:
 class Glintwing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.drafts: dict[str, draft_class.Draft] = {}
+        self.drafts: dict[str, Draft] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
         self.starting_em = lambda d: discord.Embed(
@@ -100,7 +99,7 @@ class Glintwing(commands.Cog):
         msg = await ctx.respond(content="Setting up your draft...")
         vw = StartingView(self)
         print(vw.id, "DRAFT")
-        self.drafts[vw.id] = draft_class.Draft(
+        self.drafts[vw.id] = Draft(
             draftID=vw.id,
             date=datetime.datetime.today().strftime("%Y-%m-%d"),
             host=int(ctx.author.id),
