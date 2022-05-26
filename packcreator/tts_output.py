@@ -1,6 +1,6 @@
 import random
-import packcreator
-import point_slicer
+from . import p_creator
+from . import point_slicer
 import json
 import requests
 import time
@@ -239,7 +239,7 @@ class Pack:
 
 def get_packs(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator."""
-    with open(f"setjson/{setcode}.json", "rb") as f:
+    with open(f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [
@@ -267,7 +267,7 @@ def get_packs(setcode, num_packs, land_pack=False):
     set_info = scryfall_set(abbr)
     codes = [abbr]
     for _ in range(num_packs):
-        (raw_cn_cards, foil_indexes,) = packcreator.generatepack_c1c2_special(
+        (raw_cn_cards, foil_indexes,) = p_creator.generatepack_c1c2_special(
             sheet_index_func=lambda a: point_slicer.get_number(a),
             setJSON=setJSON,
         )
@@ -301,7 +301,7 @@ def get_packs(setcode, num_packs, land_pack=False):
 
 def get_packs_v3(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
-    with open(f"sj3/{setcode}.json", "rb") as f:
+    with open(f"sj3/{setcode}.json" if __name__ == "__main__" else f"packcreator/sj3/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [
@@ -345,7 +345,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             # Log duplicate_control_list
             # log["d_c"] = duplicate_control_list[:]
     for _ in range(num_packs):
-        raw_cn_cards, foil_indexes, seed = packcreator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
+        raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
         # Log the seed
         # log["seeds"].append(seed)
         for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):

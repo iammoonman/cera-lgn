@@ -2,8 +2,7 @@ import asyncio
 import json
 import discord
 from discord.ext import commands
-import draft_class
-from draft_class import Draft
+from .draft_class import Draft
 import pickle
 import datetime
 
@@ -18,10 +17,10 @@ with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
 
 
-class DraftEventBot(commands.Cog):
+class Glintwing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.drafts: dict[str, draft_class.Draft] = {}
+        self.drafts: dict[str, Draft] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
         self.starting_em = lambda d: discord.Embed(
@@ -100,7 +99,7 @@ class DraftEventBot(commands.Cog):
         msg = await ctx.respond(content="Setting up your draft...")
         vw = StartingView(self)
         print(vw.id, "DRAFT")
-        self.drafts[vw.id] = draft_class.Draft(
+        self.drafts[vw.id] = Draft(
             draftID=vw.id,
             date=datetime.datetime.today().strftime("%Y-%m-%d"),
             host=int(ctx.author.id),
@@ -120,7 +119,7 @@ class DraftEventBot(commands.Cog):
 
 
 class StartingView(discord.ui.View):
-    def __init__(self, bot: DraftEventBot):
+    def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__()
 
@@ -178,7 +177,7 @@ class StartingView(discord.ui.View):
 
 
 class IG_View(discord.ui.View):
-    def __init__(self, bot: DraftEventBot):
+    def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__()
 
@@ -309,7 +308,7 @@ class IG_View(discord.ui.View):
 
 
 def setup(bot):
-    bot.add_cog(DraftEventBot(bot))
+    bot.add_cog(Glintwing(bot))
 
 
 if __name__ == "__main__":
@@ -317,7 +316,7 @@ if __name__ == "__main__":
         token = pickle.load(f)
 
     bot = discord.Bot()
-    bot.add_cog(DraftEventBot(bot))
+    bot.add_cog(Glintwing(bot))
 
     @bot.event
     async def on_ready():
