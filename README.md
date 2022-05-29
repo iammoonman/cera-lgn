@@ -7,7 +7,7 @@ The Glintwing / drafthandler project is an event manager, using Discord to handl
 ## Additional Notes
 Nearly all rare sheets are randomly generated on JSON. These cannot realistically be reverse engineered.</br>
 Some sets' information is currently unavailable. It is possible to reverse engineer more sets' contents, but it takes a lot of work and patience.</br>
-The Discord bots use discord.py and pycord as API wrappers.
+The Discord bots use pycord as API wrappers.
 
 ## Credits
 Thanks to the [lethe.xyz](https://www.lethe.xyz/mtg/collation/index.html) collation project for the collation data. This project is not affiliated with them, though. Consider donating to their Patreon.</br>
