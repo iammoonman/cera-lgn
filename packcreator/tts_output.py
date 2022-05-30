@@ -544,7 +544,7 @@ def scryfall_set(setcode):
 def ijson_collection(cardlist):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
     blob_json = []
-    f = open("default-cards-20220530090403.json", "rb")
+    f = open("default-cards.json", "rb")
     objects = ijson.items(f, "item")
     for o in objects:
         if [o["collector_number"], o["set"]] in cardlist:
