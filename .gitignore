@@ -161,3 +161,4 @@ cython_debug/
 **/out.json
 **/packs.json
 drafthandler/t_testing.py
+default-cards*.json

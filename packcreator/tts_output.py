@@ -6,6 +6,7 @@ import requests
 import time
 import re
 import datetime
+import ijson
 
 
 class Pack:
@@ -118,15 +119,21 @@ class Pack:
             else:
                 descriptionHold += cardData["oracle_text"]
             descriptionHold += (
-                (f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]" if "power" in cardData.keys() else "")
+                (
+                    f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]"
+                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
+                    else ""
+                )
                 if "card_faces" not in cardData.keys()
                 else (
                     f"\n[b]{cardData['card_faces'][0]['power']}/{cardData['card_faces'][0]['toughness']}[/b]"
-                    if "power" in cardData["card_faces"][0].keys()
+                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
                     else ""
                 )
             )
-            descriptionHold += f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty" if "loyalty" in cardData.keys() else ""
+            descriptionHold += (
+                f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in cardData["type_line"] else ""
+            )
             self.Description = f"{descriptionHold}"
             """Contains oracle text, if any."""
             self.Transform = Pack.transformAttrs
@@ -175,12 +182,13 @@ class Pack:
                 )
                 backDescription += (
                     f"\n[b]{cardData['card_faces'][1]['power']}/{cardData['card_faces'][1]['toughness']}[/b]"
-                    if "power" in cardData["card_faces"][1].keys()
+                    if "Creature" in cardData["card_faces"][1]["type_line"]
+                    or "Vehicle" in cardData["card_faces"][1]["type_line"]
                     else ""
                 )
                 backDescription += (
                     f"\n[b]{cardData['card_faces'][1]['loyalty']}[/b] Starting Loyalty"
-                    if "loyalty" in cardData["card_faces"][1].keys()
+                    if "Planeswalker" in cardData["card_faces"][1]["type_line"]
                     else ""
                 )
                 self.States = {
@@ -239,7 +247,9 @@ class Pack:
 
 def get_packs(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator."""
-    with open(f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb") as f:
+    with open(
+        f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb"
+    ) as f:
         setJSON = json.load(f)
     save = {
         "ObjectStates": [
@@ -318,16 +328,13 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
                     "scaleY": 1.0,
                     "scaleZ": 1.0,
                 },
-                "Nickname": f"{num_packs} Packs of {setcode}",
+                "Nickname": f"packs of {setcode}",
                 "ColorDiffuse": {"r": 0.0, "g": 0.0, "b": 0.0},
                 "Bag": {"Order": 0},
                 "ContainedObjects": [],
             }
         ]
     }
-    abbr = setJSON["default_set"]
-    set_info = scryfall_set(abbr)
-    codes = [abbr]
     # log = {
     #     "seeds": [],
     #     "setcode": setcode,
@@ -339,7 +346,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     if "flag_data" in setJSON.keys():
         if "duplicate_control" in setJSON["flag_data"].keys():
             duplicate_control_list = {
-                k: point_slicer.get_sampled_numbers(num_packs * i["count"], i["max_length"])
+                k: point_slicer.get_sampled_numbers(num_packs * i["max_length"], i["count"])
                 for k, i in setJSON["flag_data"]["duplicate_control"]["slots_counts"].items()
             }
             # Log duplicate_control_list
@@ -348,15 +355,17 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
         raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
         # Log the seed
         # log["seeds"].append(seed)
-        for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
-            set_info += scryfall_set(new_setcode[1])
-            codes.append(new_setcode[1])
+        set_info = ijson_collection(raw_cn_cards)
+        # print([a['name'] for a in set_info])
+        # print(len(raw_cn_cards))
+        # print(len(set_info))
+        new_colle = []
+        for crd in raw_cn_cards:
+            new_colle += [x for x in set_info if x['collector_number'] == crd[0] and x['set'] == crd[1]]
+        # print([a['name'] for a in new_colle])
         pack_to_add = Pack()
         pack_to_add.import_cards(
-            [
-                next(c for c in set_info if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1])
-                for cn_pair in raw_cn_cards
-            ],
+            new_colle,
             foil_indexes,
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
@@ -491,7 +500,7 @@ def get_cube(cc_id):
                     and "split" != card_data["layout"]
                     and "flip" != card_data["layout"]
                 ):
-                    print(card_data["name"])
+                    # print(card_data["name"])
                     card_data["card_faces"][0]["image_uris"]["png"] = n["Image URL"]
                     if n["Image Back URL"]:
                         card_data["card_faces"][1]["image_uris"]["png"] = n["Image Back URL"]
@@ -524,3 +533,56 @@ def scryfall_set(setcode):
         )
         full_set_json += (resjson := response.json())["data"]
     return full_set_json
+
+
+def ijson_collection(cardlist):
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    f = open("default-cards-20220530090403.json", "rb")
+    objects = ijson.items(f, "item")
+    for o in objects:
+        for c in cardlist:
+            if c[0] == o["collector_number"] and c[1] == o["set"]:
+                card_obj = {
+                    "oracle_id": o["oracle_id"],
+                    "cmc": o["cmc"],
+                    "type_line": o["type_line"],
+                    "layout": o["layout"],
+                    "set": o["set"],
+                    "collector_number": o["collector_number"],
+                }
+                if "card_faces" in o.keys():
+                    extra_obj = {
+                        "card_faces": [
+                            {
+                                "name": i["name"],
+                                "type_line": i["type_line"],
+                                "oracle_text": i["oracle_text"],
+                                "image_uris": {"png": i["image_uris"]["png"]},
+                                "power": i["power"]
+                                if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
+                                else 0,
+                                "toughness": i["toughness"]
+                                if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
+                                else 0,
+                                "mana_cost": i["mana_cost"],
+                                "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
+                            }
+                            for i in o["card_faces"]
+                        ],
+                    }
+                else:
+                    extra_obj = {
+                        "name": o["name"],
+                        "type_line": o["type_line"],
+                        "oracle_text": o["oracle_text"],
+                        "image_uris": {"png": o["image_uris"]["png"]},
+                        "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                        "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                        "mana_cost": o["mana_cost"],
+                        "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
+                    }
+                card_obj = {**card_obj, **extra_obj}
+                blob_json.append(card_obj)
+    f.close()
+    return blob_json

@@ -94,7 +94,7 @@ class Starlight(commands.Cog):
     @discord.option(
         name="set",
         description="Choose the set.",
-        choices=[discord.OptionChoice(s[0], s[1]) for s in set_choices][:10],
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices][:10],
         autocomplete=get_sets,
         type=str,
     )
