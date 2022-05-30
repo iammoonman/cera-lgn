@@ -351,22 +351,28 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             }
             # Log duplicate_control_list
             # log["d_c"] = duplicate_control_list[:]
+    all_packs = []
     for _ in range(num_packs):
         raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
         # Log the seed
         # log["seeds"].append(seed)
-        set_info = ijson_collection(raw_cn_cards)
+        all_packs.append([raw_cn_cards, foil_indexes])
+    all_cn_sets = []
+    for p in all_packs:
+        all_cn_sets += p[0]
+    set_info = ijson_collection(all_cn_sets)
+    for p in all_packs:
         # print([a['name'] for a in set_info])
         # print(len(raw_cn_cards))
         # print(len(set_info))
         new_colle = []
-        for crd in raw_cn_cards:
-            new_colle += [x for x in set_info if x['collector_number'] == crd[0] and x['set'] == crd[1]]
+        for crd in p[0]:
+            new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
         # print([a['name'] for a in new_colle])
         pack_to_add = Pack()
         pack_to_add.import_cards(
             new_colle,
-            foil_indexes,
+            p[1],
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     if land_pack:
@@ -541,48 +547,47 @@ def ijson_collection(cardlist):
     f = open("default-cards-20220530090403.json", "rb")
     objects = ijson.items(f, "item")
     for o in objects:
-        for c in cardlist:
-            if c[0] == o["collector_number"] and c[1] == o["set"]:
-                card_obj = {
-                    "oracle_id": o["oracle_id"],
-                    "cmc": o["cmc"],
-                    "type_line": o["type_line"],
-                    "layout": o["layout"],
-                    "set": o["set"],
-                    "collector_number": o["collector_number"],
+        if [o["collector_number"], o["set"]] in cardlist:
+            card_obj = {
+                "oracle_id": o["oracle_id"],
+                "cmc": o["cmc"],
+                "type_line": o["type_line"],
+                "layout": o["layout"],
+                "set": o["set"],
+                "collector_number": o["collector_number"],
+            }
+            if "card_faces" in o.keys():
+                extra_obj = {
+                    "card_faces": [
+                        {
+                            "name": i["name"],
+                            "type_line": i["type_line"],
+                            "oracle_text": i["oracle_text"],
+                            "image_uris": {"png": i["image_uris"]["png"]},
+                            "power": i["power"] if "Creature" in i["type_line"] or "Vehicle" in i["type_line"] else 0,
+                            "toughness": i["toughness"]
+                            if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
+                            else 0,
+                            "mana_cost": i["mana_cost"],
+                            "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
+                        }
+                        for i in o["card_faces"]
+                    ],
                 }
-                if "card_faces" in o.keys():
-                    extra_obj = {
-                        "card_faces": [
-                            {
-                                "name": i["name"],
-                                "type_line": i["type_line"],
-                                "oracle_text": i["oracle_text"],
-                                "image_uris": {"png": i["image_uris"]["png"]},
-                                "power": i["power"]
-                                if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
-                                else 0,
-                                "toughness": i["toughness"]
-                                if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
-                                else 0,
-                                "mana_cost": i["mana_cost"],
-                                "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
-                            }
-                            for i in o["card_faces"]
-                        ],
-                    }
-                else:
-                    extra_obj = {
-                        "name": o["name"],
-                        "type_line": o["type_line"],
-                        "oracle_text": o["oracle_text"],
-                        "image_uris": {"png": o["image_uris"]["png"]},
-                        "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
-                        "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
-                        "mana_cost": o["mana_cost"],
-                        "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
-                    }
-                card_obj = {**card_obj, **extra_obj}
-                blob_json.append(card_obj)
+            else:
+                extra_obj = {
+                    "name": o["name"],
+                    "type_line": o["type_line"],
+                    "oracle_text": o["oracle_text"],
+                    "image_uris": {"png": o["image_uris"]["png"]},
+                    "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "mana_cost": o["mana_cost"],
+                    "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
+                }
+            card_obj = {**card_obj, **extra_obj}
+            blob_json.append(card_obj)
+        if len(blob_json) == len(cardlist):
+            break
     f.close()
     return blob_json
