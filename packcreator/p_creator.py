@@ -210,6 +210,7 @@ def pack_gen_v3(
                 if sheet_key == drop_choice["key"]:
                     drop_sheet = drop_choice["count"]
             # For x in range(value)
+            # print(slot_key, sheet_key, sheet_take, drop_sheet)
             for c in range(sheet_take - drop_sheet):
                 # Take a card from slot['sheets'][key] according to the number plus x
                 pack += [
@@ -235,7 +236,7 @@ if __name__ == "__main__":
     import json
     import point_slicer
 
-    with open("packcreator/afr_2.json", "rb") as f:
+    with open("packcreator/sj3/afr_2.json", "rb") as f:
         ooo = json.load(f)
         d_c = {}
         if "flag_data" in ooo.keys():
