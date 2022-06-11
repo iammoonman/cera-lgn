@@ -394,7 +394,6 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
 def get_cube(cc_id):
     """Returns a JSON save file for Tabletop Simulator."""
     import csv
-    import copy
 
     save = {
         "ObjectStates": [
@@ -427,16 +426,36 @@ def get_cube(cc_id):
         return None
     templist = []
     the_cube = Pack()
-    foil_indexes = []
     for row in reader:
+        if row["Maybeboard"] == "true":
+            continue
         templist.append([row["Collector Number"], row["Set"]])
-    cardinfo = ijson_collection(templist)
+    cardinfo = ijson_collection(templist, True)
     cubelist = []
+    reader = csv.DictReader(response.content.decode("utf-8").splitlines())
     for row in reader:
-        for c in cardinfo:
-            if row["Collector Number"] == c["collector_number"] and row["Set"] == c["set"]:
-                cubelist.append(c)
-    the_cube.import_cards(cardinfo, foil_indexes)
+        if row["Maybeboard"] == "true":
+            continue
+        c = cardinfo[row["Collector Number"]+row["Set"]]
+        extras = {}
+        if row["Image URL"] != "" and c["layout"] not in ["transform", "modal_dfc"]:
+            extras = {"image_uris": {"png": row["Image URL"]}}
+        if (row["Image URL"] != "" or row["Image Back URL"] != "") and c["layout"] in [
+            "transform",
+            "modal_dfc",
+        ]:
+            extras = {
+                "card_faces": [
+                    {**c["card_faces"][0], "image_uris": {"png": row["Image URL"]}}
+                    if row["Image URL"] != ""
+                    else {**c["card_faces"][0]},
+                    {**c["card_faces"][1], "image_uris": {"png": row["Image Back URL"]}}
+                    if row["Image Back URL"] != ""
+                    else {**c["card_faces"][1]},
+                ]
+            }
+        cubelist.append({**c, **extras})
+    the_cube.import_cards(cubelist)
     save["ObjectStates"][0]["ContainedObjects"] = [the_cube.toDict()]
     return save
 
@@ -460,9 +479,10 @@ def scryfall_set(setcode):
     return full_set_json
 
 
-def ijson_collection(cardlist):
+def ijson_collection(cardlist, out_dict = False):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
     blob_json = []
+    out = {}
     f = open("default-cards.json", "rb")
     objects = ijson.items(f, "item")
     for o in objects:
@@ -535,7 +555,10 @@ def ijson_collection(cardlist):
                 }
             card_obj = {**card_obj, **extra_obj}
             blob_json.append(card_obj)
+            out[o["collector_number"]+o["set"]] = card_obj
         if len(blob_json) == len(cardlist):
             break
     f.close()
+    if out_dict:
+        return out
     return blob_json
