@@ -145,7 +145,7 @@ class Pack:
                     "",
                     cardData["card_faces"][0]["image_uris"]["png"]
                     if "card_faces" in cardData.keys()
-                    and "Adventure" not in cardData["type_line"]
+                    and "Adventure" not in cardData["layout"]
                     and "split" != cardData["layout"]
                     and "flip" != cardData["layout"]
                     else cardData["image_uris"]["png"],
@@ -161,7 +161,7 @@ class Pack:
             self.States = {}
             if (
                 "card_faces" in cardData.keys()
-                and "Adventure" not in cardData["type_line"]
+                and "Adventure" not in cardData["layout"]
                 and "split" != cardData["layout"]
                 and "flip" != cardData["layout"]
             ):
@@ -556,7 +556,7 @@ def ijson_collection(cardlist):
                 "set": o["set"],
                 "collector_number": o["collector_number"],
             }
-            if "card_faces" in o.keys():
+            if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
                 extra_obj = {
                     "card_faces": [
                         {
@@ -564,6 +564,35 @@ def ijson_collection(cardlist):
                             "type_line": i["type_line"],
                             "oracle_text": i["oracle_text"],
                             "image_uris": {"png": i["image_uris"]["png"]},
+                            "power": i["power"] if "Creature" in i["type_line"] or "Vehicle" in i["type_line"] else 0,
+                            "toughness": i["toughness"]
+                            if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
+                            else 0,
+                            "mana_cost": i["mana_cost"],
+                            "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
+                        }
+                        for i in o["card_faces"]
+                    ],
+                }
+            elif "card_faces" in o.keys() and o["layout"] in ["split"]:
+                extra_obj = {
+                    "name": o["name"],
+                    "type_line": o["type_line"],
+                    "oracle_text": o["card_faces"][0]["oracle_text"] + "\n" + o["card_faces"][1]["oracle_text"],
+                    "image_uris": {"png": o["image_uris"]["png"]},
+                    "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "mana_cost": o["mana_cost"],
+                    "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
+                }
+            elif "card_faces" in o.keys() and o["layout"] in ["flip"]:
+                extra_obj = {
+                    "card_faces": [
+                        {
+                            "name": i["name"],
+                            "type_line": i["type_line"],
+                            "oracle_text": i["oracle_text"],
+                            "image_uris": {"png": o["image_uris"]["png"]},
                             "power": i["power"] if "Creature" in i["type_line"] or "Vehicle" in i["type_line"] else 0,
                             "toughness": i["toughness"]
                             if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
