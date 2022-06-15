@@ -40,7 +40,7 @@
 	},
 	"flag_data": {
 		"duplicate_control": {
-			"slots_counts": { "c": {"count": 8, "max_length": 4} }
+			"slots_counts": { "c": {"per_pack_count": 8, "max_sheet_length": 4} }
 		},
 		"sequenced": {
 			"dfc": { "seq": ["a", "b", "a", "a", "b", "b", "a", "a", "a", "b", "b", "b"] }

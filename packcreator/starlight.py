@@ -1,7 +1,7 @@
 import json
 import discord
 import pickle
-from . import tts_output
+from . import p_caller
 import io
 from discord.ext import commands
 
@@ -114,7 +114,7 @@ class Starlight(commands.Cog):
     )
     async def pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        raw = tts_output.get_packs(set, num, lands)
+        raw = p_caller.get_packs(set, num, lands)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
@@ -124,7 +124,7 @@ class Starlight(commands.Cog):
     async def cube(self, ctx: discord.ApplicationContext, cc_id: str):
         await ctx.defer(ephemeral=True)
         try:
-            raw = tts_output.get_cube(cc_id)
+            raw = p_caller.get_cube(cc_id)
         except:
             return await ctx.respond("Something went wrong. Contact Moon.", ephemeral=True)
         cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{self.getSeqID()}.json")
@@ -158,7 +158,7 @@ class Starlight(commands.Cog):
     )
     async def pack_v3(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        raw = tts_output.get_packs_v3(set, num, lands)
+        raw = p_caller.get_packs_v3(set, num, lands)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
