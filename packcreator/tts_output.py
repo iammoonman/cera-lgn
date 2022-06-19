@@ -328,6 +328,8 @@ def ijson_collection(cardlist):
                     + o["card_faces"][1]["mana_cost"]
                     + "[/b]"
                     + "\n"
+                    + o["card_faces"][1]["type_line"]
+                    + "\n"
                     + italicize_reminder(o["card_faces"][1]["oracle_text"])
                     + "\n",
                     "image_uris": {"png": o["image_uris"]["png"]},
