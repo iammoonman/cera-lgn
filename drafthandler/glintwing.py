@@ -1,4 +1,3 @@
-import asyncio
 import json
 import discord
 from discord.ext import commands
@@ -31,6 +30,7 @@ class Glintwing(commands.Cog):
                     value=f"{bslash.join([p.name for p in d.players])}",
                 )
             ],
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.ig_em = lambda d, r: discord.Embed(
             title=f"{d.name} | {taglist[d.tag]} | Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
@@ -52,7 +52,7 @@ class Glintwing(commands.Cog):
                     value=f"The round ends <t:{int(r.timestamp())}:R>.",
                 )
             ],
-            description=f"{d.description}{bslash}{taglist[d.tag]}",
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.end_em = lambda d: discord.Embed(
             title=f"{d.name} | {taglist[d.tag]} | FINAL",
@@ -71,6 +71,7 @@ class Glintwing(commands.Cog):
                     reverse=True,
                 )
             ],
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
 
     @commands.slash_command(guilds=[guild])
