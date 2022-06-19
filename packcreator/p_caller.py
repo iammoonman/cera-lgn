@@ -185,7 +185,7 @@ def get_cube(cc_id):
                 if n["Image URL"]:  # Catch whether the CubeCobra card has custom images.
                     if (
                         "card_faces" in card_data.keys()
-                        and "Adventure" not in card_data["type_line"]
+                        and "adventure" != card_data["layout"]
                         and "split" != card_data["layout"]
                         and "flip" != card_data["layout"]
                     ):
@@ -230,7 +230,7 @@ def get_cube(cc_id):
             if n["Image URL"]:
                 if (
                     "card_faces" in card_data.keys()
-                    and "Adventure" not in card_data["type_line"]
+                    and "adventure" != card_data["layout"]
                     and "split" != card_data["layout"]
                     and "flip" != card_data["layout"]
                 ):

@@ -10,7 +10,6 @@ set_choices = [
     ["Aether Revolt", "aer"],
     ["Adventures in the Forgotten Realms", "afr"],
     ["Amonkhet", "akh"],
-    # ["Battlebond", "bbd"], # Not ready. V3 candidate.
     ["Battle for Zendikar", "bfz"],
     ["Born of the Gods", "bng"],
     ["Dragon's Maze", "dgm"],
