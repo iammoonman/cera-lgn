@@ -82,11 +82,7 @@ class Pack:
     class CardBlob:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
             """Represents one card."""
-            self.Nickname = (
-                f'{cardData["card_faces"][0]["name"]}\n{cardData["card_faces"][0]["type_line"]} {round(cardData["card_faces"][0]["cmc"]) if "cmc" in cardData["card_faces"][0].keys() else round(cardData["cmc"])}MV'
-                if "card_faces" in cardData.keys()
-                else f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
-            )
+            self.Nickname = f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
             """Shows up in TTS as the name of the object.
             
             Contains the name, mana value, and type line for easy searching."""
@@ -95,32 +91,28 @@ class Pack:
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
             descriptionHold = ""
-            # Contains the oracle test for the card, if any.
-            # Includes things like power/toughness, loyalty.
-            if "oracle_text" not in cardData.keys():
-                descriptionHold += (
-                    "" if "card_faces" not in cardData.keys() else cardData["card_faces"][0]["oracle_text"]
-                )
+            if (
+                "card_faces" in cardData.keys()
+                and "adventure" != cardData["layout"]
+                and "split" != cardData["layout"]
+                and "flip" != cardData["layout"]
+            ):
+                descriptionHold = cardData["card_faces"][0]["oracle_text"]
             else:
+                # Contains the oracle test for the card, if any.
+                # Includes things like power/toughness, loyalty.
                 descriptionHold += cardData["oracle_text"]
-            descriptionHold += (
-                (
+                descriptionHold += (
                     f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]"
                     if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
                     and "adventure" != cardData["layout"]
                     else ""
                 )
-                if "card_faces" not in cardData.keys()
-                else (
-                    f"\n[b]{cardData['card_faces'][0]['power']}/{cardData['card_faces'][0]['toughness']}[/b]"
-                    if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
-                    and "adventure" != cardData["layout"]
+                descriptionHold += (
+                    f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty"
+                    if "Planeswalker" in cardData["type_line"]
                     else ""
                 )
-            )
-            descriptionHold += (
-                f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in cardData["type_line"] else ""
-            )
             self.Description = f"{descriptionHold}"
             """Contains oracle text, if any, and power/toughness and loyalty."""
             self.Transform = Pack.transformAttrs
@@ -160,24 +152,8 @@ class Pack:
                     "BackIsHidden": True,
                     "UniqueBack": False,
                 }
-                backName = f'{cardData["card_faces"][1]["name"]}\n{cardData["card_faces"][1]["type_line"]} {round(cardData["card_faces"][1]["cmc"]) if "cmc" in cardData["card_faces"][1].keys() else round(cardData["cmc"])}MV'
-                backDescription = ""
-                backDescription += (
-                    ""
-                    if "oracle_text" not in cardData["card_faces"][1].keys()
-                    else cardData["card_faces"][1]["oracle_text"]
-                )
-                backDescription += (
-                    f"\n[b]{cardData['card_faces'][1]['power']}/{cardData['card_faces'][1]['toughness']}[/b]"
-                    if "Creature" in cardData["card_faces"][1]["type_line"]
-                    or "Vehicle" in cardData["card_faces"][1]["type_line"]
-                    else ""
-                )
-                backDescription += (
-                    f"\n[b]{cardData['card_faces'][1]['loyalty']}[/b] Starting Loyalty"
-                    if "Planeswalker" in cardData["card_faces"][1]["type_line"]
-                    else ""
-                )
+                backName = f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
+                backDescription = cardData["card_faces"][1]["oracle_text"]
                 self.States = {
                     "2": {
                         "Name": "Card",
@@ -264,6 +240,7 @@ def ijson_collection(cardlist):
                 "type_line": o["type_line"],
                 "layout": o["layout"],
                 "set": o["set"],
+                "name": o["name"],
                 "collector_number": o["collector_number"],
             }
             if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
@@ -272,14 +249,14 @@ def ijson_collection(cardlist):
                         {
                             "name": i["name"],
                             "type_line": i["type_line"],
-                            "oracle_text": italicize_reminder(i["oracle_text"]),
+                            "oracle_text": make_oracle_dfc(o, c == 0),
                             "image_uris": {"png": i["image_uris"]["png"]},
                             "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "mana_cost": i["mana_cost"],
                             "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
                         }
-                        for i in o["card_faces"]
+                        for c, i in enumerate(o["card_faces"])
                     ],
                 }
             elif "card_faces" in o.keys() and o["layout"] in ["split"]:
@@ -361,3 +338,32 @@ def italicize_reminder(text: str):
     out = re.sub(r"\(", "[i](", text)
     out = re.sub(r"\)", ")[/i]", out)
     return out
+
+
+def make_oracle_dfc(card_dota, is_reverse=False):
+    face_1 = card_dota["card_faces"][0]
+    face_2 = card_dota["card_faces"][1]
+    descriptionHold = "" if is_reverse else "[6E6E6E]"
+    descriptionHold += "[b]" + face_1["name"] + " " + face_1["mana_cost"] + "[/b]\n"
+    descriptionHold += face_1["type_line"] + "\n"
+    descriptionHold += italicize_reminder(face_1["oracle_text"])
+    descriptionHold += (
+        f"\n[b]{face_1['power']}/{face_1['toughness']}[/b]"
+        if ("Creature" in face_1["type_line"] or "Vehicle" in face_1["type_line"])
+        else ""
+    )
+    descriptionHold += f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_1["type_line"] else ""
+    descriptionHold += "\n"
+    descriptionHold += "[6E6E6E]" if is_reverse else "[-]"
+    descriptionHold += "\n"
+    descriptionHold += "[b]" + face_2["name"] + " " + face_2["mana_cost"] + "[/b]\n"
+    descriptionHold += face_2["type_line"] + "\n"
+    descriptionHold += italicize_reminder(face_2["oracle_text"])
+    descriptionHold += (
+        f"\n[b]{face_2['power']}/{face_2['toughness']}[/b]"
+        if ("Creature" in face_2["type_line"] or "Vehicle" in face_2["type_line"])
+        else ""
+    )
+    descriptionHold += f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else ""
+    descriptionHold += "[-]" if is_reverse else ""
+    return descriptionHold
