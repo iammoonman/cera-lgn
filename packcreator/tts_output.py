@@ -106,13 +106,15 @@ class Pack:
             descriptionHold += (
                 (
                     f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]"
-                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
+                    if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
+                    and "adventure" != cardData["layout"]
                     else ""
                 )
                 if "card_faces" not in cardData.keys()
                 else (
                     f"\n[b]{cardData['card_faces'][0]['power']}/{cardData['card_faces'][0]['toughness']}[/b]"
-                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
+                    if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
+                    and "adventure" != cardData["layout"]
                     else ""
                 )
             )
@@ -315,7 +317,7 @@ def ijson_collection(cardlist):
                     "type_line": o["type_line"],
                     "oracle_text": italicize_reminder(o["card_faces"][0]["oracle_text"])
                     + (
-                        "\n[b]" + o["power"] + "/" + o["toughness"] + "[/b]"
+                        "\n[b]" + o["power"] + "/" + o["toughness"] + "[/b]\n"
                         if "power" in o.keys() and "toughness" in o.keys()
                         else ""
                     )
