@@ -22,26 +22,26 @@ def get_packs(setcode, num_packs, land_pack=False):
             }
         ]
     }
-    abbr = setJSON["set_code"]
-    set_info = tts_output.scryfall_set(abbr)
-    codes = [abbr]
+    all_packs = []
     for _ in range(num_packs):
         (raw_cn_cards, foil_indexes,) = p_creator.generatepack_c1c2_special(
             sheet_index_func=lambda a: point_slicer.get_number(a),
             setJSON=setJSON,
         )
-        # Find the scryfall set data for the cards in the pack. Could be varied.
-        # Grabs the entire set to reduce queries. Watch for memory usage.
-        for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
-            set_info += tts_output.scryfall_set(new_setcode[1])
-            codes.append(new_setcode[1])
+        all_packs.append([raw_cn_cards, foil_indexes])
+    all_cn_sets = []
+    for p in all_packs:
+        all_cn_sets += p[0]
+    set_info = tts_output.ijson_collection(all_cn_sets)
+    for p in all_packs:
+        new_colle = []
+        for crd in p[0]:
+            new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
+        # print([a['name'] for a in new_colle])
         pack_to_add = tts_output.Pack()
         pack_to_add.import_cards(
-            [
-                next(c for c in set_info if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1])
-                for cn_pair in raw_cn_cards
-            ],
-            foil_indexes,
+            new_colle,
+            p[1],
         )
         save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
     if land_pack:

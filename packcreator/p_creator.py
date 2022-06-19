@@ -47,20 +47,20 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
         sheet_index = sheet_index_func(value)
         for p in range(value - len([j for j in keydrops_c if j == key])):
             pack = pack + [
-                (
+                [
                     setJSON["ABCD_common_sheets"][key][(sheet_index + p) % len(setJSON["ABCD_common_sheets"][key])],
                     setJSON["set_code"],
-                )
+                ]
             ]
     for key, value in ABCD_u.items():
         # For each sheet key in the ABCD, take the value and grab that many cards from the sheet.
         sheet_index = sheet_index_func(value)
         for p in range(value - len([j for j in keydrops_u if j == key])):
             pack = pack + [
-                (
+                [
                     setJSON["ABCD_uncommon_sheets"][key][(sheet_index + p) % len(setJSON["ABCD_uncommon_sheets"][key])],
                     setJSON["set_code"],
-                )
+                ]
             ]
     for key, value in ABCD_r.items():
         # Grab that many rares from the selected rare sheet.
@@ -92,10 +92,10 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
         # Now that the number has been checked, actually put in the rare.
         for p in range(value - keydrops_r):
             pack = pack + [
-                (
+                [
                     setJSON["rare_slot_sheets"][key][(sheet_index + value) % len(setJSON["rare_slot_sheets"][key])],
                     setJSON["set_code"],
-                )
+                ]
             ]
     f_indexes = []
     # Tracks the indexes of foils within the pack.
@@ -104,7 +104,7 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
         sheet_index = sheet_index_func(distribution["f"])
         for _ in range(distribution["f"]):
             pack = pack + [
-                (
+                [
                     (
                         sheet := (
                             random.choices(
@@ -114,7 +114,7 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
                         )
                     )[sheet_index % len(sheet)],
                     setJSON["set_code"],
-                )
+                ]
             ]
             f_indexes.append(len(pack))
     for key in [key for key in distribution.keys() if key not in ["c", "u", "r", "f", "drops"]]:
@@ -122,7 +122,7 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
         sheet_index = sheet_index_func(distribution[key])
         for n in range(distribution[key]):
             pack = pack + [
-                (
+                [
                     (
                         sheet := (
                             random.choices(
@@ -132,7 +132,7 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
                         )
                     )[sheet_index % len(sheet)],
                     setJSON["extras_sheets_odds"][key][2],
-                )
+                ]
             ]
     # Reverse the pack and pivot the foil indexes. This hides the rare at the bottom of the card stack in TTS.
     return pack[::-1], [(r + (len(pack) - r) * 2) % len(pack) for r in f_indexes]
