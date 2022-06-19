@@ -2,9 +2,7 @@ import random
 import pickle
 
 
-def generatepack_c1c2_special(
-    sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None
-):
+def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None):
     """
     Takes a JSON dict object, parsed in the V2 format.
 
@@ -50,9 +48,7 @@ def generatepack_c1c2_special(
         for p in range(value - len([j for j in keydrops_c if j == key])):
             pack = pack + [
                 (
-                    setJSON["ABCD_common_sheets"][key][
-                        (sheet_index + p) % len(setJSON["ABCD_common_sheets"][key])
-                    ],
+                    setJSON["ABCD_common_sheets"][key][(sheet_index + p) % len(setJSON["ABCD_common_sheets"][key])],
                     setJSON["set_code"],
                 )
             ]
@@ -62,9 +58,7 @@ def generatepack_c1c2_special(
         for p in range(value - len([j for j in keydrops_u if j == key])):
             pack = pack + [
                 (
-                    setJSON["ABCD_uncommon_sheets"][key][
-                        (sheet_index + p) % len(setJSON["ABCD_uncommon_sheets"][key])
-                    ],
+                    setJSON["ABCD_uncommon_sheets"][key][(sheet_index + p) % len(setJSON["ABCD_uncommon_sheets"][key])],
                     setJSON["set_code"],
                 )
             ]
@@ -99,9 +93,7 @@ def generatepack_c1c2_special(
         for p in range(value - keydrops_r):
             pack = pack + [
                 (
-                    setJSON["rare_slot_sheets"][key][
-                        (sheet_index + value) % len(setJSON["rare_slot_sheets"][key])
-                    ],
+                    setJSON["rare_slot_sheets"][key][(sheet_index + value) % len(setJSON["rare_slot_sheets"][key])],
                     setJSON["set_code"],
                 )
             ]
@@ -125,9 +117,7 @@ def generatepack_c1c2_special(
                 )
             ]
             f_indexes.append(len(pack))
-    for key in [
-        key for key in distribution.keys() if key not in ["c", "u", "r", "f", "drops"]
-    ]:
+    for key in [key for key in distribution.keys() if key not in ["c", "u", "r", "f", "drops"]]:
         # Catch special sheets.
         sheet_index = sheet_index_func(distribution[key])
         for n in range(distribution[key]):
@@ -172,9 +162,7 @@ def pack_gen_v3(
     pack: list[list[str, str]] = []
     foil_indexes: list[int] = []
     # Choose a distro based on distro[freq]
-    distro: dict = random.choices(
-        set["distros"], [s["freq"] for s in set["distros"]], k=1
-    )[0]
+    distro: dict = random.choices(set["distros"], [s["freq"] for s in set["distros"]], k=1)[0]
     # For each slot key in the distro['slots'].keys()
     for slot_key in distro["slots"].keys():
         # Choose a slot[option] based on option[freq]
@@ -188,9 +176,7 @@ def pack_gen_v3(
         if "drops" in distro.keys():
             if slot_key in distro["drops"].keys():
                 drop_choice = random.choices(
-                    [o for o in distro["drops"][slot_key]],
-                    [o["freq"] for o in distro["drops"][slot_key]],
-                    k=1
+                    [o for o in distro["drops"][slot_key]], [o["freq"] for o in distro["drops"][slot_key]], k=1
                 )[0]
         # For each key in slot[option]['struct']
         for sheet_key, sheet_take in struct.items():
@@ -244,16 +230,10 @@ if __name__ == "__main__":
                 d_c = {
                     k: point_slicer.get_sampled_numbers(
                         24,
-                        ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
-                            "max_length"
-                        ]
-                        * ooo["flag_data"]["duplicate_control"]["slots_counts"][k][
-                            "count"
-                        ],
+                        ooo["flag_data"]["duplicate_control"]["slots_counts"][k]["max_sheet_length"]
+                        * ooo["flag_data"]["duplicate_control"]["slots_counts"][k]["per_pack_count"],
                     )
-                    for k in ooo["flag_data"]["duplicate_control"][
-                        "slots_counts"
-                    ].keys()
+                    for k in ooo["flag_data"]["duplicate_control"]["slots_counts"].keys()
                 }
                 print(d_c)
         for n in range(24):

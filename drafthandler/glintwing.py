@@ -1,4 +1,3 @@
-import asyncio
 import json
 import discord
 from discord.ext import commands
@@ -31,6 +30,7 @@ class Glintwing(commands.Cog):
                     value=f"{bslash.join([p.name for p in d.players])}",
                 )
             ],
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.ig_em = lambda d, r: discord.Embed(
             title=f"{d.name} | {taglist[d.tag]} | Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
@@ -52,7 +52,7 @@ class Glintwing(commands.Cog):
                     value=f"The round ends <t:{int(r.timestamp())}:R>.",
                 )
             ],
-            description=f"{d.description}{bslash}{taglist[d.tag]}",
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.end_em = lambda d: discord.Embed(
             title=f"{d.name} | {taglist[d.tag]} | FINAL",
@@ -71,6 +71,7 @@ class Glintwing(commands.Cog):
                     reverse=True,
                 )
             ],
+            description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
 
     @commands.slash_command(guilds=[guild])
@@ -121,15 +122,15 @@ class Glintwing(commands.Cog):
 class StartingView(discord.ui.View):
     def __init__(self, bot: Glintwing):
         self.bot = bot
-        super().__init__()
+        super().__init__(timeout=None)
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        print(self.bot.drafts)
+        print(self.id, "JOIN")
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        print(self.bot.drafts)
-        print(self.id, "JOIN")
         self.bot.drafts[self.id].add_player(
             ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
             int(ctx.user.id),
@@ -142,10 +143,10 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        print(self.id, "DROP")
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        print(self.id, "DROP")
         self.bot.drafts[self.id].drop_player(int(ctx.user.id))
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
@@ -155,6 +156,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        print("BEGIN 1")
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -179,7 +181,7 @@ class StartingView(discord.ui.View):
 class IG_View(discord.ui.View):
     def __init__(self, bot: Glintwing):
         self.bot = bot
-        super().__init__()
+        super().__init__(timeout=None)
 
     @discord.ui.select(
         placeholder="Report the games you won.",
@@ -237,10 +239,10 @@ class IG_View(discord.ui.View):
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
+        print("REPORT", self.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        print("REPORT", self.id)
         self.bot.drafts[self.id].parse_match(int(ctx.user.id), select.values[0])
         await ctx.message.edit(
             embeds=[
@@ -255,10 +257,10 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        print("DROP", self.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        print("DROP", self.id)
         self.bot.drafts[self.id].drop_player(int(ctx.user.id))
         await ctx.message.edit(
             embeds=[
@@ -273,10 +275,10 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        print("NEXT", self.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        print("NEXT", self.id)
         if self.bot.drafts[self.id].host == int(ctx.user.id):
             if self.bot.drafts[self.id].finish_round():
                 if len([r for r in self.bot.drafts[self.id].rounds if not r.completed]) > 0:

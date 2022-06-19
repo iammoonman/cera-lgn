@@ -1,15 +1,13 @@
 import random
-from . import p_creator
-from . import point_slicer
-import json
 import requests
 import time
 import re
-import datetime
 import ijson
 
 
 class Pack:
+    """Represents one stack of cards output to the bag."""
+
     transformAttrs = {
         "posX": 0.0,
         "posY": 0.0,
@@ -24,23 +22,25 @@ class Pack:
     """Required for TTS."""
     colorAttrs = {"r": 0.0, "g": 0.0, "b": 0.0}
     """Required for TTS."""
+    foilTransformAttrs = {
+        "posX": 0.0,
+        "posY": 0.25,
+        "posZ": 0.0,
+        "rotX": 90.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 0.7006438 * 3.1,
+        "scaleY": 0.9999966 * 3.1,
+        "scaleZ": 15.3846169 * 3.1,
+    }
+    """Required for TTS."""
     StarFoil = {
         "CustomDecal": {
             "Name": "StarFoil",
             "ImageURL": "https://i.imgur.com/QnxyMMK.png",
             "Size": 1.0,
         },
-        "Transform": {
-            "posX": 0.0,
-            "posY": 0.25,
-            "posZ": 0.0,
-            "rotX": 90.0,
-            "rotY": 180.0,
-            "rotZ": 0.0,
-            "scaleX": 0.7006438 * 3.1,
-            "scaleY": 0.9999966 * 3.1,
-            "scaleZ": 15.3846169 * 3.1,
-        },
+        "Transform": foilTransformAttrs,
     }
     """Standard diagonal rainbow gradient with small star glyph in the bottom left corner of the art."""
     SetSpiralFoil = {
@@ -49,17 +49,7 @@ class Pack:
             "ImageURL": "https://i.imgur.com/Roq6TDw.png",
             "Size": 1.0,
         },
-        "Transform": {
-            "posX": 0.0,
-            "posY": 0.25,
-            "posZ": 0.0,
-            "rotX": 90.0,
-            "rotY": 180.0,
-            "rotZ": 0.0,
-            "scaleX": 0.7006438 * 3.1,
-            "scaleY": 0.9999966 * 3.1,
-            "scaleZ": 15.3846169 * 3.1,
-        },
+        "Transform": foilTransformAttrs,
     }
     """Scattered set symbols with a spiraling rainbow coloring over the stroke."""
     VoronoiFoil = {
@@ -68,17 +58,7 @@ class Pack:
             "ImageURL": "https://i.imgur.com/oIgRF2r.png",
             "Size": 1.0,
         },
-        "Transform": {
-            "posX": 0.0,
-            "posY": 0.25,
-            "posZ": 0.0,
-            "rotX": 90.0,
-            "rotY": 180.0,
-            "rotZ": 0.0,
-            "scaleX": 0.7006438 * 3.1,
-            "scaleY": 0.9999966 * 3.1,
-            "scaleZ": 15.3846169 * 3.1,
-        },
+        "Transform": foilTransformAttrs,
     }
     """Voronoi diagram, filled with separate rainbow patters to resemble shattered glass."""
 
@@ -102,40 +82,39 @@ class Pack:
     class CardBlob:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
             """Represents one card."""
-            self.Nickname = (
-                f'{cardData["card_faces"][0]["name"]}\n{cardData["card_faces"][0]["type_line"]} {round(cardData["card_faces"][0]["cmc"]) if "cmc" in cardData["card_faces"][0].keys() else round(cardData["cmc"])}MV'
-                if "card_faces" in cardData.keys()
-                else f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
-            )
+            self.Nickname = f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
+            """Shows up in TTS as the name of the object.
+            
+            Contains the name, mana value, and type line for easy searching."""
             self.Name = "Card"
             """Default property which identifies the type of this object. \"Card\" only."""
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
             descriptionHold = ""
-            if "oracle_text" not in cardData.keys():
-                descriptionHold += (
-                    "" if "card_faces" not in cardData.keys() else cardData["card_faces"][0]["oracle_text"]
-                )
+            if (
+                "card_faces" in cardData.keys()
+                and "adventure" != cardData["layout"]
+                and "split" != cardData["layout"]
+                and "flip" != cardData["layout"]
+            ):
+                descriptionHold = cardData["card_faces"][0]["oracle_text"]
             else:
+                # Contains the oracle test for the card, if any.
+                # Includes things like power/toughness, loyalty.
                 descriptionHold += cardData["oracle_text"]
-            descriptionHold += (
-                (
+                descriptionHold += (
                     f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]"
-                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
+                    if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
+                    and "adventure" != cardData["layout"]
                     else ""
                 )
-                if "card_faces" not in cardData.keys()
-                else (
-                    f"\n[b]{cardData['card_faces'][0]['power']}/{cardData['card_faces'][0]['toughness']}[/b]"
-                    if "Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"]
+                descriptionHold += (
+                    f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty"
+                    if "Planeswalker" in cardData["type_line"]
                     else ""
                 )
-            )
-            descriptionHold += (
-                f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in cardData["type_line"] else ""
-            )
             self.Description = f"{descriptionHold}"
-            """Contains oracle text, if any."""
+            """Contains oracle text, if any, and power/toughness and loyalty."""
             self.Transform = Pack.transformAttrs
             self.ColorDiffuse = Pack.colorAttrs
             self.CardID = counter * 100
@@ -145,7 +124,7 @@ class Pack:
                     "",
                     cardData["card_faces"][0]["image_uris"]["png"]
                     if "card_faces" in cardData.keys()
-                    and "Adventure" not in cardData["layout"]
+                    and "adventure" != cardData["layout"]
                     and "split" != cardData["layout"]
                     and "flip" != cardData["layout"]
                     else cardData["image_uris"]["png"],
@@ -161,7 +140,7 @@ class Pack:
             self.States = {}
             if (
                 "card_faces" in cardData.keys()
-                and "Adventure" not in cardData["layout"]
+                and "adventure" != cardData["layout"]
                 and "split" != cardData["layout"]
                 and "flip" != cardData["layout"]
             ):
@@ -173,24 +152,8 @@ class Pack:
                     "BackIsHidden": True,
                     "UniqueBack": False,
                 }
-                backName = f'{cardData["card_faces"][1]["name"]}\n{cardData["card_faces"][1]["type_line"]} {round(cardData["card_faces"][1]["cmc"]) if "cmc" in cardData["card_faces"][1].keys() else round(cardData["cmc"])}MV'
-                backDescription = ""
-                backDescription += (
-                    ""
-                    if "oracle_text" not in cardData["card_faces"][1].keys()
-                    else cardData["card_faces"][1]["oracle_text"]
-                )
-                backDescription += (
-                    f"\n[b]{cardData['card_faces'][1]['power']}/{cardData['card_faces'][1]['toughness']}[/b]"
-                    if "Creature" in cardData["card_faces"][1]["type_line"]
-                    or "Vehicle" in cardData["card_faces"][1]["type_line"]
-                    else ""
-                )
-                backDescription += (
-                    f"\n[b]{cardData['card_faces'][1]['loyalty']}[/b] Starting Loyalty"
-                    if "Planeswalker" in cardData["card_faces"][1]["type_line"]
-                    else ""
-                )
+                backName = f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
+                backDescription = cardData["card_faces"][1]["oracle_text"]
                 self.States = {
                     "2": {
                         "Name": "Card",
@@ -245,283 +208,6 @@ class Pack:
         }
 
 
-def get_packs(setcode, num_packs, land_pack=False):
-    """Returns a JSON save file for Tabletop Simulator."""
-    with open(
-        f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb"
-    ) as f:
-        setJSON = json.load(f)
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": {
-                    "posX": 0.0,
-                    "posY": 0.0,
-                    "posZ": 0.0,
-                    "rotX": 0.0,
-                    "rotY": 0.0,
-                    "rotZ": 0.0,
-                    "scaleX": 1.0,
-                    "scaleY": 1.0,
-                    "scaleZ": 1.0,
-                },
-                "Nickname": f"{num_packs} Packs of {setcode}",
-                "ColorDiffuse": {"r": 0.0, "g": 0.0, "b": 0.0},
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
-    abbr = setJSON["set_code"]
-    set_info = scryfall_set(abbr)
-    codes = [abbr]
-    for _ in range(num_packs):
-        (raw_cn_cards, foil_indexes,) = p_creator.generatepack_c1c2_special(
-            sheet_index_func=lambda a: point_slicer.get_number(a),
-            setJSON=setJSON,
-        )
-        # Find the scryfall set data for the cards in the pack. Could be varied.
-        # Grabs the entire set to reduce queries. Watch for memory usage.
-        for new_setcode in list(filter(lambda x: x[1] not in codes, raw_cn_cards)):
-            set_info += scryfall_set(new_setcode[1])
-            codes.append(new_setcode[1])
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            [
-                next(c for c in set_info if c["collector_number"] == cn_pair[0] and c["set"] == cn_pair[1])
-                for cn_pair in raw_cn_cards
-            ],
-            foil_indexes,
-        )
-        save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
-    if land_pack:
-        basicslist = list(
-            filter(
-                lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                set_info,
-            )
-        )
-        if len(basicslist) >= 5:
-            pack_to_add = Pack()
-            pack_to_add.import_cards(basicslist)
-            save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
-    return save
-
-
-def get_packs_v3(setcode, num_packs, land_pack=False):
-    """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
-    with open(f"sj3/{setcode}.json" if __name__ == "__main__" else f"packcreator/sj3/{setcode}.json", "rb") as f:
-        setJSON = json.load(f)
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": {
-                    "posX": 0.0,
-                    "posY": 0.0,
-                    "posZ": 0.0,
-                    "rotX": 0.0,
-                    "rotY": 0.0,
-                    "rotZ": 0.0,
-                    "scaleX": 1.0,
-                    "scaleY": 1.0,
-                    "scaleZ": 1.0,
-                },
-                "Nickname": f"packs of {setcode}",
-                "ColorDiffuse": {"r": 0.0, "g": 0.0, "b": 0.0},
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
-    # log = {
-    #     "seeds": [],
-    #     "setcode": setcode,
-    #     "num_p": num_packs,
-    #     "timestamp": datetime.datetime.now().isoformat(),
-    # }
-    # Calculate duplicate control specs
-    duplicate_control_list = {}
-    if "flag_data" in setJSON.keys():
-        if "duplicate_control" in setJSON["flag_data"].keys():
-            duplicate_control_list = {
-                k: point_slicer.get_sampled_numbers(num_packs * i["max_length"], i["count"])
-                for k, i in setJSON["flag_data"]["duplicate_control"]["slots_counts"].items()
-            }
-            # Log duplicate_control_list
-            # log["d_c"] = duplicate_control_list[:]
-    all_packs = []
-    for _ in range(num_packs):
-        raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
-        # Log the seed
-        # log["seeds"].append(seed)
-        all_packs.append([raw_cn_cards, foil_indexes])
-    all_cn_sets = []
-    for p in all_packs:
-        all_cn_sets += p[0]
-    set_info = ijson_collection(all_cn_sets)
-    for p in all_packs:
-        # print([a['name'] for a in set_info])
-        # print(len(raw_cn_cards))
-        # print(len(set_info))
-        new_colle = []
-        for crd in p[0]:
-            new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
-        # print([a['name'] for a in new_colle])
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            new_colle,
-            p[1],
-        )
-        save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
-    if land_pack:
-        pack_to_add = Pack()
-        pack_to_add.import_cards(
-            [
-                list(
-                    filter(
-                        lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                        set_info,
-                    )
-                )
-            ]
-        )
-        save["ContainedObjects"].append(pack_to_add.toDict())
-    return save  # , log
-
-
-def get_cube(cc_id):
-    """Returns a JSON save file for Tabletop Simulator."""
-    import csv
-    import copy
-
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": {
-                    "posX": 0.0,
-                    "posY": 0.0,
-                    "posZ": 0.0,
-                    "rotX": 0.0,
-                    "rotY": 0.0,
-                    "rotZ": 0.0,
-                    "scaleX": 1.0,
-                    "scaleY": 1.0,
-                    "scaleZ": 1.0,
-                },
-                "Nickname": f"{cc_id}",
-                "ColorDiffuse": {"r": 0.0, "g": 0.0, "b": 0.0},
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
-    response = requests.get(
-        f"https://cubecobra.com/cube/download/csv/{cc_id}?primary=Color%20Category&secondary=Types-Multicolor&tertiary=Mana%20Value&quaternary=Alphabetical&showother=false",
-        headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
-    )
-    reader = csv.DictReader(response.content.decode("utf-8").splitlines())
-    if "Name" not in reader.fieldnames:  # Catching 404 errors in CubeCobra is much harder than it should be.
-        return None
-    templist = []
-    the_cube = Pack()
-    for row in reader:
-        if len(templist) == 10:  # Buffering to serve query length has an impact on sorting.
-            # CubeCobra data is always fundamentally based on data from Scryfall. The query will not fail.
-            response = requests.get(
-                "https://api.scryfall.com/cards/search?q="
-                + "".join(
-                    [
-                        f'(cn%3D"{i["Collector Number"]}"+set%3D{i["Set"]}){"+or+" if templist.index(i)<len(templist)-1 else ""}'
-                        for i in templist
-                    ]
-                )
-                + "&unique=prints",
-                headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
-            )
-            holdhold = response.json()
-            cards_to_import = []
-            foil_indexes = []
-            for i, n in enumerate(templist):
-                # Convert the CubeCobra csv information to the Scryfall data used by the Pack class.
-                # This will also catch duplicate cards.
-                card_data = copy.deepcopy(
-                    [
-                        j
-                        for j in holdhold["data"]
-                        if j["collector_number"] == n["Collector Number"] and j["set"] == n["Set"]
-                    ][0]
-                )
-                if n["Image URL"]:  # Catch whether the CubeCobra card has custom images.
-                    if (
-                        "card_faces" in card_data.keys()
-                        and "Adventure" not in card_data["type_line"]
-                        and "split" != card_data["layout"]
-                        and "flip" != card_data["layout"]
-                    ):
-                        card_data["card_faces"][0]["image_uris"]["png"] = n["Image URL"]
-                        if n["Image Back URL"]:
-                            card_data["card_faces"][1]["image_uris"]["png"] = n["Image Back URL"]
-                    else:
-                        card_data["image_uris"]["png"] = n["Image URL"]
-                cards_to_import.append(card_data)
-                if n["Finish"] == "Foil":  # Catch the CubeCobra card being foiled.
-                    foil_indexes.append(i)
-            the_cube.import_cards(cards_to_import, foil_indexes)
-            templist = []
-            foil_indexes = []
-            time.sleep(0.25)
-        if row["Maybeboard"] == "false":  # Maybeboarded cards are included in the csv.
-            templist.append(row)
-    if len(templist) > 0:
-        # Catch an uneven number of cards.
-        response = requests.get(
-            "https://api.scryfall.com/cards/search?q="
-            + "".join(
-                [
-                    f'(cn%3D"{i["Collector Number"]}"+set%3D{i["Set"]}){"+or+" if templist.index(i)<len(templist)-1 else ""}'
-                    for i in templist
-                ]
-            )
-            + "&unique=prints",
-            headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
-        )
-        holdhold = response.json()
-        cards_to_import = []
-        foil_indexes = []
-        for i, n in enumerate(templist):
-            card_data = copy.deepcopy(
-                [
-                    j
-                    for j in holdhold["data"]
-                    if j["collector_number"] == n["Collector Number"] and j["set"] == n["Set"]
-                ][0]
-            )
-            if n["Image URL"]:
-                if (
-                    "card_faces" in card_data.keys()
-                    and "Adventure" not in card_data["type_line"]
-                    and "split" != card_data["layout"]
-                    and "flip" != card_data["layout"]
-                ):
-                    # print(card_data["name"])
-                    card_data["card_faces"][0]["image_uris"]["png"] = n["Image URL"]
-                    if n["Image Back URL"]:
-                        card_data["card_faces"][1]["image_uris"]["png"] = n["Image Back URL"]
-                else:
-                    card_data["image_uris"]["png"] = n["Image URL"]
-            cards_to_import.append(card_data)
-            if n["Finish"] == "Foil":
-                foil_indexes.append(i)
-        the_cube.import_cards(cards_to_import, foil_indexes)
-        templist = []
-        foil_indexes = []
-    save["ObjectStates"][0]["ContainedObjects"] = [the_cube.toDict()]
-    return save
-
-
 def scryfall_set(setcode):
     """Returns list of JSON data containing all cards from the set."""
     full_set_json = []
@@ -554,6 +240,7 @@ def ijson_collection(cardlist):
                 "type_line": o["type_line"],
                 "layout": o["layout"],
                 "set": o["set"],
+                "name": o["name"],
                 "collector_number": o["collector_number"],
             }
             if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
@@ -562,28 +249,28 @@ def ijson_collection(cardlist):
                         {
                             "name": i["name"],
                             "type_line": i["type_line"],
-                            "oracle_text": i["oracle_text"],
+                            "oracle_text": make_oracle_dfc(o, c == 0),
                             "image_uris": {"png": i["image_uris"]["png"]},
-                            "power": i["power"] if "Creature" in i["type_line"] or "Vehicle" in i["type_line"] else 0,
-                            "toughness": i["toughness"]
-                            if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
-                            else 0,
+                            "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
+                            "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "mana_cost": i["mana_cost"],
-                            "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
+                            "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
                         }
-                        for i in o["card_faces"]
+                        for c, i in enumerate(o["card_faces"])
                     ],
                 }
             elif "card_faces" in o.keys() and o["layout"] in ["split"]:
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": o["card_faces"][0]["oracle_text"] + "\n" + o["card_faces"][1]["oracle_text"],
+                    "oracle_text": italicize_reminder(o["card_faces"][0]["oracle_text"])
+                    + "\n"
+                    + italicize_reminder(o["card_faces"][1]["oracle_text"]),
                     "image_uris": {"png": o["image_uris"]["png"]},
-                    "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
-                    "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
+                    "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
                     "mana_cost": o["mana_cost"],
-                    "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
+                    "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
                 }
             elif "card_faces" in o.keys() and o["layout"] in ["flip"]:
                 extra_obj = {
@@ -591,28 +278,53 @@ def ijson_collection(cardlist):
                         {
                             "name": i["name"],
                             "type_line": i["type_line"],
-                            "oracle_text": i["oracle_text"],
+                            "oracle_text": italicize_reminder(i["oracle_text"]),
                             "image_uris": {"png": o["image_uris"]["png"]},
-                            "power": i["power"] if "Creature" in i["type_line"] or "Vehicle" in i["type_line"] else 0,
-                            "toughness": i["toughness"]
-                            if "Creature" in i["type_line"] or "Vehicle" in i["type_line"]
-                            else 0,
+                            "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
+                            "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "mana_cost": i["mana_cost"],
-                            "loyalty": i["loyalty"] if "Planeswalker" in i["type_line"] else 0,
+                            "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
                         }
                         for i in o["card_faces"]
                     ],
+                }
+            elif "card_faces" in o.keys() and o["layout"] in ["adventure"]:
+                extra_obj = {
+                    "name": o["name"],
+                    "type_line": o["type_line"],
+                    "oracle_text": italicize_reminder(o["card_faces"][0]["oracle_text"])
+                    + (
+                        "\n[b]" + o["power"] + "/" + o["toughness"] + "[/b]\n"
+                        if "power" in o.keys() and "toughness" in o.keys()
+                        else ""
+                    )
+                    + "\n"
+                    + "[b]"
+                    + o["card_faces"][1]["name"]
+                    + " "
+                    + o["card_faces"][1]["mana_cost"]
+                    + "[/b]"
+                    + "\n"
+                    + o["card_faces"][1]["type_line"]
+                    + "\n"
+                    + italicize_reminder(o["card_faces"][1]["oracle_text"])
+                    + "\n",
+                    "image_uris": {"png": o["image_uris"]["png"]},
+                    "power": 0,  # o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
+                    "toughness": 0,  # o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
+                    "mana_cost": o["mana_cost"],
+                    "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
                 }
             else:
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": o["oracle_text"],
+                    "oracle_text": italicize_reminder(o["oracle_text"]),
                     "image_uris": {"png": o["image_uris"]["png"]},
-                    "power": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
-                    "toughness": o["power"] if "Creature" in o["type_line"] or "Vehicle" in o["type_line"] else 0,
+                    "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
+                    "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
                     "mana_cost": o["mana_cost"],
-                    "loyalty": o["loyalty"] if "Planeswalker" in o["type_line"] else 0,
+                    "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
                 }
             card_obj = {**card_obj, **extra_obj}
             blob_json.append(card_obj)
@@ -620,3 +332,38 @@ def ijson_collection(cardlist):
             break
     f.close()
     return blob_json
+
+
+def italicize_reminder(text: str):
+    out = re.sub(r"\(", "[i](", text)
+    out = re.sub(r"\)", ")[/i]", out)
+    return out
+
+
+def make_oracle_dfc(card_dota, is_reverse=False):
+    face_1 = card_dota["card_faces"][0]
+    face_2 = card_dota["card_faces"][1]
+    descriptionHold = "" if is_reverse else "[6E6E6E]"
+    descriptionHold += "[b]" + face_1["name"] + " " + face_1["mana_cost"] + "[/b]\n"
+    descriptionHold += face_1["type_line"] + "\n"
+    descriptionHold += italicize_reminder(face_1["oracle_text"])
+    descriptionHold += (
+        f"\n[b]{face_1['power']}/{face_1['toughness']}[/b]"
+        if ("Creature" in face_1["type_line"] or "Vehicle" in face_1["type_line"])
+        else ""
+    )
+    descriptionHold += f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_1["type_line"] else ""
+    descriptionHold += "\n"
+    descriptionHold += "[6E6E6E]" if is_reverse else "[-]"
+    descriptionHold += "\n"
+    descriptionHold += "[b]" + face_2["name"] + " " + face_2["mana_cost"] + "[/b]\n"
+    descriptionHold += face_2["type_line"] + "\n"
+    descriptionHold += italicize_reminder(face_2["oracle_text"])
+    descriptionHold += (
+        f"\n[b]{face_2['power']}/{face_2['toughness']}[/b]"
+        if ("Creature" in face_2["type_line"] or "Vehicle" in face_2["type_line"])
+        else ""
+    )
+    descriptionHold += f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else ""
+    descriptionHold += "[-]" if is_reverse else ""
+    return descriptionHold
