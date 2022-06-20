@@ -75,6 +75,7 @@ def get_number(num_to_take):
 def get_sampled_numbers(n_packs: int, n_rares: int):
     """Returns a randomly sampled list of numbers range(0,n_rares) with reduced chance of repeats."""
     out = []
+    # Takes split samples of the range to maintain the chance of duplicates.
     while len(out) < n_packs:
         out += random.sample(
             range(n_rares), k=(min([max([(n_packs * 41 // 43) - n_rares, 1]), n_rares]))

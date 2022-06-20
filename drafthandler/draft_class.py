@@ -273,6 +273,8 @@ class Draft:
         # Does not allow the host to drop.
         if self.host == p_id:
             return
+        if p_id not in [p.player_id for p in self.players]:
+            return
         # If there are no rounds, delete player
         if len(self.rounds) == 0:
             hold = None
