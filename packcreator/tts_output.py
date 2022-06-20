@@ -91,12 +91,7 @@ class Pack:
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
             descriptionHold = ""
-            if (
-                "card_faces" in cardData.keys()
-                and "adventure" != cardData["layout"]
-                and "split" != cardData["layout"]
-                and "flip" != cardData["layout"]
-            ):
+            if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 descriptionHold = cardData["card_faces"][0]["oracle_text"]
             else:
                 # Contains the oracle test for the card, if any.
@@ -126,7 +121,6 @@ class Pack:
                     if "card_faces" in cardData.keys()
                     and "adventure" != cardData["layout"]
                     and "split" != cardData["layout"]
-                    and "flip" != cardData["layout"]
                     else cardData["image_uris"]["png"],
                 ),
                 "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
@@ -138,12 +132,7 @@ class Pack:
             self.CustomDeck = self.frontImage
             self.AttachedDecals = decals if isFoil else []
             self.States = {}
-            if (
-                "card_faces" in cardData.keys()
-                and "adventure" != cardData["layout"]
-                and "split" != cardData["layout"]
-                and "flip" != cardData["layout"]
-            ):
+            if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["png"]),
                     "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
@@ -227,7 +216,7 @@ def scryfall_set(setcode):
     return full_set_json
 
 
-def ijson_collection(cardlist, out_dict = False):
+def ijson_collection(cardlist, out_dict=False):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
     blob_json = []
     out = {}
@@ -264,7 +253,16 @@ def ijson_collection(cardlist, out_dict = False):
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": italicize_reminder(o["card_faces"][0]["oracle_text"])
+                    "oracle_text": "[b]"
+                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
+                    + "\n"
+                    + o["card_faces"][0]["type_line"]
+                    + "\n"
+                    + italicize_reminder(o["card_faces"][0]["oracle_text"])
+                    + "\n\n"
+                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
+                    + "\n"
+                    + o["card_faces"][1]["type_line"]
                     + "\n"
                     + italicize_reminder(o["card_faces"][1]["oracle_text"]),
                     "image_uris": {"png": o["image_uris"]["png"]},
@@ -279,14 +277,14 @@ def ijson_collection(cardlist, out_dict = False):
                         {
                             "name": i["name"],
                             "type_line": i["type_line"],
-                            "oracle_text": italicize_reminder(i["oracle_text"]),
+                            "oracle_text": make_oracle_dfc(o, c == 0),
                             "image_uris": {"png": o["image_uris"]["png"]},
                             "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                             "mana_cost": i["mana_cost"],
                             "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
                         }
-                        for i in o["card_faces"]
+                        for c, i in enumerate(o["card_faces"])
                     ],
                 }
             elif "card_faces" in o.keys() and o["layout"] in ["adventure"]:
@@ -300,11 +298,7 @@ def ijson_collection(cardlist, out_dict = False):
                         else ""
                     )
                     + "\n"
-                    + "[b]"
-                    + o["card_faces"][1]["name"]
-                    + " "
-                    + o["card_faces"][1]["mana_cost"]
-                    + "[/b]"
+                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
                     + "\n"
                     + o["card_faces"][1]["type_line"]
                     + "\n"
@@ -329,7 +323,7 @@ def ijson_collection(cardlist, out_dict = False):
                 }
             card_obj = {**card_obj, **extra_obj}
             blob_json.append(card_obj)
-            out[o["collector_number"]+o["set"]] = card_obj
+            out[o["collector_number"] + o["set"]] = card_obj
         if len(blob_json) == len(cardlist):
             break
     f.close()
