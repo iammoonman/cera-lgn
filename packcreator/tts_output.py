@@ -350,7 +350,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         if ("Creature" in face_1["type_line"] or "Vehicle" in face_1["type_line"])
         else ""
     )
-    descriptionHold += f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_1["type_line"] else ""
+    descriptionHold += f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty" if "loyalty" in face_1.keys() else ""
     descriptionHold += "\n"
     descriptionHold += "[6E6E6E]" if is_reverse else "[-]"
     descriptionHold += "\n"
@@ -362,6 +362,6 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         if ("Creature" in face_2["type_line"] or "Vehicle" in face_2["type_line"])
         else ""
     )
-    descriptionHold += f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else ""
+    descriptionHold += f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "loyalty" in face_2.keys() else ""
     descriptionHold += "[-]" if is_reverse else ""
     return descriptionHold

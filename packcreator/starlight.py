@@ -125,10 +125,10 @@ class Starlight(commands.Cog):
     @discord.option(name="cc_id", description="CubeCobra ID.")
     async def cube(self, ctx: discord.ApplicationContext, cc_id: str):
         await ctx.defer(ephemeral=True)
-        try:
-            raw = p_caller.get_cube(cc_id)
-        except:
-            return await ctx.respond("Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.", ephemeral=True)
+        #try:
+        raw = p_caller.get_cube(cc_id)
+        #except:
+            #return await ctx.respond("Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.", ephemeral=True)
         cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
