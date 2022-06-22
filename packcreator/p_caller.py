@@ -2,6 +2,7 @@ import json
 import time
 import requests
 from . import tts_output, p_creator, point_slicer
+import random
 
 
 def get_packs(setcode, num_packs, land_pack=False):
@@ -129,7 +130,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     return save  # , log
 
 
-def get_cube(cc_id):
+def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
     import csv
     import copy
@@ -154,12 +155,11 @@ def get_cube(cc_id):
     if "Name" not in reader.fieldnames:  # Catching 404 errors in CubeCobra is much harder than it should be.
         return None
     templist = []
-    the_cube = tts_output.Pack()
     foil_indexes = []
     for row in reader:
         templist.append([row["Collector Number"], row["Set"]])
-        if row["Finish"] == "Foil":
-            foil_indexes += [len(templist)]
+        # if row["Finish"] == "Foil":
+        #     foil_indexes += [len(templist)]
     cardinfo = tts_output.ijson_collection(templist)
     cubelist = []
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
@@ -186,14 +186,19 @@ def get_cube(cc_id):
                                     else c["card_faces"][1]["image_uris"]["png"]
                                 },
                             },
-                        ]
+                        ],
+                        "finish": row["Finish"] == "Foil",
                     }
                 else:
                     x = {
                         "image_uris": {"png": row["Image URL"] if row["Image URL"] != "" else c["image_uris"]["png"]},
+                        "finish": row["Finish"] == "Foil",
                     }
                 cubelist.append({**c, **x})
                 break
-    the_cube.import_cards(cubelist, foil_indexes)
-    save["ObjectStates"][0]["ContainedObjects"] = [the_cube.toDict()]
+    random.shuffle(cubelist)
+    for i in [cubelist[u:u+p_len] for u in range(0, len(cubelist), p_len)]:
+        the_cube = tts_output.Pack()
+        the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
+        save["ObjectStates"][0]["ContainedObjects"] += [the_cube.toDict()]
     return save
