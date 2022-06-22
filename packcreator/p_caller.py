@@ -162,11 +162,38 @@ def get_cube(cc_id):
             foil_indexes += [len(templist)]
     cardinfo = tts_output.ijson_collection(templist)
     cubelist = []
+    reader = csv.DictReader(response.content.decode("utf-8").splitlines())
     for row in reader:
         for c in cardinfo:
             if row["Collector Number"] == c["collector_number"] and row["Set"] == c["set"]:
-                cubelist.append(c)
+                x = {}
+                if "card_faces" in c.keys():
+                    x = {
+                        "card_faces": [
+                            {
+                                **c["card_faces"][0],
+                                "image_uris": {
+                                    "png": row["Image URL"]
+                                    if row["Image URL"] != ""
+                                    else c["card_faces"][0]["image_uris"]["png"]
+                                },
+                            },
+                            {
+                                **c["card_faces"][1],
+                                "image_uris": {
+                                    "png": row["Image Back URL"]
+                                    if row["Image Back URL"] != ""
+                                    else c["card_faces"][1]["image_uris"]["png"]
+                                },
+                            },
+                        ]
+                    }
+                else:
+                    x = {
+                        "image_uris": {"png": row["Image URL"] if row["Image URL"] != "" else c["image_uris"]["png"]},
+                    }
+                cubelist.append({**c, **x})
                 break
-    the_cube.import_cards(cardinfo, foil_indexes)
+    the_cube.import_cards(cubelist, foil_indexes)
     save["ObjectStates"][0]["ContainedObjects"] = [the_cube.toDict()]
     return save
