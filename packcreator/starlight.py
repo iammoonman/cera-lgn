@@ -113,19 +113,23 @@ class Starlight(commands.Cog):
     )
     async def pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        raw = p_caller.get_packs(set, num, lands)
+        try:
+            raw = p_caller.get_packs(set, num, lands)
+        except:
+            return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
     @commands.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
     @discord.default_permissions(manage_roles=True)
     @discord.option(name="cc_id", description="CubeCobra ID.")
-    async def cube(self, ctx: discord.ApplicationContext, cc_id: str):
+    @discord.option(name="len_p", description="Size of the packs.", min=1, max=150, default=15)
+    async def cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
         await ctx.defer(ephemeral=True)
-        try:
-            raw = p_caller.get_cube(cc_id)
-        except:
-            return await ctx.respond("Something went wrong. Contact Moon.", ephemeral=True)
+        #try:
+        raw = p_caller.get_cube(cc_id, len_p)
+        #except:
+            #return await ctx.respond("Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.", ephemeral=True)
         cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
@@ -157,7 +161,10 @@ class Starlight(commands.Cog):
     )
     async def pack_v3(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        raw = p_caller.get_packs_v3(set, num, lands)
+        try:
+            raw = p_caller.get_packs_v3(set, num, lands)
+        except:
+            return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
