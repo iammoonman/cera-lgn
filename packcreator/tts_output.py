@@ -90,26 +90,15 @@ class Pack:
             """Default property which identifies the type of this object. \"Card\" only."""
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
-            descriptionHold = ""
+            self.Description = ""
+            """Contains oracle text, power/toughness, and loyalty if any.
+            
+            Formatted on import."""
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
-                descriptionHold = cardData["card_faces"][0]["oracle_text"]
+                self.Description = cardData["card_faces"][0]["oracle_text"]
             else:
-                # Contains the oracle test for the card, if any.
-                # Includes things like power/toughness, loyalty.
-                descriptionHold += cardData["oracle_text"]
-                descriptionHold += (
-                    f"\n[b]{cardData['power']}/{cardData['toughness']}[/b]"
-                    if ("Creature" in cardData["type_line"] or "Vehicle" in cardData["type_line"])
-                    and "adventure" != cardData["layout"]
-                    else ""
-                )
-                descriptionHold += (
-                    f"\n[b]{cardData['loyalty']}[/b] Starting Loyalty"
-                    if "Planeswalker" in cardData["type_line"]
-                    else ""
-                )
-            self.Description = f"{descriptionHold}"
-            """Contains oracle text, if any, and power/toughness and loyalty."""
+                # Oracle text formatting is applied on import
+                self.Description = cardData["oracle_text"]
             self.Transform = Pack.transformAttrs
             self.ColorDiffuse = Pack.colorAttrs
             self.CardID = counter * 100
@@ -253,18 +242,7 @@ def ijson_collection(cardlist, out_dict=False):
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": "[b]"
-                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
-                    + "\n"
-                    + o["card_faces"][0]["type_line"]
-                    + "\n"
-                    + italicize_reminder(o["card_faces"][0]["oracle_text"])
-                    + "\n\n"
-                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
-                    + "\n"
-                    + o["card_faces"][1]["type_line"]
-                    + "\n"
-                    + italicize_reminder(o["card_faces"][1]["oracle_text"]),
+                    "oracle_text": make_oracle_splitadventure(o),
                     "image_uris": {"png": o["image_uris"]["png"]},
                     "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
                     "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
@@ -291,19 +269,7 @@ def ijson_collection(cardlist, out_dict=False):
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": italicize_reminder(o["card_faces"][0]["oracle_text"])
-                    + (
-                        "\n[b]" + o["power"] + "/" + o["toughness"] + "[/b]\n"
-                        if "power" in o.keys() and "toughness" in o.keys()
-                        else ""
-                    )
-                    + "\n"
-                    + f'[b]{o["card_faces"][1]["name"]} {o["card_faces"][1]["mana_cost"]}[/b]'
-                    + "\n"
-                    + o["card_faces"][1]["type_line"]
-                    + "\n"
-                    + italicize_reminder(o["card_faces"][1]["oracle_text"])
-                    + "\n",
+                    "oracle_text": make_oracle_splitadventure(o),
                     "image_uris": {"png": o["image_uris"]["png"]},
                     "power": 0,  # o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
                     "toughness": 0,  # o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
@@ -314,7 +280,7 @@ def ijson_collection(cardlist, out_dict=False):
                 extra_obj = {
                     "name": o["name"],
                     "type_line": o["type_line"],
-                    "oracle_text": italicize_reminder(o["oracle_text"]),
+                    "oracle_text": make_oracle_normal(o),
                     "image_uris": {"png": o["image_uris"]["png"]},
                     "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
                     "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
@@ -364,4 +330,47 @@ def make_oracle_dfc(card_dota, is_reverse=False):
     )
     descriptionHold += f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "loyalty" in face_2.keys() else ""
     descriptionHold += "[-]" if is_reverse else ""
+    return descriptionHold
+
+
+def make_oracle_normal(card_data):
+    descriptionHold = italicize_reminder(card_data["oracle_text"])
+    descriptionHold += (
+        f"\n[b]{card_data['power']}/{card_data['toughness']}[/b]"
+        if ("Creature" in card_data["type_line"] or "Vehicle" in card_data["type_line"])
+        and "adventure" != card_data["layout"]
+        else ""
+    )
+    descriptionHold += (
+        f"\n[b]{card_data['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in card_data["type_line"] else ""
+    )
+    return descriptionHold
+
+
+def make_oracle_splitadventure(card_data):
+    descriptionHold = (
+        "[b]"
+        + f'[b]{card_data["card_faces"][0]["name"]} {card_data["card_faces"][0]["mana_cost"]}[/b]'
+        + "\n"
+        + card_data["card_faces"][0]["type_line"]
+        + "\n"
+        + italicize_reminder(card_data["card_faces"][0]["oracle_text"])
+        + (
+            "\n[b]" + card_data["card_faces"][0]["power"] + "/" + card_data["card_faces"][0]["toughness"] + "[/b]\n"
+            if "power" in card_data["card_faces"][0].keys() and "toughness" in card_data["card_faces"][0].keys()
+            else ""
+        )
+        + "\n"
+        + f'[b]{card_data["card_faces"][1]["name"]} {card_data["card_faces"][1]["mana_cost"]}[/b]'
+        + "\n"
+        + card_data["card_faces"][1]["type_line"]
+        + "\n"
+        + italicize_reminder(card_data["card_faces"][1]["oracle_text"])
+        + "\n"
+        + (
+            "\n[b]" + card_data["card_faces"][1]["power"] + "/" + card_data["card_faces"][1]["toughness"] + "[/b]\n"
+            if "power" in card_data["card_faces"][1].keys() and "toughness" in card_data["card_faces"][1].keys()
+            else ""
+        )
+    )
     return descriptionHold
