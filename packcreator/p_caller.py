@@ -86,7 +86,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     if "flag_data" in setJSON.keys():
         if "duplicate_control" in setJSON["flag_data"].keys():
             duplicate_control_list = {
-                k: point_slicer.get_sampled_numbers(num_packs * i["max_sheet_length"], i["per_pack_count"])
+                k: point_slicer.get_sampled_numbers(num_packs * i["per_pack_count"], i["max_sheet_length"])
                 for k, i in setJSON["flag_data"]["duplicate_control"]["slots_counts"].items()
             }
             # Log duplicate_control_list
@@ -197,7 +197,7 @@ def get_cube(cc_id, p_len):
                 cubelist.append({**c, **x})
                 break
     random.shuffle(cubelist)
-    for i in [cubelist[u:u+p_len] for u in range(0, len(cubelist), p_len)]:
+    for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
         the_cube = tts_output.Pack()
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
         save["ObjectStates"][0]["ContainedObjects"] += [the_cube.toDict()]

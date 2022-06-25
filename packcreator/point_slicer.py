@@ -32,16 +32,12 @@ def get_section(number_to_take):
     except:
         sections = None
     try:
-        section_chosen = random.choice(
-            [s for s in sections if len(s) >= number_to_take]
-        )
+        section_chosen = random.choice([s for s in sections if len(s) >= number_to_take])
     except:
-        sections = respawn_sections(
+        sections = respawn_sections(number_to_take, min_len=number_to_take - 2) + respawn_sections(
             number_to_take, min_len=number_to_take - 2
-        ) + respawn_sections(number_to_take, min_len=number_to_take - 2)
-        section_chosen = random.choice(
-            [s for s in sections if len(s) >= number_to_take]
         )
+        section_chosen = random.choice([s for s in sections if len(s) >= number_to_take])
     sections.remove(section_chosen)
     while len(section_chosen) > number_to_take:
         if random.random() > 0.5:
@@ -72,12 +68,14 @@ def get_number(num_to_take):
     return random.choice(out)
 
 
-def get_sampled_numbers(n_packs: int, n_rares: int):
+def get_sampled_numbers(n_packs_requested: int, n_rares_in_sheet: int):
     """Returns a randomly sampled list of numbers range(0,n_rares) with reduced chance of repeats."""
     out = []
     # Takes split samples of the range to maintain the chance of duplicates.
-    while len(out) < n_packs:
+    while len(out) < n_packs_requested:
         out += random.sample(
-            range(n_rares), k=(min([max([(n_packs * 41 // 43) - n_rares, 1]), n_rares]))
+            range(n_rares_in_sheet),
+            k=(min([max([(n_packs_requested * 41 // 43) - n_rares_in_sheet, 1]), n_rares_in_sheet])),
         )
+    print(out)
     return out
