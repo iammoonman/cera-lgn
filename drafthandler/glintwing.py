@@ -38,7 +38,7 @@ class Glintwing(commands.Cog):
                 discord.EmbedField(
                     inline=True,
                     name=f"GAME: {i.players[0]} vs {i.players[1]}",
-                    value=f"G1W: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
+                    value=f"G1 Winner: {i.players[i.gwinners[0]] if len(i.gwinners) > 0 else 'NONE'}{bslash}"
                     + f"G2 Winner: {(i.players[i.gwinners[1]] if i.gwinners[1] is not None else 'NONE') if len(i.gwinners) > 1 else 'NONE'}{bslash}"
                     + f"G3 Winner: {(i.players[i.gwinners[2]] if i.gwinners[2] is not None else 'NONE') if len(i.gwinners) > 2 else 'NONE'}{bslash}"
                     + (f"{i.players[0]} has dropped.{bslash}" if i.drops[0] else "")
@@ -61,9 +61,9 @@ class Glintwing(commands.Cog):
                     inline=True,
                     name=f"{p.name}",
                     value=f"SCORE: {p.score}{bslash}"
-                    + f"GWP: {round(p.gwp,2)}{bslash}"
-                    + f"OGP: {round(p.ogp,2)}{bslash}"
-                    + f"OMP: {round(p.omp,2)}",
+                    + f"GWP: {p.gwp:.2f}{bslash}"
+                    + f"OGP: {p.ogp:.2f}{bslash}"
+                    + f"OMP: {p.omp:.2f}",
                 )
                 for p in sorted(
                     d.players,
