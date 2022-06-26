@@ -188,16 +188,15 @@ class Starlight(commands.Cog):
         type=str,
     )
     async def p1p1_v3(self, ctx: discord.ApplicationContext, set: str):
-        await ctx.defer(ephemeral=True)
+        await ctx.defer()
         try:
             raw = p1p1.make_p1p1(set)
+            f_o = discord.File(raw, f'p1p1_{set}.png')
+            await ctx.respond(content=f"P1P1 for {set}",file=f_o)
         except:
             return await ctx.respond(
                 "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
-                ephemeral=True,
             )
-        f_o = discord.File(raw, f'p1p1_{set}.png')
-        await ctx.respond(file=f_o, ephemeral=True)
         return
 
 
