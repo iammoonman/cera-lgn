@@ -221,6 +221,7 @@ def get_p1p1_v3(setcode):
     # Log the seed
     # log["seeds"].append(seed)
     set_info = tts_output.ijson_collection(raw_cn_cards)
+    new_colle = []
     for crd in raw_cn_cards:
         new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
-    return []
+    return new_colle, foil_indexes

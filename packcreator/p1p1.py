@@ -1,18 +1,46 @@
+import time
 from PIL import Image
-from .p_caller import get_p1p1_v3
+from . import p_caller
+import io
+import requests
+import re
 
-# stringio file object from requests from image uri
-# image.open() it
-# push it to array
-# go 5 wide
-# make a large image canvas
-# width = min(length of pack, 5) * im_width
-# height = length of pack // 5 * im_height
-#  if length of pack % 5 == 0
-# else length of pack // 5 + 1 * im_height
+im_width = 146
+im_height = 204
 
-# im_c = Image.new(im.mode, (im.width + im2.width, max(im.height, im2.height)))
-# im_c.paste(im, (0, 0))
-# im_c.paste(im2, (im.width, 0))
-# im_c.save('new_image.png', quality=50)
-# im_c.show()
+
+def make_p1p1(setcode):
+    # Grab from get_p1p1_v3
+    pack, foils = p_caller.get_p1p1_v3(setcode)
+    width = min(len(pack), 5) * im_width
+    height = (len(pack) // 5) if len(pack) % 5 == 0 else (len(pack) // 5 + 1)
+    height = height * im_height
+    image_composite = Image.new("RGBA", (width, height))
+    row = 0
+    column = 0
+    # for each card in the pack,
+    #  if column == 5:
+    #   column = 0
+    #   row += 1
+    #  paste the image at (column*im_width, row*im_height)
+    #  column += 1
+    for card in pack:
+        if column == 5:
+            column = 0
+            row += 1
+        uri = re.sub(
+            "\?\d+$",
+            "",
+            card["card_faces"][0]["image_uris"]["small"]
+            if "card_faces" in card.keys() and "adventure" != card["layout"] and "split" != card["layout"]
+            else card["image_uris"]["small"],
+        )
+        resp = requests.get(uri, stream=True)
+        new_im = Image.open(io.BytesIO(resp.content))
+        image_composite.paste(new_im, (column * im_width, row * im_height))
+        new_im.close()
+        column += 1
+    f = io.BytesIO()
+    image_composite.save(f, "png")
+    f.seek(0)
+    return f

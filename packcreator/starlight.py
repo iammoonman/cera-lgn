@@ -4,6 +4,7 @@ import pickle
 from . import p_caller
 import io
 from discord.ext import commands
+from . import p1p1
 
 set_choices = [
     ["Fifth Edition", "5ed"],
@@ -116,7 +117,10 @@ class Starlight(commands.Cog):
         try:
             raw = p_caller.get_packs(set, num, lands)
         except:
-            return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
@@ -129,7 +133,10 @@ class Starlight(commands.Cog):
         try:
             raw = p_caller.get_cube(cc_id, len_p)
         except:
-            return await ctx.respond("Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.", ephemeral=True)
+            return await ctx.respond(
+                "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
         cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
@@ -164,9 +171,34 @@ class Starlight(commands.Cog):
         try:
             raw = p_caller.get_packs_v3(set, num, lands)
         except:
-            return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
+
+    @commands.slash_command(guild_ids=[guild], description="Load a pack image for a Pack 1, Pick 1.")
+    @discord.default_permissions(manage_roles=True)
+    @discord.option(
+        name="set",
+        description="Choose the set.",
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10],
+        autocomplete=get_sets_v3,
+        type=str,
+    )
+    async def p1p1_v3(self, ctx: discord.ApplicationContext, set: str):
+        await ctx.defer(ephemeral=True)
+        try:
+            raw = p1p1.make_p1p1(set)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
+        f_o = discord.File(raw, f'p1p1_{set}.png')
+        await ctx.respond(file=f_o, ephemeral=True)
+        return
 
 
 def setup(bot):
