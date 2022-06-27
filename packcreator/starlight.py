@@ -189,10 +189,11 @@ class Starlight(commands.Cog):
     )
     async def p1p1_v3(self, ctx: discord.ApplicationContext, set: str):
         await ctx.defer()
+        real_name = [s[0] for s in set_choices_v3 if s[1] == set][0]
         try:
             raw = p1p1.make_p1p1(set)
-            f_o = discord.File(raw, f'p1p1_{set}.png')
-            await ctx.respond(content=f"P1P1 for {set}",file=f_o)
+            f_o = discord.File(raw, f"p1p1_{set}.png")
+            await ctx.respond(content=f"Pack 1, Pick 1 for {real_name}", file=f_o)
         except:
             return await ctx.respond(
                 "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
