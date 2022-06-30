@@ -202,3 +202,26 @@ def get_cube(cc_id, p_len):
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
         save["ObjectStates"][0]["ContainedObjects"] += [the_cube.toDict()]
     return save
+
+
+def get_p1p1_v3(setcode):
+    """Returns a list of card objects for use in the p1p1 function."""
+    with open(f"sj3/{setcode}.json" if __name__ == "__main__" else f"packcreator/sj3/{setcode}.json", "rb") as f:
+        setJSON = json.load(f)
+    duplicate_control_list = {}
+    if "flag_data" in setJSON.keys():
+        if "duplicate_control" in setJSON["flag_data"].keys():
+            duplicate_control_list = {
+                k: point_slicer.get_sampled_numbers(i["per_pack_count"], i["max_sheet_length"])
+                for k, i in setJSON["flag_data"]["duplicate_control"]["slots_counts"].items()
+            }
+            # Log duplicate_control_list
+            # log["d_c"] = duplicate_control_list[:]
+    raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
+    # Log the seed
+    # log["seeds"].append(seed)
+    set_info = tts_output.ijson_collection(raw_cn_cards)
+    new_colle = []
+    for crd in raw_cn_cards:
+        new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
+    return new_colle, foil_indexes
