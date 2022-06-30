@@ -77,8 +77,11 @@ def get_cube(cc_id, p_len):
     return save
 
 
-def get_cube_p1p1(cc_id):
-    return
+def get_cube_p1p1(cc_id, seed=None):
+    # Generate a random string of numbers
+    if seed is None:
+        seed = "".join([random.randint(0,9) for i in range(6)])
+    return f"https://cubecobra.com/cube/samplepackimage/{cc_id}/{seed}"
 
 
 def get_cube_deck():
