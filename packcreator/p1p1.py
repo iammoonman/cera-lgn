@@ -1,6 +1,6 @@
 import time
 from PIL import Image
-from . import p_caller
+from packcreator import p_caller
 import io
 import requests
 import re
