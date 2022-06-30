@@ -1,4 +1,4 @@
-from exports import tts_output
+from exporttemplates import tts_output
 import requests
 import random
 import csv

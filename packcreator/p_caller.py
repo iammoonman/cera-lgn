@@ -1,6 +1,6 @@
 import json
 
-from exports import tts_output
+from exporttemplates import tts_output
 from packcreator import p_creator, point_slicer
 
 
