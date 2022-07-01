@@ -8,18 +8,7 @@ import copy
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
 
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": tts_output.Pack.transformAttrs,
-                "Nickname": f"{cc_id}",
-                "ColorDiffuse": tts_output.Pack.colorAttrs,
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
+    save = tts_output.Save(name=f"packs of of the cube with id {cc_id}")
     response = requests.get(
         f"https://cubecobra.com/cube/download/csv/{cc_id}?primary=Color%20Category&secondary=Types-Multicolor&tertiary=Mana%20Value&quaternary=Alphabetical&showother=false",
         headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
@@ -28,7 +17,7 @@ def get_cube(cc_id, p_len):
     if "Name" not in reader.fieldnames:  # Catching 404 errors in CubeCobra is much harder than it should be.
         return None
     templist = []
-    foil_indexes = []
+    # foil_indexes = []
     for row in reader:
         templist.append([row["Collector Number"], row["Set"]])
         # if row["Finish"] == "Foil":
@@ -73,8 +62,8 @@ def get_cube(cc_id, p_len):
     for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
         the_cube = tts_output.Pack()
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
-        save["ObjectStates"][0]["ContainedObjects"] += [the_cube.toDict()]
-    return save
+        save.addObject(the_cube.toDict())
+    return save.getOut()
 
 
 def get_cube_p1p1(cc_id, seed="0"):

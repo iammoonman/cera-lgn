@@ -10,18 +10,7 @@ def get_packs(setcode, num_packs, land_pack=False):
         f"setjson/{setcode}.json" if __name__ == "__main__" else f"packcreator/setjson/{setcode}.json", "rb"
     ) as f:
         setJSON = json.load(f)
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": tts_output.Pack.transformAttrs,
-                "Nickname": f"{num_packs} Packs of {setcode}",
-                "ColorDiffuse": tts_output.Pack.colorAttrs,
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
+    save = tts_output.Save(name=f"packs of {setcode}")
     all_packs = []
     for _ in range(num_packs):
         (raw_cn_cards, foil_indexes,) = p_creator.generatepack_c1c2_special(
@@ -43,7 +32,7 @@ def get_packs(setcode, num_packs, land_pack=False):
             new_colle,
             p[1],
         )
-        save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
+        save.addObject(pack_to_add.toDict())
     if land_pack:
         basicslist = list(
             filter(
@@ -54,26 +43,15 @@ def get_packs(setcode, num_packs, land_pack=False):
         if len(basicslist) >= 5:
             pack_to_add = tts_output.Pack()
             pack_to_add.import_cards(basicslist)
-            save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
-    return save
+            save.addObject(pack_to_add.toDict())
+    return save.getOut()
 
 
 def get_packs_v3(setcode, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator. Also returns logging information."""
     with open(f"sj3/{setcode}.json" if __name__ == "__main__" else f"packcreator/sj3/{setcode}.json", "rb") as f:
         setJSON = json.load(f)
-    save = {
-        "ObjectStates": [
-            {
-                "Name": "Bag",
-                "Transform": tts_output.Pack.transformAttrs,
-                "Nickname": f"packs of {setcode}",
-                "ColorDiffuse": tts_output.Pack.colorAttrs,
-                "Bag": {"Order": 0},
-                "ContainedObjects": [],
-            }
-        ]
-    }
+    save = tts_output.Save(name=f"packs of {setcode}")
     # log = {
     #     "seeds": [],
     #     "setcode": setcode,
@@ -113,7 +91,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
             new_colle,
             p[1],
         )
-        save["ObjectStates"][0]["ContainedObjects"].append(pack_to_add.toDict())
+        save.addObject(pack_to_add.toDict())
     if land_pack:
         pack_to_add = tts_output.Pack()
         pack_to_add.import_cards(
@@ -125,8 +103,8 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
                 )
             ]
         )
-        save["ContainedObjects"].append(pack_to_add.toDict())
-    return save  # , log
+        save.addObject(pack_to_add.toDict())
+    return save.getOut()  # , log
 
 
 def get_p1p1_v3(setcode):

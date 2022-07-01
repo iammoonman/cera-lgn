@@ -4,35 +4,64 @@ import time
 import re
 import ijson
 
+transformAttrs = {
+    "posX": 0.0,
+    "posY": 0.0,
+    "posZ": 0.0,
+    "rotX": 0.0,
+    "rotY": 0.0,
+    "rotZ": 0.0,
+    "scaleX": 1.0,
+    "scaleY": 1.0,
+    "scaleZ": 1.0,
+}
+"""Required for TTS."""
+colorAttrs = {"r": 0.0, "g": 0.0, "b": 0.0}
+"""Required for TTS."""
+foilTransformAttrs = {
+    "posX": 0.0,
+    "posY": 0.25,
+    "posZ": 0.0,
+    "rotX": 90.0,
+    "rotY": 180.0,
+    "rotZ": 0.0,
+    "scaleX": 0.7006438 * 3.1,
+    "scaleY": 0.9999966 * 3.1,
+    "scaleZ": 15.3846169 * 3.1,
+}
+"""Required for TTS."""
+
+
+class Save:
+    """Represents a TTS save file."""
+
+    def __init__(self, name: str = "Bag of Stuff"):
+        self.ContainedObjects = []
+        self.Nickname = name
+        pass
+
+    def addObject(self, obj):
+        self.ContainedObjects.append(obj)
+        return
+
+    def getOut(self):
+        return {
+            "ObjectStates": [
+                {
+                    "Name": "Bag",
+                    "Transform": transformAttrs,
+                    "Nickname": self.Nickname,
+                    "ColorDiffuse": colorAttrs,
+                    "Bag": {"Order": 0},
+                    "ContainedObjects": self.ContainedObjects,
+                }
+            ]
+        }
+
 
 class Pack:
     """Represents one stack of cards output to the bag."""
 
-    transformAttrs = {
-        "posX": 0.0,
-        "posY": 0.0,
-        "posZ": 0.0,
-        "rotX": 0.0,
-        "rotY": 0.0,
-        "rotZ": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "scaleZ": 1.0,
-    }
-    """Required for TTS."""
-    colorAttrs = {"r": 0.0, "g": 0.0, "b": 0.0}
-    """Required for TTS."""
-    foilTransformAttrs = {
-        "posX": 0.0,
-        "posY": 0.25,
-        "posZ": 0.0,
-        "rotX": 90.0,
-        "rotY": 180.0,
-        "rotZ": 0.0,
-        "scaleX": 0.7006438 * 3.1,
-        "scaleY": 0.9999966 * 3.1,
-        "scaleZ": 15.3846169 * 3.1,
-    }
     """Required for TTS."""
     StarFoil = {
         "CustomDecal": {
@@ -69,8 +98,8 @@ class Pack:
         self.ContainedObjects = []
         self.deckObject = {
             "Name": "Deck",
-            "Transform": self.transformAttrs,
-            "ColorDiffuse": self.colorAttrs,
+            "Transform": transformAttrs,
+            "ColorDiffuse": colorAttrs,
             "DeckIDs": [],
             "CustomDeck": {},
             "ContainedObjects": [],
@@ -99,8 +128,8 @@ class Pack:
             else:
                 # Oracle text formatting is applied on import
                 self.Description = cardData["oracle_text"]
-            self.Transform = Pack.transformAttrs
-            self.ColorDiffuse = Pack.colorAttrs
+            self.Transform = transformAttrs
+            self.ColorDiffuse = colorAttrs
             self.CardID = counter * 100
             self.frontImage = {
                 "FaceURL": re.sub(
@@ -137,8 +166,8 @@ class Pack:
                         "Name": "Card",
                         "Nickname": backName,
                         "Description": backDescription,
-                        "Transform": Pack.transformAttrs,
-                        "ColorDiffuse": Pack.colorAttrs,
+                        "Transform": transformAttrs,
+                        "ColorDiffuse": colorAttrs,
                         "CardID": int((counter * 1000) - 100) * 100,
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
@@ -175,8 +204,8 @@ class Pack:
         """Returns a dictionary for the final JSON."""
         return {
             "Name": "Deck",
-            "Transform": self.transformAttrs,
-            "ColorDiffuse": self.colorAttrs,
+            "Transform": transformAttrs,
+            "ColorDiffuse": colorAttrs,
             "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
             "CustomDeck": {
                 str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)]
@@ -299,7 +328,7 @@ def ijson_collection(cardlist, out_dict=False):
                     ],
                     "type_line": o["card_faces"][0]["type_line"] + " // " + o["card_faces"][1]["type_line"],
                     "cmc": o["card_faces"][0]["cmc"],
-                    "oracle_id": o["card_faces"][0]["oracle_id"]
+                    "oracle_id": o["card_faces"][0]["oracle_id"],
                 }
             else:
                 extra_obj = {
