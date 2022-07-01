@@ -18,6 +18,8 @@ async def on_ready():
     print("Starlight invoked")
     bot.load_extension("drafthandler.glintwing")
     print("Glintwing invoked")
+    bot.load_extension("webimporter.flamewave")
+    print("Flamewave invoked")
     print("Syncing commands...")
     await bot.sync_commands()
     print("Commands synced.")
