@@ -17,7 +17,7 @@ class Flamewave(commands.Cog):
     @discord.default_permissions(manage_roles=True)
     @discord.option(name="cc_id", description="CubeCobra ID.")
     @discord.option(name="len_p", description="Size of the packs.", min=1, max=150, default=15)
-    async def cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
+    async def cc_cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
         await ctx.defer(ephemeral=True)
         try:
             raw = cubecobra.get_cube(cc_id, len_p)
