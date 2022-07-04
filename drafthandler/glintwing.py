@@ -21,7 +21,7 @@ class Glintwing(commands.Cog):
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
         self.starting_em = lambda draft: discord.Embed(
-            title=f"{draft.name} | ENTRY",
+            title=f"{draft.title} | ENTRY",
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
@@ -31,7 +31,7 @@ class Glintwing(commands.Cog):
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
         )
         self.ig_em = lambda draft, round_timestamp: discord.Embed(
-            title=f"{draft.name} | Round: {(current_round:=[i_r for i_r in draft.rounds if not i_r.completed][0]).title}",
+            title=f"{draft.title} | Round: {(current_round:=[i_r for i_r in draft.rounds if not i_r.completed][0]).title}",
             fields=[
                 discord.EmbedField(
                     inline=True,
@@ -53,7 +53,7 @@ class Glintwing(commands.Cog):
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
         )
         self.end_em = lambda draft: discord.Embed(
-            title=f"{draft.name} | FINAL",
+            title=f"{draft.title} | FINAL",
             fields=[
                 discord.EmbedField(
                     inline=True,
