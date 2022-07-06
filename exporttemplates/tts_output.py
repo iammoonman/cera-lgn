@@ -91,13 +91,14 @@ class Pack:
     }
     """Voronoi diagram, filled with separate rainbow patters to resemble shattered glass."""
 
-    def __init__(self):
+    def __init__(self, nick=""):
         """Create a pack."""
         self.DeckIDs = []
         self.CustomDeck = {}
         self.ContainedObjects = []
         self.deckObject = {
             "Name": "Deck",
+            "Nickname": nick,
             "Transform": transformAttrs,
             "ColorDiffuse": colorAttrs,
             "DeckIDs": [],
