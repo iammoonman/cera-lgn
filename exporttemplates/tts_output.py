@@ -53,7 +53,7 @@ class Save:
                     "Nickname": self.Nickname,
                     "ColorDiffuse": colorAttrs,
                     "Bag": {"Order": 0},
-                    "ContainedObjects": self.ContainedObjects,
+                    "ContainedObjects": [f.toDict() for f in self.ContainedObjects],
                 }
             ]
         }
@@ -96,6 +96,7 @@ class Pack:
         self.DeckIDs = []
         self.CustomDeck = {}
         self.ContainedObjects = []
+        self.Nickname = nick
         self.deckObject = {
             "Name": "Deck",
             "Nickname": nick,
@@ -207,6 +208,7 @@ class Pack:
             "Name": "Deck",
             "Transform": transformAttrs,
             "ColorDiffuse": colorAttrs,
+            "Nickname": self.Nickname,
             "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
             "CustomDeck": {
                 str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)]
