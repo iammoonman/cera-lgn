@@ -1,7 +1,7 @@
 import ijson
 import io
 
-from exporttemplates import tts_output
+from exporttemplates import tts_output, tts_import
 
 
 def create_mtgadrafttk(draft_file: io.FileIO):
@@ -14,13 +14,14 @@ def create_mtgadrafttk(draft_file: io.FileIO):
     # users > picks as keys for carddata
     name = ""
     name_gen = ijson.items(draft_file, "sessionID")
-    name = name_gen.next()
+    for u in name_gen:
+        name = u
     draft_file.seek(0)
     cards = {}
     cards_generator = ijson.kvitems(draft_file, "carddata")
     for k, v in cards_generator:
         cards[k] = [v["collector_number"], v["set"]]  # add extra properties for customs
-    ij_cards = tts_output.ijson_collection([[v[0], v[1]] for k, v in cards.items()], True)
+    ij_cards = tts_import.ijson_collection([[v[0], v[1]] for k, v in cards.items()], True)
     draft_file.seek(0)
     users = {}
     users_generator = ijson.kvitems(draft_file, "users")
