@@ -35,7 +35,7 @@ def get_packs(setcode, num_packs, land_pack=False):
         save.addObject(pack_to_add.toDict())
     if land_pack:
         basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
-        setcode = "m21"
+        setcode = "m21" if setcode in ["fun"] else setcode
         pack_to_add = tts_output.Pack()
         basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
         pack_to_add.import_cards(basic_cards)
@@ -90,7 +90,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
         save.addObject(pack_to_add.toDict())
     if land_pack:
         basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
-        setcode = "m21"
+        setcode = "m21" if setcode in ["ppm"] else setcode
         pack_to_add = tts_output.Pack()
         basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
         pack_to_add.import_cards(basic_cards)
