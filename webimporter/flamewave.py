@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 import pickle
 from webimporter import cubecobra
+from webimporter import mtgadrafttk
+from io import BytesIO
 
 with open("guild.pickle", "rb") as f:
     guild = pickle.load(f)
@@ -42,6 +44,17 @@ class Flamewave(commands.Cog):
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
             )
         return await ctx.respond(content=uri)
+
+    @commands.slash_command(guild_ids=[guild], description="Get the TTS cards out of MTGADraft.tk")
+    @discord.default_permissions(manage_roles=True)
+    @discord.option(name="file", description="The DraftLog file.", type=discord.Attachment)
+    async def tk_log(self, ctx: discord.ApplicationContext, file: discord.Attachment):
+        await ctx.defer(ephemeral=True)
+        f = BytesIO(await file.read())
+        f2, n = mtgadrafttk.create_mtgadrafttk(f)
+        new_file = discord.File(io.StringIO(json.dumps(f2)), filename=f"draft_{n}.json")
+        await ctx.respond(file=new_file, ephemeral=True)
+        return
 
 
 def setup(bot):

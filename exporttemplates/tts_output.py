@@ -50,7 +50,7 @@ class Save:
                     "Nickname": self.Nickname,
                     "ColorDiffuse": colorAttrs,
                     "Bag": {"Order": 0},
-                    "ContainedObjects": self.ContainedObjects,
+                    "ContainedObjects": [f.toDict() for f in self.ContainedObjects],
                 }
             ]
         }
@@ -88,13 +88,15 @@ class Pack:
     }
     """Voronoi diagram, filled with separate rainbow patters to resemble shattered glass."""
 
-    def __init__(self):
+    def __init__(self, nick=""):
         """Create a pack."""
         self.DeckIDs = []
         self.CustomDeck = {}
         self.ContainedObjects = []
+        self.Nickname = nick
         self.deckObject = {
             "Name": "Deck",
+            "Nickname": nick,
             "Transform": transformAttrs,
             "ColorDiffuse": colorAttrs,
             "DeckIDs": [],
@@ -203,6 +205,7 @@ class Pack:
             "Name": "Deck",
             "Transform": transformAttrs,
             "ColorDiffuse": colorAttrs,
+            "Nickname": self.Nickname,
             "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
             "CustomDeck": {
                 str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)]
