@@ -1,6 +1,6 @@
 import json
 
-from exporttemplates import tts_output
+from exporttemplates import tts_output, tts_import
 from packcreator import p_creator, point_slicer
 
 
@@ -21,7 +21,7 @@ def get_packs(setcode, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = tts_output.ijson_collection(all_cn_sets)
+    set_info = tts_import.ijson_collection(all_cn_sets)
     for p in all_packs:
         new_colle = []
         for crd in p[0]:
@@ -34,16 +34,12 @@ def get_packs(setcode, num_packs, land_pack=False):
         )
         save.addObject(pack_to_add.toDict())
     if land_pack:
-        basicslist = list(
-            filter(
-                lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                set_info,
-            )
-        )
-        if len(basicslist) >= 5:
-            pack_to_add = tts_output.Pack()
-            pack_to_add.import_cards(basicslist)
-            save.addObject(pack_to_add.toDict())
+        basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
+        setcode = "m21" if setcode in ["fun"] else setcode
+        pack_to_add = tts_output.Pack()
+        basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
+        pack_to_add.import_cards(basic_cards)
+        save.addObject(pack_to_add.toDict())
     return save.getOut()
 
 
@@ -77,7 +73,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = tts_output.ijson_collection(all_cn_sets)
+    set_info = tts_import.ijson_collection(all_cn_sets)
     for p in all_packs:
         # print([a['name'] for a in set_info])
         # print(len(raw_cn_cards))
@@ -93,16 +89,11 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
         )
         save.addObject(pack_to_add.toDict())
     if land_pack:
+        basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
+        setcode = "m21" if setcode in ["ppm"] else setcode
         pack_to_add = tts_output.Pack()
-        pack_to_add.import_cards(
-            [
-                x
-                for x in filter(
-                    lambda x: x["name"] in ["Plains", "Island", "Swamp", "Mountain", "Forest"],
-                    set_info,
-                )
-            ]
-        )
+        basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
+        pack_to_add.import_cards(basic_cards)
         save.addObject(pack_to_add.toDict())
     return save.getOut()  # , log
 
@@ -123,7 +114,7 @@ def get_p1p1_v3(setcode):
     raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
     # Log the seed
     # log["seeds"].append(seed)
-    set_info = tts_output.ijson_collection(raw_cn_cards)
+    set_info = tts_import.ijson_collection(raw_cn_cards)
     new_colle = []
     for crd in raw_cn_cards:
         new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
