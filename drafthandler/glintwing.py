@@ -23,7 +23,7 @@ class Glintwing(commands.Cog):
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
         self.starting_em = lambda d: discord.Embed(
-            title=f"{d.name} | {taglist[d.tag]} | ENTRY",
+            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}ENTRY",
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
@@ -33,7 +33,7 @@ class Glintwing(commands.Cog):
             description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.ig_em = lambda d, r: discord.Embed(
-            title=f"{d.name} | {taglist[d.tag]} | Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
+            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
             fields=[
                 discord.EmbedField(
                     inline=True,
@@ -55,7 +55,7 @@ class Glintwing(commands.Cog):
             description=f"{d.description}{bslash}*{taglist[d.tag]}*",
         )
         self.end_em = lambda d: discord.Embed(
-            title=f"{d.name} | {taglist[d.tag]} | FINAL",
+            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}FINAL",
             fields=[
                 discord.EmbedField(
                     inline=True,
