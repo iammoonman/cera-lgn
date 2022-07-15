@@ -63,7 +63,7 @@ set_choices = [
     ["Zendikar Rising", "znr"],
 ]
 
-set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"], ["Pauper Masters", "ppm"]]
+set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"], ["Pauper Masters", "ppm"], ["Urza's Saga", "usg"], ["Dominaria", "dom"]]
 
 
 with open("guild.pickle", "rb") as f:
