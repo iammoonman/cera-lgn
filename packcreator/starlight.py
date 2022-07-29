@@ -215,7 +215,9 @@ class Starlight(commands.Cog):
         try:
             raw = p_caller.get_packs_setfile(f, num, lands)
         except json.JSONDecodeError as err:
-            return await ctx.respond(f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True)
+            return await ctx.respond(
+                f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True
+            )
         except KeyError as err:
             return await ctx.respond(
                 f"The file you submitted wasn't properly formed. It is missing the {err} key. If you don't understand what that means, contact Moon.",
@@ -223,9 +225,7 @@ class Starlight(commands.Cog):
             )
         except:
             return await ctx.respond(
-                """Something went wrong with your file as it was processing.
-Check to ensure that all required fields have good values and that the document is valid JSON.
-If that all checks out, contact Moon.""",
+                "Something went wrong with your file as it was processing.\nCheck to ensure that all required fields have good values and that the document is valid JSON.\nIf that all checks out, contact Moon.",
                 ephemeral=True,
             )
         # Return errors
