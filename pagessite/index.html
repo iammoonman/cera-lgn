@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cera</title>
+    <!-- Entire bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.8/lib/draggable.bundle.js"></script>
+    <style>
+        .draggable-source--is-dragging {
+            visibility: hidden;
+        }
+
+        #cardarea {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            width: 874px;
+            gap: 2px;
+            border: 1px solid blue;
+            padding: 5px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .drag {
+            user-select: none;
+            height: 102px;
+            width: 73px;
+            border: 1px solid red;
+            position: relative;
+        }
+
+        .drag>img {
+            height: 102px;
+            width: 73px;
+        }
+
+        .drag>button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: white;
+        }
+
+        .drag>button:hover {
+            background-color: black;
+        }
+
+        .bigtext {
+            height: 100px;
+            width: 874px;
+        }
+
+        .main {
+            display: grid;
+            width: 100%;
+            justify-content: center;
+        }
+
+        #sheetform {
+            display: grid;
+            grid-template: "a b""c d"
+        }
+
+        #structureform {
+            display: none;
+        }
+
+        #root {
+            width: max-content;
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <label>card sheet</label>
+        <div id="sheetform">
+            <div id="cardarea" style="resize: vertical;">
+            </div>
+            <button onclick="myfunc()">sheet_to_text</button>
+            <textarea class="bigtext" style="resize: vertical;" id="bt">
+[["11", "eld"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"]]</textarea>
+            <button onclick="newfunc()">text_to_sheet</button>
+        </div>
+        <hr width="100%"/>
+        <div id="structureform">
+            <label>V3 file structure</label>
+            <button>print output</button>
+            <textarea disabled style="resize: vertical;">abc</textarea>
+            <ul>
+                <li id="default_set">
+                    <label>default_set</label>
+                    <input placeholder="placeholder">
+                </li>
+                <li id="full_name">
+                    <label>full_name</label>
+                    <input placeholder="placeholder">
+                </li>
+                <li id="distros">
+                    <label>distros</label>
+                    <ol class="d_list">
+                        <li class="distro">
+                            <label>distro</label>
+                            <section class="slots">
+                                <label>slots</label>
+                                <ul>
+                                    <li class="microslot">
+                                        <label>slot</label>
+                                        <input type="text" placeholder="key">
+                                        <label>count</label>
+                                        <input type="number" min="1">
+                                    </li>
+                                </ul>
+                                <button onclick="addDSlot()">add slot</button>
+                                <button onclick="removeDSlot()">remove slot</button>
+                            </section>
+                            <section class="drops">
+                                <label>drops</label>
+                                <ol>
+                                    <li class="drop">
+                                        <label>drop</label>
+                                        <input type="text" placeholder="key">
+                                        <ol>
+                                            <label>drop choices</label>
+                                            <li class="dropchoice">
+                                                <label>key</label>
+                                                <input type="text" placeholder="key">
+                                                <label>count</label>
+                                                <input type="number" min="1">
+                                                <label>freq</label>
+                                                <input type="number" step="0.1" min="0" max="1">
+                                            </li>
+                                        </ol>
+                                    </li>
+                                </ol>
+                                <button onclick="addDropKey()">add drop key</button>
+                                <button onclick="removeDropKey()">remove drop key</button>
+                            </section>
+                            <section class="freq">
+                                <label>freq</label>
+                                <input type="number" step="0.1" min="0" max="1">
+                            </section>
+                        </li>
+                    </ol>
+                    <button onclick="addDistro()">add distro</button>
+                    <button onclick="removeDistro()">remove distro</button>
+                    <hr />
+                </li>
+                <li id="slots">
+                    <label>slots</label>
+                    <ul>
+                        <li class="slot">
+                            <label>slot</label>
+                            <input type="text" placeholder="key">
+                            <section class="flags">
+                                <label>flags:</label>
+                                <label for="foil">foil</label>
+                                <input type="checkbox" value="foil" name="foil">
+                                <label for="duplicate_control">duplicate_control</label>
+                                <input type="checkbox" value="duplicate_control" name="duplicate_control">
+                            </section>
+                            <section class="options">
+                                <label>options</label>
+                                <ol>
+                                    <li class="option">
+                                        <section class="struct">
+                                            <label>struct</label>
+                                            <ul>
+                                                <li class="microslot">
+                                                    <label>slot</label>
+                                                    <input type="text" placeholder="key">
+                                                    <label>count</label>
+                                                    <input type="number" min="1">
+                                                </li>
+                                            </ul>
+                                            <button>add slot</button>
+                                            <button>remove slot</button>
+                                        </section>
+                                        <section class="freq">
+                                            <label>freq</label>
+                                            <input type="number" step="0.1" min="0" max="1">
+                                        </section>
+                                    </li>
+                                </ol>
+                                <button onclick="addOption()">add option</button>
+                                <button onclick="removeOption()">remove option</button>
+                            </section>
+                            <section class="sheets">
+                                <label>sheets</label>
+                                <ul>
+                                    <li class="sheet">
+                                        <label>sheet</label>
+                                        <input type="text" placeholder="key">
+                                        <label>cards</label>
+                                        <input style="width: 250px;" type="text"
+                                            placeholder="card list from `text_to_sheet` above">
+                                    </li>
+                                </ul>
+                                <button onclick="addSheet()">add sheet</button>
+                                <button onclick="removeSheet()">remove sheet</button>
+                            </section>
+                        </li>
+                    </ul>
+                    <button onclick="addSLOT()">add slot</button>
+                    <button onclick="removeSLOT()">remove slot</button>
+                    <hr />
+                </li>
+                <li id="flag_data">
+                    <label>flag_data</label>
+                    <section class="duplicate_control">
+                        <label>duplicate_control</label>
+                        <section class="slots_counts">
+                            <label>slots_counts</label>
+                            <section class="dupe_slot">
+                                <label>slot</label>
+                                <input type="text" placeholder="key">
+                                <section class="dupe_data">
+                                    <label>per_pack_count</label>
+                                    <input type="number">
+                                    <label>max_sheet_length</label>
+                                    <input type="number">
+                                </section>
+                            </section>
+                        </section>
+                    </section>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function addDSlot() { }
+        function removeDSlot() { }
+        function addDropKey() { }
+        function removeDropKey() { }
+        function addDistro() { }
+        function removeDistro() { }
+        function addSSlot() { }
+        function removeSSlot() { }
+        function addOption() { }
+        function removeOption() { }
+        function addSheet() { }
+        function removeSheet() { }
+        function addSLOT() { }
+        function removeSLOT() { }
+        const sortable = new Draggable.Sortable(
+            document.getElementById('cardarea'), {
+            draggable: '.drag',
+            mirror: { appendTo: '#cardarea', constrainDimensions: true, },
+        }
+        )
+        const testElement = (prop) => {
+            const i = document.createElement('div')
+            i.classList.add('drag')
+            i.setAttribute('data-cn', prop.cn)
+            i.setAttribute('data-set', prop.set)
+            i.innerHTML = `
+            <img src="${prop.uri}"/>
+            `
+            return i
+        }
+        async function newfunc() {
+            const el = document.getElementById('bt')
+            try {
+                const le = JSON.parse(el.value)
+                const u = document.getElementById('cardarea')
+                var child = u.lastElementChild
+                while (child) {
+                    u.removeChild(child)
+                    child = u.lastElementChild
+                }
+                var identifiers = []
+                le.map(async (d, ick) => {
+                    if (typeof d == typeof [] && d != []) {
+                        identifiers.push({ "collector_number": d[0], "set": d[1] == "" ? document.getElementById('def').value : d[1] })
+                    }
+                    if (typeof d == typeof "" && d != "") {
+                        identifiers.push({ "collector_number": d, "set": document.getElementById('def').value })
+                    }
+                })
+                console.log({ "identifiers": identifiers })
+                const resp = await fetch(`https://api.scryfall.com/cards/collection`, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "identifiers": identifiers }) })
+                    // .then(e => console.log(e))
+                    .then(r => r.json())
+                    .then(j => {
+                        j.data.map((e) => {
+                            let q = testElement({ cn: e.collector_number, set: e.set, uri: e.image_uris.small })
+                            u.appendChild(q)
+                        })
+                    })
+            } catch (e) {
+                alert(e);
+            }
+        }
+        function myfunc() {
+            sortable.containers.map((d) => {
+                const el = [];
+                for (let ss = 0; ss < d.children.length; ss++) {
+                    // console.log(item.getAttribute('data-cn'), item.getAttribute('data-set'));
+                    setTimeout(el.push([d.children[ss].getAttribute('data-cn'), d.children[ss].getAttribute('data-set')]), 200 * ss);
+                }
+                document.getElementById('bt').value = JSON.stringify(el);
+            })
+        }
+    </script>
+</body>
+
+</html>
