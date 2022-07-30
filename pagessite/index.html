@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cera</title>
+    <!-- Entire bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.8/lib/draggable.bundle.js"></script>
+    <style>
+        .draggable-source--is-dragging {
+            visibility: hidden;
+        }
+
+        #cardarea {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            width: 874px;
+            gap: 2px;
+            border: 1px solid blue;
+            padding: 5px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .drag {
+            user-select: none;
+            height: 102px;
+            width: 73px;
+            border: 1px solid red;
+            position: relative;
+        }
+
+        .drag>img {
+            height: 102px;
+            width: 73px;
+        }
+
+        .drag>button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: white;
+        }
+
+        .drag>button:hover {
+            background-color: black;
+        }
+
+        .bigtext {
+            height: 100px;
+            width: 874px;
+        }
+
+        .main {
+            display: grid;
+            width: 100%;
+            justify-content: center;
+        }
+
+        #slots {
+            display: grid;
+            grid-template: "a b""c c";
+        }
+
+        #sheetform {
+            display: grid;
+            grid-template: "a b""c d"
+        }
+
+        #structureform {
+            display: none;
+        }
+
+        #jsoneditor {
+            max-width: 800px;
+            height: 500px;
+        }
+    </style>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.9.0/dist/jsoneditor.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.9.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css"> -->
+</head>
+
+<body>
+    <div class="main">
+        <div id="sheetform">
+            <div id="cardarea">
+            </div>
+            <button onclick="myfunc()">sheet_to_text</button>
+            <textarea class="bigtext"
+                id="bt">[["11", "eld"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"], ["5", "isd"], ["24", "afr"]]</textarea>
+            <button onclick="newfunc()">text_to_sheet</button>
+        </div>
+        <!-- <div id="jsoneditor"></div> -->
+    </div>
+    <script>
+        // const container = document.getElementById('jsoneditor')
+        // const options = {}
+        // const editor = new JSONEditor(container, options)
+        // const init = {
+        //     "default_set": "",
+        //     "full_name": "",
+        //     "distros": [
+        //         {
+        //             "slots": { "c": 9, "u": 3, "r": 1, "f": 1 },
+        //             "drops": {
+        //                 "c": [{ "key": "b", "count": 1, "freq": 1 }]
+        //             },
+        //             "freq": 0.2
+        //         }
+        //     ],
+        //     "slots": {
+        //         "c": {
+        //             "flags": ["duplicate_control"],
+        //             "options": [
+        //                 { "struct": { "a": 2, "b": 2, "c": 6 }, "freq": 1 }
+        //             ],
+        //             "sheets": { "a": [] }
+        //         },
+        //         "f": {
+        //             "flags": ["foil"],
+        //             "options": [
+        //                 { "struct": { "a": 1 }, "freq": 0.9 },
+        //                 { "struct": { "b": 1 }, "freq": 0.1 }
+        //             ],
+        //             "sheets": {
+        //                 "a": [["132", "aer"], ["133", "aer"], ["134", "aer"]],
+        //                 "b": []
+        //             }
+        //         },
+        //         "dfc": {
+        //             "flags": ["sequenced"],
+        //             "options": [
+        //                 { "struct": { "a": 1 }, "freq": 0.9 },
+        //                 { "struct": { "b": 1 }, "freq": 0.1 }
+        //             ],
+        //             "sheets": { "a": [], "b": [] }
+        //         }
+        //     },
+        //     "flag_data": {
+        //         "duplicate_control": {
+        //             "slots_counts": { "c": { "per_pack_count": 8, "max_sheet_length": 4 } }
+        //         }
+        //     }
+        // }
+        // editor.set(init)
+        // const updatedJson = editor.get()
+
+
+        const sortable = new Draggable.Sortable(
+            document.getElementById('cardarea'), {
+            draggable: '.drag',
+            mirror: { appendTo: '#cardarea', constrainDimensions: true, },
+        }
+        )
+        const testElement = (prop) => {
+            const i = document.createElement('div')
+            i.classList.add('drag')
+            i.setAttribute('data-cn', prop.cn)
+            i.setAttribute('data-set', prop.set)
+            i.innerHTML = `
+            <img src="${prop.uri}"/>
+            `
+            return i
+        }
+        async function newfunc() {
+            const el = document.getElementById('bt')
+            try {
+                const le = JSON.parse(el.value)
+                const u = document.getElementById('cardarea')
+                var child = u.lastElementChild
+                while (child) {
+                    u.removeChild(child)
+                    child = u.lastElementChild
+                }
+                var identifiers = []
+                le.map(async (d, ick) => {
+                    if (typeof d == typeof [] && d != []) {
+                        identifiers.push({ "collector_number": d[0], "set": d[1] == "" ? document.getElementById('def').value : d[1] })
+                    }
+                    if (typeof d == typeof "" && d != "") {
+                        identifiers.push({ "collector_number": d, "set": document.getElementById('def').value })
+                    }
+                })
+                console.log({ "identifiers": identifiers })
+                const resp = await fetch(`https://api.scryfall.com/cards/collection`, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "identifiers": identifiers }) })
+                    // .then(e => console.log(e))
+                    .then(r => r.json())
+                    .then(j => {
+                        j.data.map((e) => {
+                            let q = testElement({ cn: e.collector_number, set: e.set, uri: e.image_uris.small })
+                            u.appendChild(q)
+                        })
+                    })
+            } catch (e) {
+                alert(e);
+            }
+        }
+        function myfunc() {
+            sortable.containers.map((d) => {
+                const el = [];
+                for (let ss = 0; ss < d.children.length; ss++) {
+                    // console.log(item.getAttribute('data-cn'), item.getAttribute('data-set'));
+                    setTimeout(el.push([d.children[ss].getAttribute('data-cn'), d.children[ss].getAttribute('data-set')]), 200 * ss);
+                }
+                document.getElementById('bt').value = JSON.stringify(el);
+            })
+        }
+    </script>
+</body>
+
+</html>
