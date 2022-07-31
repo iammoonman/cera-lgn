@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands
 from discord.ext.pages import Paginator, Page
 import pickle
-import re
 
 import requests
 from requests.utils import quote
