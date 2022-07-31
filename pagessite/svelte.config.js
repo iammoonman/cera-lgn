@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-github';
+import adapter from 'svelte-adapter-github';
 import preprocess from 'svelte-preprocess';
 
 const dev = process.env.NODE_ENV === 'development';
@@ -23,9 +23,6 @@ const config = {
 			precompress: false,
 		}),
 		prerender: { default: true },
-		paths: {
-			base: dev ? '' : '/cera',
-		},
 	}
 };
 
