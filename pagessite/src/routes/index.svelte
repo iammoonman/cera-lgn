@@ -1,2 +1,5 @@
-<h1 class="underline bg-gray-50">Welcome to SvelteKit</h1>
-<p class="text-2xl bg-gray-900 text-white py-2 px-6 rounded shadow">Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script>
+	import Carddisplay from '../components/carddisplay.svelte';
+</script>
+
+<Carddisplay />
