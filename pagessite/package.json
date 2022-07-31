@@ -35,6 +35,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@sveltejs/adapter-static": "^1.0.0-next.38"
+		"@sveltejs/adapter-static": "^1.0.0-next.38",
+		"svelte-dnd-action": "^0.9.19"
 	}
 }
