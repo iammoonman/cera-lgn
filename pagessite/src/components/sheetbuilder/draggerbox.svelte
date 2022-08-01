@@ -1,10 +1,8 @@
 <script lang="ts">
 	import Singlecard from './singlecard.svelte';
 
-	export let propcardlist: { cardname: string; uri: string; id: number; set: string; cn: string }[]
-	$: cardlist = [...propcardlist];
+	export let cardlist: { cardname: string; uri: string; id: number; set: string; cn: string }[];
 	import { dndzone } from 'svelte-dnd-action';
-	import { afterUpdate } from 'svelte';
 	function handleDndConsider(e: any) {
 		cardlist = e.detail.items;
 	}
@@ -25,7 +23,7 @@
 		{/each}
 	</section>
 	<section id="textarea">
-		<input type="text" value={`${cardlist}`} />
+		<input type="text" value={`[${cardlist.map((e) => `["${e.cn}", "${e.set}"]`)}]`} />
 	</section>
 </div>
 
@@ -42,6 +40,6 @@
 		overflow-y: scroll;
 	}
 	input {
-		width: max-content;
+		width: 874px;
 	}
 </style>

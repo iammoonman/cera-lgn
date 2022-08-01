@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { afterUpdate } from 'svelte';
+	import {sheetlist} from './stores';
 
 	import Draggerbox from './draggerbox.svelte';
 	let cardlist = [] as {
@@ -25,14 +25,21 @@
 		['5', 'isd'],
 		['24', 'afr']
 	];
+    sheetlist.subscribe(val => cardlist = val)
 	onMount(async () => {
 		let identifiers: any[] = [];
-		defaultcardlist.map(async (d) => {
-			identifiers.push({
-				collector_number: d[0],
-				set: d[1] == '' ? 'lea' : d[1]
-			});
-		});
+		// defaultcardlist.map(async (d) => {
+		// 	identifiers.push({
+		// 		collector_number: d[0],
+		// 		set: d[1] == '' ? 'lea' : d[1]
+		// 	});
+		// });
+        cardlist.map(async (d) => {
+            identifiers.push({
+                collector_number: d.cn,
+                set: d.set,
+            })
+        })
 		console.log({ identifiers: identifiers });
 		const resp = await fetch(`https://api.scryfall.com/cards/collection`, {
 			method: 'POST',
@@ -42,7 +49,7 @@
 		})
 			.then((r) => r.json())
 			.then((j) => {
-                const newlist: any[] = [];
+				const newlist: any[] = [];
 				defaultcardlist.map((e, i) => {
 					const cardstuff = j.data.find((q: any) => q.collector_number == e[0] && q.set == e[1]);
 					newlist.push({
@@ -53,14 +60,14 @@
 						uri: cardstuff.image_uris.small
 					});
 				});
-                // this assignment MUST be here
-                // this aint react, props dont just update by themselves
-                cardlist = newlist;
+				// this assignment MUST be here
+				// this aint react, props dont just update by themselves
+				cardlist = newlist;
 			});
 		console.log(cardlist);
 	});
 </script>
 
 <div>
-	<Draggerbox propcardlist={cardlist} />
+	<Draggerbox {cardlist} />
 </div>
