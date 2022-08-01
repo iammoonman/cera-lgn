@@ -1,23 +1,10 @@
 <script lang="ts">
 	import Singlecard from './singlecard.svelte';
 
-	let cardlist: { cardname: string; uri: string; id: number; set: string; cn: string }[] = [
-		{
-			set: '',
-			cn: '',
-			id: 1,
-			cardname: 'Metallic Mimic',
-			uri: 'https://c1.scryfall.com/file/scryfall-cards/small/front/1/a/1aa4eba9-9e91-4beb-9296-a18baa73a318.jpg?1576382339'
-		},
-		{
-			set: '',
-			cn: '',
-			id: 2,
-			cardname: 'Metallic Mimic',
-			uri: 'https://c1.scryfall.com/file/scryfall-cards/small/front/1/a/1aa4eba9-9e91-4beb-9296-a18baa73a318.jpg?1576382339'
-		}
-	];
+	export let propcardlist: { cardname: string; uri: string; id: number; set: string; cn: string }[]
+	$: cardlist = [...propcardlist];
 	import { dndzone } from 'svelte-dnd-action';
+	import { afterUpdate } from 'svelte';
 	function handleDndConsider(e: any) {
 		cardlist = e.detail.items;
 	}
@@ -26,7 +13,7 @@
 	}
 </script>
 
-<div>
+<div class="m-10">
 	<section
 		id="cardarea"
 		use:dndzone={{ items: cardlist, flipDurationMs: 50 }}
@@ -38,7 +25,7 @@
 		{/each}
 	</section>
 	<section id="textarea">
-		<input type="text" value={`${cardlist}`}/>
+		<input type="text" value={`${cardlist}`} />
 	</section>
 </div>
 

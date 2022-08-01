@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 	export let cardName = '';
-	export let uri = '';
+	export let uri: string;
 </script>
 
 <div>

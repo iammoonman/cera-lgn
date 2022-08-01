@@ -1,6 +1,6 @@
 <script>
-	import Draggerbox from '../components/sheetbuilder/draggerbox.svelte';
-	import Carddisplay from '../components/carddisplay.svelte';
+import Sheetbuildercomponent from "../components/sheetbuilder/sheetbuildercomponent.svelte";
+
 </script>
 
-<Draggerbox />
+<Sheetbuildercomponent />
