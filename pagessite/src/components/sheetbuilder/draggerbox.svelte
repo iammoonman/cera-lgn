@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	import { dndzone } from 'svelte-dnd-action';
 	import { V3Store } from './stores';
 	let cardlist: {
@@ -12,7 +10,31 @@
 	}[] = [];
 	export let slotname: string;
 	export let sheetname: string;
-	let default_set = 'lea';
+	let timer: string | number | NodeJS.Timeout | undefined;
+	function debounceUpdate() {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			V3Store.update((v) => {
+				return {
+					...v,
+					slots: {
+						...v.slots,
+						[slotname]: {
+							...v.slots[slotname],
+							sheets: {
+								...v.slots[slotname].sheets,
+								[sheetname]: cardlist.map(
+									(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
+										return [e.cn, e.set];
+									}
+								)
+							}
+						}
+					}
+				};
+			});
+		}, 3000);
+	}
 	V3Store.subscribe((v) => {
 		cardlist = v.slots[slotname].sheets[sheetname].map((c, i) => {
 			if (Array.isArray(c)) {
@@ -32,7 +54,8 @@
 				uri: ''
 			};
 		});
-		default_set = v.default_set;
+		getStuff();
+		console.log('run subscribe');
 	});
 
 	function handleDndConsider(e: any) {
@@ -40,62 +63,22 @@
 	}
 	function handleDndFinalize(e: any) {
 		cardlist = e.detail.items;
-		// V3Store.update((v) => {
-		// 	return {
-		// 		...v,
-		// 		slots: {
-		// 			...v.slots,
-		// 			[slotname]: {
-		// 				...v.slots[slotname],
-		// 				sheets: {
-		// 					...v.slots[slotname].sheets,
-		// 					[sheetname]: e.detail.items.map(
-		// 						(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
-		// 							return [e.cn, e.set];
-		// 						}
-		// 					)
-		// 				}
-		// 			}
-		// 		}
-		// 	};
-		// });
-		getStuff();
+		debounceUpdate();
 	}
 	function handleDeleteFinalize(e: any) {
 		deletezoneobjects = e.detail.items;
 		deletezoneobjects = [];
-		// cardlist = cardlist.filter((q) =>
-		// 	e.detail.items.find((h: any) => {
-		// 		return h.id == q.id && h.cn == q.cn && h.set == q.set;
-		// 	}) === undefined
-		// );
-		// V3Store.update((v) => {
-		// 	return {
-		// 		...v,
-		// 		slots: {
-		// 			...v.slots,
-		// 			[slotname]: {
-		// 				...v.slots[slotname],
-		// 				sheets: {
-		// 					...v.slots[slotname].sheets,
-		// 					[sheetname]: cardlist.map(
-		// 						(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
-		// 							return [e.cn, e.set];
-		// 						}
-		// 					)
-		// 				}
-		// 			}
-		// 		}
-		// 	};
-		// });
-		getStuff();
+		cardlist = cardlist.filter(
+			(q) =>
+				e.detail.items.find((h: any) => {
+					return h.id == q.id && h.cn == q.cn && h.set == q.set;
+				}) === undefined
+		);
+		debounceUpdate();
 	}
 	function handleDeleteConsider(e: any) {
 		deletezoneobjects = e.detail.items;
 	}
-	onMount(async () => {
-		getStuff();
-	});
 	async function getStuff() {
 		let identifiers: { collector_number: string; set: string }[] = [];
 		cardlist.map(async (d) => {
@@ -154,7 +137,7 @@
 	<section
 		class="rounded-lg cardarea bg-red-100"
 		use:dndzone={{ items: deletezoneobjects, flipDurationMs: 50, type: 'healthy' }}
-		style="height: 100px;"
+		style="height: 100px; width: 100px; overflow: hidden;"
 		on:consider={handleDeleteConsider}
 		on:finalize={handleDeleteFinalize}
 	>
