@@ -31,6 +31,7 @@
 		headers = { full_name: v.full_name, default_set: v.default_set };
 		slots = v.slots;
 	});
+	import Switch from '@smui/switch';
 </script>
 
 <section id="headers" class="rounded-xl bg-yellow-200 grid grid-cols-1 p-1 gap-1">
@@ -104,7 +105,7 @@
 			</div>
 		</div>
 	{/each}
-	<span class="rounded-lg bg-yellow-400 p-1">ADD NEW DISTRO</span>
+	<Button bgColorClass={'bg-slate-400'} text={'ADD NEW DISTRO'} />
 </section>
 <section id="slots" class="rounded-xl bg-yellow-200 p-1">
 	SLOTS
@@ -115,14 +116,26 @@
 					<span>SLOT {s[0]}</span>
 					<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 				</div>
-				<div class="rounded-xl bg-yellow-600 p-1">
-					<div>
-						<input type="checkbox" value="foil" name="foil" />
-						<label for="foil">foil</label>
+				<div class="rounded-xl bg-yellow-600 p-1 flex flex-row justify-around">
+					<div class="flex justify-between items-center w-max">
+						<span class="h-min">foil</span>
+						<Switch
+							color="primary"
+							on:SMUISwitch:change={(e) =>
+								e.detail.selected
+									? s[1].flags.push('foil')
+									: (s[1].flags = s[1].flags.filter((f) => f !== 'foil'))}
+						/>
 					</div>
-					<div>
-						<input type="checkbox" value="duplicate_control" name="duplicate_control" />
-						<label for="duplicate_control">duplicate_control</label>
+					<div class="flex justify-between items-center w-max">
+						<span class="h-min">duplicate_control</span>
+						<Switch
+							color="primary"
+							on:SMUISwitch:change={(e) =>
+								e.detail.selected
+									? s[1].flags.push('duplicate_control')
+									: (s[1].flags = s[1].flags.filter((f) => f !== 'duplicate_control'))}
+						/>
 					</div>
 				</div>
 				<div class="rounded-xl bg-yellow-600 p-1">
