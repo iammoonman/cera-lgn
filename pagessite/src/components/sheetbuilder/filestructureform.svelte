@@ -24,6 +24,7 @@
 			sheets: Record<string, (string | string[])[]>;
 		}
 	> = {};
+	import Button from '../utilities/button.svelte';
 	import { V3Store } from './stores';
 	V3Store.subscribe((v) => {
 		distros = v.distros;
@@ -47,12 +48,13 @@
 		<input id="default_set" value={''} class="rounded-sm m-1" />
 	</div>
 </section>
-<section id="distros" class="rounded-xl bg-yellow-200 p-1">
+<section id="distros" class="rounded-xl bg-yellow-200 p-1 grid gap-1">
 	DISTROS
 	{#each distros as d}
 		<div class="rounded-xl bg-yellow-400 p-1 flex flex-col gap-1">
 			<div class="rounded-xl bg-yellow-500 p-1 flex flex-row justify-between">
-				<span>DISTRO</span><span>DELETE</span>
+				<span>DISTRO</span>
+				<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 			</div>
 			<div class="rounded-xl bg-yellow-600 p-1">
 				<span>SLOTS</span>
@@ -61,14 +63,14 @@
 						<div class="rounded-xl bg-yellow-800 p-1 flex justify-around">
 							<span>KEY: {s[0]}</span>
 							<span>NUM: {s[1]}</span>
-							<span>ADD</span>
-							<span>SUBTRACT</span>
-							<span>DELETE</span>
+							<Button text={'Add'} bgColorClass={'bg-green-200'} />
+							<Button text={'Subtract'} bgColorClass={'bg-blue-200'} />
+							<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 						</div>
 					{/each}
 					<div class="rounded-xl bg-yellow-900 p-1 flex justify-around w-40">
 						<span>KEY: A</span>
-						<span>ADD</span>
+						<Button text={'Add'} bgColorClass={'bg-green-200'} />
 					</div>
 				</div>
 			</div>
@@ -83,25 +85,26 @@
 									<span>SHEET: {q.key}</span>
 									<span>NUM: {q.count}</span>
 									<span>FREQ: {q.freq}</span>
-									<span>ADD</span>
-									<span>SUBTRACT</span>
-									<span>DELETE</span>
+									<Button text={'Add'} bgColorClass={'bg-green-200'} />
+									<Button text={'Subtract'} bgColorClass={'bg-blue-200'} />
+									<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 								{/each}
 							</div>
 						</div>
 					{/each}
 					<div class="rounded-xl bg-yellow-900 p-1 flex justify-around w-40">
 						<span>KEY: A</span>
-						<span>ADD</span>
+						<Button text={'Add'} bgColorClass={'bg-green-200'} />
 					</div>
 				</div>
 			</div>
 			<div class="rounded-xl bg-yellow-600 p-1 flex flex-row justify-between">
 				<span>FREQ</span>
-				<input type="number" value={0} step={0.1} class="rounded-sm" />
+				<input type="number" value={0} step={0.1} max={1} min={0} class="rounded-sm" />
 			</div>
 		</div>
 	{/each}
+	<span class="rounded-lg bg-yellow-400 p-1">ADD NEW DISTRO</span>
 </section>
 <section id="slots" class="rounded-xl bg-yellow-200 p-1">
 	SLOTS
@@ -109,7 +112,8 @@
 		{#each Object.entries(slots) as s}
 			<div class="rounded-xl bg-yellow-500 p-1 grid grid-cols-1 gap-1">
 				<div class="rounded-xl bg-yellow-500 p-1 flex flex-row justify-between">
-					<span>SLOT {s[0]}</span><span>DELETE</span>
+					<span>SLOT {s[0]}</span>
+					<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 				</div>
 				<div class="rounded-xl bg-yellow-600 p-1">
 					<div>
@@ -132,19 +136,19 @@
 										<div class="rounded-xl bg-yellow-800 p-1 flex justify-around">
 											<span>KEY: {st[0]}</span>
 											<span>NUM: {st[1]}</span>
-											<span>ADD</span>
-											<span>SUBTRACT</span>
-											<span>DELETE</span>
+											<Button text={'Add'} bgColorClass={'bg-green-200'} />
+											<Button text={'Subtract'} bgColorClass={'bg-blue-200'} />
+											<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 										</div>
 									{/each}
 									<div class="rounded-xl bg-yellow-900 p-1 flex justify-around w-40">
 										<span>KEY: b</span>
-										<span>ADD</span>
+										<Button text={'Add'} bgColorClass={'bg-green-200'} />
 									</div>
 								</div>
 								<div class="rounded-xl bg-yellow-800 p-1 flex flex-row justify-between">
 									<span>FREQ</span>
-									<input type="number" value={0} step={0.1} class="rounded-sm" />
+									<input type="number" value={0} step={0.1} max={1} min={0} class="rounded-sm" />
 								</div>
 							</div>
 						{/each}
@@ -154,12 +158,13 @@
 					SHEETS
 					{#each Object.entries(s[1].sheets) as sh}
 						<div class="rounded-xl bg-yellow-700 flex flex-row justify-between p-1">
-							<span>KEY: {sh[0]}</span><span>VIEW</span>
+							<span>KEY: {sh[0]}</span>
+							<Button text={'View'} bgColorClass={'bg-blue-200'} />
 						</div>
 					{/each}
 					<div class="rounded-xl bg-yellow-800 p-1 flex justify-around w-40">
 						<span>KEY: b</span>
-						<span>ADD</span>
+						<Button text={'Add'} bgColorClass={'bg-green-200'} />
 					</div>
 				</div>
 			</div>
