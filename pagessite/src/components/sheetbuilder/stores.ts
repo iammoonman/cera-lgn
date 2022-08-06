@@ -20,60 +20,81 @@ type V3 = {
 	}
 }
 
+// export const V3Store = writable({
+// 	default_set: "lea",
+// 	full_name: "",
+// 	distros: [
+// 		{
+// 			slots: new Map([['c', 1], ['d', 2]]),
+// 			drops: new Map([
+// 				['c', [{ key: "a", count: 1, freq: 1 }]],
+// 				['d', [{ key: "q", count: 1, freq: 1 }, { key: "r", count: 1, freq: 1 }]
+// 				]]),
+// 			freq: 1
+// 		}
+// 	],
+// 	slots: new Map([
+// 		['c', {
+// 			flags: [],
+// 			options: [
+// 				{ struct: new Map(Object.entries({ a: 2 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ a: 2, b: 3 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ a: 2, b: 3, c: 4 })), freq: 1 }
+// 			],
+// 			sheets: new Map(Object.entries({
+// 				a: ["10", "11"],
+// 				b: ["10", "11"],
+// 				c: ["10", "11"]
+// 			}))
+// 		}],
+// 		['d', {
+// 			flags: [],
+// 			options: [
+// 				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
+// 			],
+// 			sheets: new Map(Object.entries({
+// 				q: ["10", "11"],
+// 				v: ["10", "11"],
+// 				r: ["10", "11"]
+// 			}))
+// 		}],
+// 		['q', {
+// 			flags: [],
+// 			options: [
+// 				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
+// 				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
+// 			],
+// 			sheets: new Map(Object.entries({
+// 				q: ["10", "11"],
+// 				v: ["10", "11"],
+// 				r: ["10", "11"]
+// 			}))
+// 		}]
+// 	]),
+// 	flag_data: {
+// 	},
+// } as V3);
+
 export const V3Store = writable({
-	default_set: "lea",
+	default_set: "",
 	full_name: "",
-	distros: [
-		{
-			slots: new Map([['c', 1], ['d', 2]]),
-			drops: new Map([
-				['c', [{ key: "a", count: 1, freq: 1 }]],
-				['d', [{ key: "q", count: 1, freq: 1 }, { key: "r", count: 1, freq: 1 }]
-				]]),
-			freq: 1
-		}
-	],
-	slots: new Map([
-		['c', {
-			flags: [],
-			options: [
-				{ struct: new Map(Object.entries({ a: 2 })), freq: 1 },
-				{ struct: new Map(Object.entries({ a: 2, b: 3 })), freq: 1 },
-				{ struct: new Map(Object.entries({ a: 2, b: 3, c: 4 })), freq: 1 }
-			],
-			sheets: new Map(Object.entries({
-				a: ["10", "11"],
-				b: ["10", "11"],
-				c: ["10", "11"]
-			}))
-		}],
-		['d', {
-			flags: [],
-			options: [
-				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
-				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
-				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
-			],
-			sheets: new Map(Object.entries({
-				q: ["10", "11"],
-				v: ["10", "11"],
-				r: ["10", "11"]
-			}))
-		}],
-		['q', {
-			flags: [],
-			options: [
-				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
-				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
-				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
-			],
-			sheets: new Map(Object.entries({
-				q: ["10", "11"],
-				v: ["10", "11"],
-				r: ["10", "11"]
-			}))
-		}]
-	]),
+	distros: [],
+	slots: new Map([['q', {
+		flags: [],
+		options: [
+			{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
+			{ struct: new Map(Object.entries({ q: 2, v: 3 })), freq: 1 },
+			{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
+		],
+		sheets: new Map(Object.entries({
+			q: ["10", "11"],
+			v: ["10", "11"],
+			r: ["10", "11"]
+		}))
+	}]]),
 	flag_data: {
 	},
 } as V3);

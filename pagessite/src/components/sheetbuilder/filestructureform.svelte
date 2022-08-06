@@ -25,6 +25,6 @@
 </section>
 <Distrobuilder />
 
-<!-- <Slotsbuilder /> -->
+<Slotsbuilder />
 <style>
 </style>
