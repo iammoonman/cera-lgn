@@ -4,12 +4,6 @@ import Filestructureform from './filestructureform.svelte';
 </script>
 
 <div class="m-10 rounded-md bg-blue-200 p-5 grid gap-1">
-	<Draggerbox sheetname={'a'} slotname={'c'} />
+	<!-- <Draggerbox sheetname={'a'} slotname={'c'} /> -->
 	<Filestructureform />
 </div>
-
-<style>
-	div {
-		width: min-content;
-	}
-</style>

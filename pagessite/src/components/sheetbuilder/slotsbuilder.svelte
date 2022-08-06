@@ -14,12 +14,12 @@
 		}
 	> = {};
 	import { V3Store } from './stores';
+	let keyColors = new Map();
+	let colors: string[] = ['green', 'blue', 'red', 'orange', 'purple'];
 	V3Store.subscribe((v) => {
 		slots = v.slots;
 		keyColors = new Map(Object.keys(v.slots).map((k) => [k, colors.pop()]));
 	});
-	let keyColors = new Map();
-	let colors: string[] = ['green', 'blue', 'red', 'orange', 'purple'];
 </script>
 
 <section id="slots" class="rounded-xl p-1 grid gap-1">

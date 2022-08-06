@@ -4,11 +4,11 @@
 	V3Store.subscribe((v) => {
 		headers = { full_name: v.full_name, default_set: v.default_set };
 	});
-import Distrobuilder from './distrobuilder.svelte';
-import Slotsbuilder from './slotsbuilder.svelte';
+	import Distrobuilder from './distrobuilder.svelte';
+	import Slotsbuilder from './slotsbuilder.svelte';
 </script>
 
-<section id="headers" class="rounded-xl grid grid-cols-1 p-1 gap-1">
+<section id="headers" class="rounded-xl grid grid-cols-1 p-1 gap-1 hidden">
 	HEADERS
 	<div class="rounded-xl flex flex-row justify-between">
 		<label for="full_name" class="p-2">Set Full Name</label>
@@ -24,7 +24,7 @@ import Slotsbuilder from './slotsbuilder.svelte';
 	</div>
 </section>
 <Distrobuilder />
-<Slotsbuilder />
 
+<!-- <Slotsbuilder /> -->
 <style>
 </style>
