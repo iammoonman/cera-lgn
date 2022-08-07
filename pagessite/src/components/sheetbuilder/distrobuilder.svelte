@@ -23,8 +23,8 @@
 	V3Store.subscribe((v) => {
 		distros = v.distros;
 		outerslots = v.slots;
+		console.log(distros)
 	});
-	let val = '';
 </script>
 
 <section id="distros" class="rounded-xl p-1 grid gap-1">
