@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Badge from '../utilities/badge.svelte';
 	import Button from '../utilities/button.svelte';
-	import Select, { Option } from '@smui/select';
 	import { V3Store } from './stores';
+	import List, { Item } from '@smui/list';
 	import Numberinput from '../utilities/numberinput.svelte';
+	import Fakeselectmenu from '../utilities/fakeselectmenu.svelte';
 	let distros: {
 		slots: Map<string, number>;
 		drops: Map<string, { key: string; count: number; freq: number }[]>;
@@ -23,8 +24,74 @@
 	V3Store.subscribe((v) => {
 		distros = v.distros;
 		outerslots = v.slots;
-		console.log(distros)
 	});
+	function swapSlotKey(
+		distro: {
+			slots: Map<string, number>;
+			drops: Map<string, { key: string; count: number; freq: number }[]>;
+			freq: number;
+		},
+		oldkey: string,
+		newkey: string
+	) {
+		const newDistro = distro;
+		const oldValue = newDistro.slots.get(oldkey) ?? 1;
+		newDistro.slots.delete(oldkey);
+		newDistro.slots.set(newkey, oldValue);
+		V3Store.update((p) => {
+			return {
+				...p,
+				distros: [...p.distros.filter((d) => d != distro), newDistro]
+			};
+		});
+		return;
+	}
+	function swapDropSlotKey(
+		distro: {
+			slots: Map<string, number>;
+			drops: Map<string, { key: string; count: number; freq: number }[]>;
+			freq: number;
+		},
+		oldkey: string,
+		newkey: string
+	) {
+		const newDistro = distro;
+		const prevDropslot = newDistro.drops.get(oldkey);
+		if (prevDropslot === undefined) return;
+		newDistro.drops.delete(oldkey);
+		newDistro.drops.set(newkey, prevDropslot);
+		V3Store.update((pv) => {
+			return {
+				...pv,
+				distros: [...pv.distros.filter((d) => d !== distro), newDistro]
+			};
+		});
+		return;
+	}
+	function swapdropsheetkey(
+		distro: {
+			slots: Map<string, number>;
+			drops: Map<string, { key: string; count: number; freq: number }[]>;
+			freq: number;
+		},
+		dropkey: string,
+		oldobj: { key: string; count: number; freq: number },
+		newkey: string
+	) {
+		const newDistro = distro;
+		const newDropSheets = newDistro.drops.get(dropkey);
+		if (newDropSheets === undefined) return;
+		newDistro.drops.set(dropkey, [
+			...newDropSheets.filter((ds) => ds.key !== oldobj.key),
+			{ key: newkey, count: oldobj.count, freq: oldobj.freq }
+		]);
+		V3Store.update((pv) => {
+			return {
+				...pv,
+				distros: [...pv.distros.filter((d) => d !== distro), newDistro]
+			};
+		});
+	}
 </script>
 
 <section id="distros" class="rounded-xl p-1 grid gap-1">
@@ -69,27 +136,17 @@
 						/>
 					</div>
 					<div class="grid grid-cols-1 gap-1">
-						{#each [...distro.slots] as [slotkey, numberinslot]}
+						{#each [...distro.slots] as [slots_slotkey, numberinslot]}
 							<div class="rounded-xl p-1 flex justify-around place-items-center">
-								<Select
-									label="Slot key: {slotkey}"
-									on:MDCSelect:change={(e) => {
-										const newDistro = distro;
-										const oldValue = newDistro.slots.get(slotkey) ?? 1;
-										newDistro.slots.delete(slotkey);
-										newDistro.slots.set(e.detail.value, oldValue);
-										V3Store.update((p) => {
-											return {
-												...p,
-												distros: [...p.distros.filter((d) => d != distro), newDistro]
-											};
-										});
-									}}
-								>
-									{#each [...outerslots].filter(([o, r]) => !distro.slots.has(o)) as [otherslotkey, v]}
-										<Option value={otherslotkey}>{otherslotkey}</Option>
-									{/each}
-								</Select>
+								<Fakeselectmenu bgColor={''} buttonText={`Slot key: ${slots_slotkey}`}>
+									<List>
+										{#each [...outerslots].filter(([ok, ov]) => !distro.slots.has(ok)) as [slotkey, v]}
+											<Item on:SMUI:action={() => swapSlotKey(distro, slots_slotkey, slotkey)}>
+												<span>{slotkey}</span>
+											</Item>
+										{/each}
+									</List>
+								</Fakeselectmenu>
 								<span>
 									NUM:
 									<Numberinput
@@ -99,7 +156,7 @@
 										on:change={(e) => {
 											const newDistro = distro;
 											// @ts-ignore
-											newDistro.slots.set(slotkey, parseInt(e.currentTarget.value));
+											newDistro.slots.set(slots_slotkey, parseInt(e.currentTarget.value));
 											V3Store.update((p) => {
 												return {
 													...p,
@@ -114,7 +171,7 @@
 									bgColorClass={'bg-red-400'}
 									on:click={() => {
 										const newDistro = distro;
-										newDistro.slots.delete(slotkey);
+										newDistro.slots.delete(slots_slotkey);
 										V3Store.update((p) => {
 											return {
 												...p,
@@ -154,25 +211,19 @@
 						{#each [...distro.drops] as [dropslotkey, dropslotvalue]}
 							<div class="rounded-xl p-1 flex justify-around items-center">
 								<div class="flex flex-col gap-1">
-									<Select
-										label="Slot key: {dropslotkey}"
-										on:MDCSelect:change={(e) => {
-											const newDistro = distro;
-											const prevDropslot = dropslotvalue;
-											newDistro.drops.delete(dropslotkey);
-											newDistro.drops.set(e.detail.value, prevDropslot);
-											V3Store.update((pv) => {
-												return {
-													...pv,
-													distros: [...pv.distros.filter((d) => d !== distro), newDistro]
-												};
-											});
-										}}
-									>
-										{#each [...outerslots].filter(([ok, ov]) => !distro.drops.has(ok)) as [slotkey, v]}
-											<Option value={slotkey}>{slotkey}</Option>
-										{/each}
-									</Select>
+									<Fakeselectmenu bgColor={''} buttonText={`Slot key: ${dropslotkey}`}>
+										<List>
+											{#each [...outerslots].filter(([ok, ov]) => !distro.drops.has(ok)) as [slotkey, v]}
+												<Item
+													on:SMUI:action={() => {
+														swapDropSlotKey(distro, dropslotkey, slotkey);
+													}}
+												>
+													<span>{slotkey}</span>
+												</Item>
+											{/each}
+										</List>
+									</Fakeselectmenu>
 									<Button
 										text={'Add Sheet'}
 										bgColorClass={'bg-green-200'}
@@ -204,38 +255,43 @@
 											class="flex flex-row items-center justify-between w-full rounded-xl gap-1 p-1"
 										>
 											<div class="flex flex-row justify-between px-3 gap-1">
-												<Select
-													label="Sheet key: {q.key}"
-													on:MDCSelect:change={(e) => {
-														// Not working after first change
-														const newDistro = distro;
-														const newDropSheets = newDistro.drops.get(dropslotkey);
-														if (newDropSheets === undefined) return;
-														newDistro.drops.set(dropslotkey, [
-															...newDropSheets.filter((ds) => ds.key !== q.key),
-															{ key: e.detail.value, count: q.count, freq: q.freq }
-														]);
-														V3Store.update((pv) => {
-															return {
-																...pv,
-																distros: [...pv.distros.filter((d) => d !== distro), newDistro]
-															};
-														});
-													}}
-												>
-													{#each [...(outerslots.get(dropslotkey)?.sheets ?? [])].filter(([sk, sv]) => !dropslotvalue.find((x) => x.key === sk)) as [sheetkey, v]}
-														<Option value={sheetkey}>{sheetkey}</Option>
-													{/each}
-												</Select>
+												<Fakeselectmenu bgColor={''} buttonText={`Sheet key: ${q.key}`}>
+													<List>
+														{#each [...(outerslots.get(dropslotkey)?.sheets ?? [])].filter(([sk, sv]) => !dropslotvalue.find((x) => x.key === sk)) as [sheetkey, v]}
+															<Item
+																on:SMUI:action={() =>
+																	swapdropsheetkey(distro, dropslotkey, q, sheetkey)}
+															>
+																<span>{sheetkey}</span>
+															</Item>
+														{/each}
+													</List>
+												</Fakeselectmenu>
 											</div>
 											<div class="flex flex-row justify-between items-center px-3 gap-1">
 												<span class="h-min text-center">NUM</span>
 												<Numberinput
 													val={q.count}
 													step={1}
-													max={1}
+													max={99}
 													min={1}
-													on:change={(e) => null}
+													on:change={(e) => {
+														const newDistro = distro;
+														const newDropSheets = newDistro.drops.get(dropslotkey);
+														if (newDropSheets === undefined) return;
+														newDistro.drops.set(dropslotkey, [
+															...newDropSheets.filter((ds) => ds.key !== q.key),
+															// @ts-ignore
+															{ key: q.key, count: parseInt(e.currentTarget.value), freq: q.freq }
+														]);
+														V3Store.update((p) => {
+															return {
+																...p,
+																distros: [...p.distros.filter((d) => d != distro), newDistro]
+															};
+														});
+														return null;
+													}}
 												/>
 											</div>
 											<div class="flex flex-row justify-between items-center px-3 gap-1">
@@ -245,7 +301,23 @@
 													step={0.1}
 													max={1}
 													min={0}
-													on:change={(e) => null}
+													on:change={(e) => {
+														const newDistro = distro;
+														const newDropSheets = newDistro.drops.get(dropslotkey);
+														if (newDropSheets === undefined) return;
+														newDistro.drops.set(dropslotkey, [
+															...newDropSheets.filter((ds) => ds.key !== q.key),
+															// @ts-ignore
+															{ key: q.key, count: q.count, freq: parseFloat(e.currentTarget.value) }
+														]);
+														V3Store.update((p) => {
+															return {
+																...p,
+																distros: [...p.distros.filter((d) => d != distro), newDistro]
+															};
+														});
+														return null;
+													}}
 												/>
 											</div>
 											<Button

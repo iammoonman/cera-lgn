@@ -82,19 +82,7 @@ export const V3Store = writable({
 	default_set: "",
 	full_name: "",
 	distros: [],
-	slots: new Map([['q', {
-		flags: [],
-		options: [
-			{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
-			{ struct: new Map(Object.entries({ q: 2, v: 3 })), freq: 1 },
-			{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
-		],
-		sheets: new Map(Object.entries({
-			q: ["10", "11"],
-			v: ["10", "11"],
-			r: ["10", "11"]
-		}))
-	}]]),
+	slots: new Map([]),
 	flag_data: {
 	},
 } as V3);

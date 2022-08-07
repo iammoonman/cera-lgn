@@ -2,17 +2,17 @@
 	import Switch from '@smui/switch';
 	import Badge from '../utilities/badge.svelte';
 	import Button from '../utilities/button.svelte';
-	let slots: Record<
+	let slots: Map<
 		string,
 		{
 			flags: ('foil' | 'duplicate_control')[];
 			options: {
-				struct: Record<string, number>;
+				struct: Map<string, number>;
 				freq: number;
 			}[];
-			sheets: Record<string, (string | string[])[]>;
+			sheets: Map<string, (string | string[])[]>;
 		}
-	> = {};
+	> = new Map();
 	import { V3Store } from './stores';
 	let keyColors = new Map();
 	let colors: string[] = ['green', 'blue', 'red', 'orange', 'purple'];
@@ -24,7 +24,7 @@
 
 <section id="slots" class="rounded-xl p-1 grid gap-1">
 	SLOTS
-	{#each Object.entries(slots) as s}
+	{#each [...slots] as s}
 		<div class="rounded-xl p-1 grid grid-cols-1 gap-1">
 			<div class="rounded-xl p-1 flex flex-row justify-between">
 				<span>SLOT: <Badge text={s[0]} bgcolor={keyColors.get(s[0])} /></span>
@@ -77,18 +77,13 @@
 								<Button text={'New Slot'} bgColorClass={'bg-green-200'} />
 							</div>
 							<div class="grid grid-cols-1 gap-1 h-min">
-								{#each Array.from(Object.entries(o.struct)) as st}
+								{#each [...o.struct] as st}
 									<div class="rounded-xl p-1 flex justify-around items-center">
 										<span class="h-min text-center">KEY: {st[0]}</span>
-										<span class="h-min text-center"
-											>NUM: <input
-												type="number"
-												value={1}
-												step={1}
-												min={1}
-												class="rounded-sm w-10"
-											/></span
-										>
+										<span class="h-min text-center">
+											NUM:
+											<input type="number" value={1} step={1} min={1} class="rounded-sm w-10" />
+										</span>
 										<Button text={'Delete'} bgColorClass={'bg-red-400'} />
 									</div>
 								{/each}
@@ -103,7 +98,7 @@
 					<Button text={'New Sheet'} bgColorClass={'bg-green-200'} />
 				</div>
 				<div class="rounded-xl p-1 grid gap-1">
-					{#each Object.entries(s[1].sheets) as sh}
+					{#each [...s[1].sheets] as sh}
 						<div class="rounded-xl flex flex-row justify-between p-1 items-center gap-1">
 							<span class="h-min text-center mr-auto">KEY: {sh[0]}</span>
 							<Button text={'View'} bgColorClass={'bg-blue-400'} />
@@ -114,5 +109,16 @@
 			</div>
 		</div>
 	{/each}
-	<Button bgColorClass={'bg-green-200'} text={'ADD NEW SLOT'} />
+	<Button
+		bgColorClass={'bg-green-200'}
+		text={'ADD NEW SLOT'}
+		on:click={() => {
+			V3Store.update((oldstore) => {
+				return {
+					...oldstore,
+					slots: new Map([...oldstore.slots, ['m', { flags: [], options: [], sheets: new Map() }]])
+				};
+			});
+		}}
+	/>
 </section>
