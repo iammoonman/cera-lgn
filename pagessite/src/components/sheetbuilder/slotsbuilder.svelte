@@ -106,13 +106,36 @@
 				</div>
 				<div class="rounded-xl p-1 grid gap-1">
 					{#each s_value.options as o}
-						<div class="rounded-xl p-1 grid grid-cols-[120px_minmax(100px,_1fr)] gap-1">
-							<div class="rounded-xl p-1 grid grid-cols-1 gap-1 w-max">
-								<div class="flex flex-row justify-between w-min px-3 items-center gap-1">
+						<div
+							class="rounded-xl p-1 grid grid-cols-[180px_minmax(100px,_1fr)] gap-1 items-center"
+						>
+							<div class="rounded-xl p-1 grid grid-cols-1 gap-1 items-center h-min">
+								<div class="grid grid-cols-2 px-3 items-center gap-1 h-min">
 									<span class="h-min text-center">FREQ</span>
-									<Numberinput val={o.freq} step={0.1} max={1} min={0} />
+									<Numberinput
+										val={o.freq}
+										step={0.1}
+										max={1}
+										min={0}
+										on:change={(e) => {
+											const newSlots = slots;
+											const newSlot = newSlots.get(s_key);
+											if (newSlot === undefined) return;
+											const myOptions = newSlot.options.filter((o2) => o2 !== o);
+											// @ts-ignore
+											o.freq = parseFloat(e.target.value);
+											newSlot.options = [...myOptions, o];
+											newSlots.set(s_key, newSlot);
+											V3Store.update((oldstore) => {
+												return {
+													...oldstore,
+													slots: newSlots
+												};
+											});
+										}}
+									/>
 								</div>
-								<div class="flex flex-row flex-nowrap w-full gap-1">
+								<div class="flex flex-row flex-nowrap w-full h-min gap-1 justify-between">
 									<Button
 										text={'New Slot'}
 										bgColorClass={'bg-green-200'}
@@ -121,7 +144,11 @@
 											const newSlot = newSlots.get(s_key);
 											if (newSlot === undefined) return;
 											const myOptions = newSlot.options.filter((o2) => o2 !== o);
-											o.struct.set('x', 1);
+											const [newSheetKey] = [...newSlot.sheets.keys()].filter(
+												(k) => !o.struct.has(k)
+											);
+											if (newSheetKey === undefined) return;
+											o.struct.set(newSheetKey, 1);
 											newSlot.options = [...myOptions, o];
 											newSlots.set(s_key, newSlot);
 											V3Store.update((oldstore) => {
@@ -137,7 +164,7 @@
 										bgColorClass={'bg-red-400'}
 										on:click={() => {
 											const newSlot = s_value;
-											newSlot.options = newSlot.options.filter(o2 => o2 != o);
+											newSlot.options = newSlot.options.filter((o2) => o2 != o);
 											const newSlots = slots;
 											newSlots.set(s_key, newSlot);
 											V3Store.update((oldstore) => {
@@ -152,11 +179,33 @@
 							</div>
 							<div class="grid grid-cols-1 gap-1 h-min">
 								{#each [...o.struct] as [st, st_v]}
-									<div class="rounded-xl p-1 flex justify-around items-center">
-										<span class="h-min text-center">KEY: {st}</span>
+									<div
+										class="rounded-xl p-1 flex flex-row gap-1 justify-around items-center w-full"
+									>
+										<span class="h-min text-center w-28">KEY: {st}</span>
 										<span class="h-min text-center">
 											NUM:
-											<Numberinput val={st_v} step={1} min={1} />
+											<Numberinput
+												val={st_v}
+												step={1}
+												min={1}
+												on:change={(e) => {
+													const newSlots = slots;
+													const newSlot = newSlots.get(s_key);
+													if (newSlot === undefined) return;
+													const myOptions = newSlot.options.filter((o2) => o2 !== o);
+													// @ts-ignore
+													o.struct.set(st, parseInt(e.target.value));
+													newSlot.options = [...myOptions, o];
+													newSlots.set(s_key, newSlot);
+													V3Store.update((oldstore) => {
+														return {
+															...oldstore,
+															slots: newSlots
+														};
+													});
+												}}
+											/>
 										</span>
 										<Button
 											text={'Delete'}
@@ -187,14 +236,44 @@
 			<div class="grid grid-cols-[120px_minmax(100px,_1fr)] gap-1">
 				<div class="grid grid-rows-2 rounded-xl h-min mt-auto mb-auto p-1">
 					<span class="h-min text-center">SHEETS</span>
-					<Button text={'New Sheet'} bgColorClass={'bg-green-200'} />
+					<Button
+						text={'New Sheet'}
+						bgColorClass={'bg-green-200'}
+						on:click={() => {
+							const oldStuff = s_value;
+							const newSlots = slots;
+							oldStuff.sheets.set(Math.random().toString(36).slice(2, 7), []);
+							newSlots.set(s_key, oldStuff);
+							V3Store.update((oldstore) => {
+								return {
+									...oldstore,
+									slots: newSlots
+								};
+							});
+						}}
+					/>
 				</div>
 				<div class="rounded-xl p-1 grid gap-1">
 					{#each [...s_value.sheets] as [sh, sh_v]}
 						<div class="rounded-xl flex flex-row justify-between p-1 items-center gap-1">
 							<span class="h-min text-center mr-auto">KEY: {sh}</span>
 							<Button text={'Edit'} bgColorClass={'bg-blue-400'} />
-							<Button text={'Delete'} bgColorClass={'bg-red-400'} />
+							<Button
+								text={'Delete'}
+								bgColorClass={'bg-red-400'}
+								on:click={() => {
+									const oldStuff = s_value;
+									const newSlots = slots;
+									oldStuff.sheets.delete(sh);
+									newSlots.set(s_key, oldStuff);
+									V3Store.update((oldstore) => {
+										return {
+											...oldstore,
+											slots: newSlots
+										};
+									});
+								}}
+							/>
 						</div>
 					{/each}
 				</div>
@@ -208,7 +287,10 @@
 			V3Store.update((oldstore) => {
 				return {
 					...oldstore,
-					slots: new Map([...oldstore.slots, ['m', { flags: [], options: [], sheets: new Map() }]])
+					slots: new Map([
+						...oldstore.slots,
+						[Math.random().toString(36).slice(2, 7), { flags: [], options: [], sheets: new Map() }]
+					])
 				};
 			});
 		}}
