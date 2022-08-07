@@ -62,7 +62,7 @@ def get_cube(cc_id, p_len):
     for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
         the_cube = tts_output.Pack()
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
-        save.addObject(the_cube.toDict())
+        save.addObject(the_cube)
     return save.getOut()
 
 

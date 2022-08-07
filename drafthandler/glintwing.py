@@ -20,8 +20,8 @@ class Glintwing(commands.Cog):
         self.drafts: dict[str, Draft] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
-        self.starting_em = lambda draft: discord.Embed(
-            title=f"{draft.title} | ENTRY",
+        self.starting_em = lambda d: discord.Embed(
+            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}ENTRY",
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
@@ -30,8 +30,8 @@ class Glintwing(commands.Cog):
             ],
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
         )
-        self.ig_em = lambda draft, round_timestamp: discord.Embed(
-            title=f"{draft.title} | Round: {(current_round:=[i_r for i_r in draft.rounds if not i_r.completed][0]).title}",
+        self.ig_em = lambda d, r: discord.Embed(
+            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
             fields=[
                 discord.EmbedField(
                     inline=True,

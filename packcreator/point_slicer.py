@@ -77,5 +77,4 @@ def get_sampled_numbers(n_packs_requested: int, n_rares_in_sheet: int):
             range(n_rares_in_sheet),
             k=(min([max([(n_packs_requested * 41 // 43) - n_rares_in_sheet, 1]), n_rares_in_sheet])),
         )
-    print(out)
     return out

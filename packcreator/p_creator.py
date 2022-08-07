@@ -216,26 +216,3 @@ def pack_gen_v3(
         [(radix + (len(pack) - radix) * 2) % len(pack) for radix in foil_indexes],
         seed,
     )
-
-
-if __name__ == "__main__":
-    import json
-    import point_slicer
-
-    with open("packcreator/sj3/afr_2.json", "rb") as f:
-        ooo = json.load(f)
-        d_c = {}
-        if "flag_data" in ooo.keys():
-            if "duplicate_control" in ooo["flag_data"].keys():
-                d_c = {
-                    k: point_slicer.get_sampled_numbers(
-                        24,
-                        ooo["flag_data"]["duplicate_control"]["slots_counts"][k]["max_sheet_length"]
-                        * ooo["flag_data"]["duplicate_control"]["slots_counts"][k]["per_pack_count"],
-                    )
-                    for k in ooo["flag_data"]["duplicate_control"]["slots_counts"].keys()
-                }
-                print(d_c)
-        for n in range(24):
-            w, n, s = pack_gen_v3(set=ooo, d_c=d_c)
-            print(len(w), n, s)
