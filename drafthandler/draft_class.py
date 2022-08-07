@@ -1,4 +1,6 @@
 class Draft:
+    """Represents a single event of a Swiss-system tournament."""
+
     def __init__(
         self,
         draftID: int,
@@ -6,18 +8,22 @@ class Draft:
         host: int,
         tag: str,
         description: str,
-        name: str,
+        title: str,
         max_rounds: int = 3,
     ):
-        self.draftID = draftID
-        self.date = date
-        self.host = host
-        self.tag = tag
-        self.description = description
-        self.name = name
-        self.players = []
-        self.rounds = []
-        self.max_rounds = max_rounds
+        self.draftID: int = draftID
+        """Unique ID."""
+        self.date: str = date
+        """Translates to the output JSON."""
+        self.host: int = host
+        """The Discord user ID of the host."""
+        self.tag: str = tag
+        """Three-character code for the category."""
+        self.description: str = description
+        self.title: str = title
+        self.players: list[Draft.Player] = []
+        self.rounds: list[Draft.Round] = []
+        self.max_rounds: int = max_rounds
 
     def tojson(self):
         """Calculates the final scores of the draft and returns a JSON."""
@@ -26,7 +32,7 @@ class Draft:
             "draftID": self.draftID,
             "tag": self.tag,
             "date": self.date,
-            "title": self.name,
+            "title": self.title,
             "rounds": [
                 {
                     "roundNUM": i.title,
@@ -46,9 +52,9 @@ class Draft:
                 {
                     "playerID": i.player_id,
                     "score": i.score,
-                    "gwp": round(i.gwp, 2),
-                    "ogp": round(i.ogp, 2),
-                    "omp": round(i.omp, 2),
+                    "gwp": f"{i.gwp:.2f}",
+                    "ogp": f"{i.ogp:.2f}",
+                    "omp": f"{i.omp:.2f}",
                 }
                 for i in self.players
             ],
@@ -56,25 +62,35 @@ class Draft:
         return draftobj
 
     class Player:
-        def __init__(self, n, id):
-            self.player_id = id
-            self.name = n
-            self.score = 0
+        def __init__(self, n: str, id: int):
+            self.player_id: int = id
+            """Discord user ID for the player."""
+            self.name: str = n
+            """Used for quick access. Not output to JSON."""
+            self.score: int = 0
             """Final match score. 3 for wins and byes, 1 for tie, 0 for loss."""
-            self.gpts = 0
+            self.gpts: int = 0
             """Games won. Does not increment for byes."""
-            self.mpts = 0
+            self.mpts: int = 0
             """Match points. Similar to score."""
-            self.gcount = 0
+            self.gcount: int = 0
             """Total games played. Does not increment for byes."""
-            self.mcount = 0
+            self.mcount: int = 0
             """Total matches played. *Does* increment with byes."""
-            self.opponents = []
-            self.dropped = False
-            self.ogp = None
-            self.omp = None
-            self.gwp = None
-            self.mwp = None
+            self.opponents: list[Draft.Player] = []
+            """Used for quick access. Not output to JSON."""
+            self.dropped: bool = False
+            """Global participation status. Locked in at the end of the round."""
+            self.ogp: float = None
+            """Opponent Game-Win Percentage"""
+            self.omp: float = None
+            """Opponent Match-Win Percentage"""
+            self.gwp: float = None
+            """Game-Win Percentage"""
+            self.mwp: float = None
+            """Match-Win Percentage
+            
+            Not output to JSON."""
 
         def __lt__(self, other):
             if self.score != other.score:
@@ -85,27 +101,33 @@ class Draft:
                 return self.name < other.name
 
         def __repr__(self):
-            return self.name + " (" + str(self.score) + ")"
+            return f"{self.name} ({self.score})"
 
         def __eq__(self, other):
             return self.player_id == other.player_id
 
     class Round:
-        def __init__(self, title):
-            self.completed = False
-            self.matches = []
-            self.title = title
+        """One round from the event."""
+
+        def __init__(self, title: str):
+            self.completed: bool = False
+            self.matches: list[Draft.Round.Match] = []
+            self.title: str = title
+            """Used if the round has a custom title."""
 
         class Match:
+            """One match from the round."""
+
             def __init__(self, p=[]):
                 self.players = p
-                self.gwinners = []
-                self.drops = [False for i in p]
+                self.gwinners: list[int] = []
                 if p[1] == Draft.Player("Bye", "-1"):
+                    # Automatically set score for the bye.
                     self.gwinners = [0, 0, None]
+                self.drops = [False for i in p]
 
     def do_pairings(self):
-        """Generates a new round based on the scores of the previous round. DO NOT CALL BY ITSELF."""
+        """Generates a new round based on the scores of the previous round. DO NOT CALL without checking for completeness."""
         # Make a temp list of players and pairings
         # Sort the list of players by score.
         # For each player, get the next player who:
@@ -309,36 +331,3 @@ class Draft:
             player.ogp = sum(h := [p.gwp for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
             player.omp = sum(j := [p.mwp for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
         return
-
-
-# dr = Draft(1, "TODAY", "ME", "TAG", "NOPE", "THE")
-# dr.add_player("A", "1")
-# dr.add_player("B", "2", True)
-# dr.add_player("C", "3")
-# dr.add_player("D", "4")
-# dr.do_pairings()
-# dr.parse_match("1", "0")
-# dr.parse_match("3", "1")
-# if dr.finish_round():
-#     print("n4", dr.rounds)
-# else:
-#     print("NOT DONE")
-# dr.parse_match("1", "0")
-# dr.parse_match("2", "1")
-# if dr.finish_round():
-#     print("n4", dr.rounds)
-# else:
-#     print("NOT DONE")
-# dr.parse_match("1", "0")
-# dr.parse_match("2", "1")
-# if dr.finish_round():
-#     print("n4", dr.rounds)
-# else:
-#     print("NOT DONE")
-# import json
-
-# print(json.dumps(dr.tojson()))
-# THE ORDER IS:
-# add_players
-# if finish_round, then continue
-# remember: FINISH_ROUND  CALLS  DO_PAIRINGS
