@@ -1,5 +1,5 @@
 
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 type V3 = {
 	default_set: string,
@@ -20,64 +20,6 @@ type V3 = {
 	}
 }
 
-// export const V3Store = writable({
-// 	default_set: "lea",
-// 	full_name: "",
-// 	distros: [
-// 		{
-// 			slots: new Map([['c', 1], ['d', 2]]),
-// 			drops: new Map([
-// 				['c', [{ key: "a", count: 1, freq: 1 }]],
-// 				['d', [{ key: "q", count: 1, freq: 1 }, { key: "r", count: 1, freq: 1 }]
-// 				]]),
-// 			freq: 1
-// 		}
-// 	],
-// 	slots: new Map([
-// 		['c', {
-// 			flags: [],
-// 			options: [
-// 				{ struct: new Map(Object.entries({ a: 2 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ a: 2, b: 3 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ a: 2, b: 3, c: 4 })), freq: 1 }
-// 			],
-// 			sheets: new Map(Object.entries({
-// 				a: ["10", "11"],
-// 				b: ["10", "11"],
-// 				c: ["10", "11"]
-// 			}))
-// 		}],
-// 		['d', {
-// 			flags: [],
-// 			options: [
-// 				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
-// 			],
-// 			sheets: new Map(Object.entries({
-// 				q: ["10", "11"],
-// 				v: ["10", "11"],
-// 				r: ["10", "11"]
-// 			}))
-// 		}],
-// 		['q', {
-// 			flags: [],
-// 			options: [
-// 				{ struct: new Map(Object.entries({ q: 2 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ q: 2, b: 3 })), freq: 1 },
-// 				{ struct: new Map(Object.entries({ q: 2, v: 3, r: 4 })), freq: 1 }
-// 			],
-// 			sheets: new Map(Object.entries({
-// 				q: ["10", "11"],
-// 				v: ["10", "11"],
-// 				r: ["10", "11"]
-// 			}))
-// 		}]
-// 	]),
-// 	flag_data: {
-// 	},
-// } as V3);
-
 export const V3Store = writable({
 	default_set: "",
 	full_name: "",
@@ -86,3 +28,55 @@ export const V3Store = writable({
 	flag_data: {
 	},
 } as V3);
+
+export function validateStore() {
+	const slots: Record<string, Array<string>> = {};
+	const stor = get(V3Store);
+	[...stor.slots].forEach(([sk, sv]) => {
+		slots[sk] = [...sv.sheets.keys()]
+	});
+	// Iterate over slots.options
+	const newslots = new Map();
+	[...stor.slots].forEach(([sk, sv]) => {
+		const newOptions: typeof sv.options = []
+		sv.options.forEach(x => {
+			const newX = {
+				struct: new Map([...x.struct].filter(([k, v]) => {
+					return slots[sk].find(sheetkey => sheetkey === k)
+				})),
+				freq: x.freq
+			};
+			newOptions.push(newX)
+		})
+		newslots.set(sk, { ...sv, options: newOptions })
+	})
+	// Iterate over distros.slots
+	// Iterate over distros.drops
+	const newDistros: typeof stor.distros = []
+	stor.distros.forEach(d => {
+		const newDS = new Map();
+		[...d.slots].forEach(([dsk, dsv]) => {
+			if (slots[dsk]) {
+				newDS.set(dsk, dsv)
+			}
+		})
+		const newDD = new Map();
+		[...d.drops].forEach(([dsk, dsv]) => {
+			const newDSV: { key: string; count: number; freq: number; }[] = []
+			dsv.forEach(dsvI => {
+				if (slots[dsk]) {
+					if (slots[dsk].find(n => n == dsvI.key)) {
+						newDSV.push(dsvI)
+					}
+				}
+			})
+			if (newDSV.length > 0) {
+				newDD.set(dsk, newDSV)
+			}
+		})
+		newDistros.push({ slots: newDS, drops: newDD, freq: d.freq })
+	})
+	V3Store.update(oldstore => {
+		return { ...oldstore, distros: newDistros, slots: newslots }
+	})
+}

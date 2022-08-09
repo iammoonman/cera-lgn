@@ -5,26 +5,9 @@
 	import List, { Item } from '@smui/list';
 	import Numberinput from '../utilities/numberinput.svelte';
 	import Fakeselectmenu from '../utilities/fakeselectmenu.svelte';
-	let distros: {
-		slots: Map<string, number>;
-		drops: Map<string, { key: string; count: number; freq: number }[]>;
-		freq: number;
-	}[];
-	let outerslots: Map<
-		string,
-		{
-			flags: ('foil' | 'duplicate_control')[];
-			options: {
-				struct: Map<string, number>;
-				freq: number;
-			}[];
-			sheets: Map<string, (string | string[])[]>;
-		}
-	>;
-	V3Store.subscribe((v) => {
-		distros = v.distros;
-		outerslots = v.slots;
-	});
+	// V3Store.subscribe((v) => {
+	// 	outerslots = v.slots;
+	// });
 	function swapSlotKey(
 		distro: {
 			slots: Map<string, number>;
@@ -96,7 +79,7 @@
 
 <section id="distros" class="rounded-xl p-1 grid gap-1">
 	DISTROS
-	{#each distros as distro}
+	{#each $V3Store.distros as distro}
 		<div class="rounded-xl p-1 flex flex-col gap-1">
 			<div class="rounded-xl p-1 flex flex-row justify-between">
 				<span>DISTRO</span>
@@ -122,7 +105,7 @@
 							bgColorClass={'bg-green-200'}
 							on:click={() => {
 								const newDistro = distro;
-								const filtered = [...outerslots].filter(([o, r]) => !distro.slots.has(o));
+								const filtered = [...$V3Store.slots].filter(([o, r]) => !distro.slots.has(o));
 								if (filtered.length === 0) return;
 								const [newKey, newV] = filtered[0];
 								newDistro.slots.set(newKey, 1);
@@ -140,7 +123,7 @@
 							<div class="rounded-xl p-1 flex justify-around place-items-center">
 								<Fakeselectmenu bgColor={''} buttonText={`Slot key: ${slots_slotkey}`}>
 									<List>
-										{#each [...outerslots].filter(([ok, ov]) => !distro.slots.has(ok)) as [slotkey, v]}
+										{#each [...$V3Store.slots].filter(([ok, ov]) => !distro.slots.has(ok)) as [slotkey, v]}
 											<Item on:SMUI:action={() => swapSlotKey(distro, slots_slotkey, slotkey)}>
 												<span>{slotkey}</span>
 											</Item>
@@ -194,7 +177,7 @@
 							bgColorClass={'bg-green-200'}
 							on:click={() => {
 								const newDistro = distro;
-								const newKey = [...outerslots].filter(([d, v]) => !newDistro.drops.has(d));
+								const newKey = [...$V3Store.slots].filter(([d, v]) => !newDistro.drops.has(d));
 								if (newKey.length === 0) return;
 								const [foundKey, foundVal] = newKey[0];
 								newDistro.drops.set(foundKey, []);
@@ -213,7 +196,7 @@
 								<div class="flex flex-col gap-1">
 									<Fakeselectmenu bgColor={''} buttonText={`Slot key: ${dropslotkey}`}>
 										<List>
-											{#each [...outerslots].filter(([ok, ov]) => !distro.drops.has(ok)) as [slotkey, v]}
+											{#each [...$V3Store.slots].filter(([ok, ov]) => !distro.drops.has(ok)) as [slotkey, v]}
 												<Item
 													on:SMUI:action={() => {
 														swapDropSlotKey(distro, dropslotkey, slotkey);
@@ -229,7 +212,7 @@
 										bgColorClass={'bg-green-200'}
 										on:click={() => {
 											const newDistro = distro;
-											const mySlot = outerslots.get(dropslotkey);
+											const mySlot = $V3Store.slots.get(dropslotkey);
 											if (mySlot === undefined) return;
 											const newSheet = [...mySlot.sheets].filter(
 												([ms, mv]) => !dropslotvalue.find((ev) => ev.key === ms)
@@ -257,7 +240,7 @@
 											<div class="flex flex-row justify-between px-3 gap-1">
 												<Fakeselectmenu bgColor={''} buttonText={`Sheet key: ${q.key}`}>
 													<List>
-														{#each [...(outerslots.get(dropslotkey)?.sheets ?? [])].filter(([sk, sv]) => !dropslotvalue.find((x) => x.key === sk)) as [sheetkey, v]}
+														{#each [...($V3Store.slots.get(dropslotkey)?.sheets ?? [])].filter(([sk, sv]) => !dropslotvalue.find((x) => x.key === sk)) as [sheetkey, v]}
 															<Item
 																on:SMUI:action={() =>
 																	swapdropsheetkey(distro, dropslotkey, q, sheetkey)}

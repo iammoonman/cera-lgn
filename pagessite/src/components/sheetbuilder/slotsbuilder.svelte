@@ -14,7 +14,7 @@
 			sheets: Map<string, (string | string[])[]>;
 		}
 	> = new Map();
-	import { V3Store } from './stores';
+	import { V3Store, validateStore } from './stores';
 	V3Store.subscribe((v) => {
 		slots = v.slots;
 	});
@@ -38,6 +38,7 @@
 								slots: newSlots
 							};
 						});
+						validateStore()
 					}}
 				/>
 			</div>
@@ -79,6 +80,7 @@
 									slots: newSlots
 								};
 							});
+							validateStore()
 						}}
 					/>
 				</div>
@@ -101,6 +103,7 @@
 									slots: newSlots
 								};
 							});
+							validateStore()
 						}}
 					/>
 				</div>
@@ -132,6 +135,7 @@
 													slots: newSlots
 												};
 											});
+											validateStore()
 										}}
 									/>
 								</div>
@@ -157,6 +161,7 @@
 													slots: newSlots
 												};
 											});
+											validateStore()
 										}}
 									/>
 									<Button
@@ -173,6 +178,7 @@
 													slots: newSlots
 												};
 											});
+											validateStore()
 										}}
 									/>
 								</div>
@@ -204,6 +210,7 @@
 															slots: newSlots
 														};
 													});
+													validateStore()
 												}}
 											/>
 										</span>
@@ -224,6 +231,7 @@
 														slots: newSlots
 													};
 												});
+												validateStore()
 											}}
 										/>
 									</div>
@@ -250,6 +258,7 @@
 									slots: newSlots
 								};
 							});
+							validateStore()
 						}}
 					/>
 				</div>
@@ -272,6 +281,7 @@
 											slots: newSlots
 										};
 									});
+									validateStore()
 								}}
 							/>
 						</div>
@@ -293,6 +303,7 @@
 					])
 				};
 			});
+			validateStore()
 		}}
 	/>
 </section>
