@@ -17,10 +17,8 @@ const config = {
 		adapter: adapter({
 			pages: 'docs',
 			assets: 'docs',
-			domain: null,
-			jekyll: false,
 			fallback: null,
-			precompress: false,
+			precompress: false
 		}),
 		prerender: { default: true },
 	}
