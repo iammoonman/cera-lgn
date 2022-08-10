@@ -8,12 +8,13 @@
 	import Slotsbuilder from './slotsbuilder.svelte';
 	import { get } from 'svelte/store';
 	import Button from '../utilities/button.svelte';
+	$: textcontent = '';
 </script>
 
 <section id="headers" class="rounded-xl grid grid-cols-1 p-1 gap-1">
 	HEADERS
 	<Button
-		text={'Print object to console'}
+		text={'Print object'}
 		bgColorClass={'bg-green-200'}
 		on:click={() => {
 			const output2 = get(V3Store);
@@ -43,8 +44,10 @@
 				})
 			};
 			console.log(JSON.stringify(newOutput));
+			textcontent = JSON.stringify(newOutput)
 		}}
 	/>
+	<textarea disabled value={textcontent} style="resize: none; overflow-y: scroll;" />
 	<div class="rounded-xl flex flex-row justify-between">
 		<label for="full_name" class="p-2">Set Full Name</label>
 		<input

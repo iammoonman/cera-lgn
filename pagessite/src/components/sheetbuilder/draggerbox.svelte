@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dndzone } from 'svelte-dnd-action';
-	import { V3Store } from './stores';
+	import { V3Store, type V3 } from './stores';
 	let cardlist: {
 		cardname: string;
 		uri: string;
@@ -17,26 +17,29 @@
 			V3Store.update((v) => {
 				return {
 					...v,
-					slots: {
+					slots: new Map([
 						...v.slots,
-						[slotname]: {
-							...v.slots[slotname],
-							sheets: {
-								...v.slots[slotname].sheets,
-								[sheetname]: cardlist.map(
-									(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
-										return [e.cn, e.set];
-									}
-								)
+						[
+							slotname,
+							{
+								...v.slots.get(slotname),
+								sheets: {
+									...v.slots.get(slotname)!.sheets,
+									[sheetname]: cardlist.map(
+										(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
+											return [e.cn, e.set];
+										}
+									)
+								}
 							}
-						}
-					}
-				};
+						]
+					])
+				} as V3;
 			});
 		}, 3000);
 	}
 	V3Store.subscribe((v) => {
-		cardlist = v.slots[slotname].sheets[sheetname].map((c, i) => {
+		cardlist = v.slots.get(slotname)!.sheets.get(sheetname)!.map((c, i) => {
 			if (Array.isArray(c)) {
 				return {
 					cardname: '',

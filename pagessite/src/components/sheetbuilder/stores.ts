@@ -1,7 +1,7 @@
 
 import { get, writable } from 'svelte/store';
 
-type V3 = {
+export type V3 = {
 	default_set: string,
 	full_name: string,
 	distros: {
