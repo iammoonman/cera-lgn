@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dndzone } from 'svelte-dnd-action';
-	import { V3Store, type V3 } from './stores';
+	import { V3Selection, V3Store, type V3 } from './stores';
 	let cardlist: {
 		cardname: string;
 		uri: string;
@@ -8,8 +8,12 @@
 		set: string;
 		cn: string;
 	}[] = [];
-	export let slotname: string;
-	export let sheetname: string;
+	let slotkey = '';
+	let sheetkey = '';
+	V3Selection.subscribe((s) => {
+		slotkey = s.slotkey;
+		sheetkey = s.sheetkey;
+	});
 	let timer: string | number | NodeJS.Timeout | undefined;
 	function debounceUpdate() {
 		clearTimeout(timer);
@@ -20,12 +24,12 @@
 					slots: new Map([
 						...v.slots,
 						[
-							slotname,
+							slotkey,
 							{
-								...v.slots.get(slotname),
+								...v.slots.get(slotkey),
 								sheets: {
-									...v.slots.get(slotname)!.sheets,
-									[sheetname]: cardlist.map(
+									...v.slots.get(slotkey)!.sheets,
+									[sheetkey]: cardlist.map(
 										(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
 											return [e.cn, e.set];
 										}
@@ -39,7 +43,11 @@
 		}, 3000);
 	}
 	V3Store.subscribe((v) => {
-		cardlist = v.slots.get(slotname)!.sheets.get(sheetname)!.map((c, i) => {
+		const tempslot = v.slots.get(slotkey);
+		if (tempslot === undefined) return;
+		const templist = tempslot.sheets.get(sheetkey)
+		if (templist === undefined) return;
+		cardlist = templist.map((c, i) => {
 			if (Array.isArray(c)) {
 				return {
 					cardname: '',
@@ -58,7 +66,6 @@
 			};
 		});
 		getStuff();
-		console.log('run subscribe');
 	});
 
 	function handleDndConsider(e: any) {
