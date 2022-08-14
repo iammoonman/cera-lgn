@@ -1,13 +1,9 @@
 <script lang="ts">
-	import Badge from '../utilities/badge.svelte';
 	import Button from '../utilities/button.svelte';
 	import { V3Store } from './stores';
 	import List, { Item } from '@smui/list';
 	import Numberinput from '../utilities/numberinput.svelte';
 	import Fakeselectmenu from '../utilities/fakeselectmenu.svelte';
-	// V3Store.subscribe((v) => {
-	// 	outerslots = v.slots;
-	// });
 	function swapSlotKey(
 		distro: {
 			slots: Map<string, number>;

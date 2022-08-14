@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { Card } from 'src/types/scryfall';
+
 	import { dndzone } from 'svelte-dnd-action';
 	import Button from '../utilities/button.svelte';
 	import { V3Selection, V3Store, type V3 } from './stores';
@@ -117,14 +119,24 @@
 			.then((j) => {
 				const newlist: typeof cardlist = [];
 				cardlist.forEach((e, i) => {
-					const cardstuff = j.data.find((q: any) => q.collector_number == e.cn && q.set == e.set);
+					const cardstuff: Card = j.data.find(
+						(q: Card) => q.collector_number == e.cn && q.set == e.set
+					);
 					if (cardstuff !== undefined) {
+						let imageURI = '';
+						if (cardstuff.image_uris !== undefined) {
+							imageURI = cardstuff.image_uris.small;
+						} else {
+							const hold = cardstuff.card_faces!;
+							imageURI = hold[0].image_uris!.small;
+						}
+						if (imageURI === '') return;
 						newlist.push({
 							cardname: cardstuff.name,
 							cn: cardstuff.collector_number,
 							set: cardstuff.set,
 							id: i,
-							uri: cardstuff.image_uris.small
+							uri: imageURI
 						});
 					}
 				});
