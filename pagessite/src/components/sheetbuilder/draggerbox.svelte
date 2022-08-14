@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { dndzone } from 'svelte-dnd-action';
+	import Button from '../utilities/button.svelte';
 	import { V3Selection, V3Store, type V3 } from './stores';
 	let cardlist: {
 		cardname: string;
@@ -27,14 +28,23 @@
 							slotkey,
 							{
 								...v.slots.get(slotkey),
-								sheets: {
+								sheets: new Map([
 									...v.slots.get(slotkey)!.sheets,
-									[sheetkey]: cardlist.map(
-										(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
-											return [e.cn, e.set];
-										}
-									)
-								}
+									[
+										sheetkey,
+										cardlist.map(
+											(e: {
+												cardname: string;
+												uri: string;
+												id: number;
+												set: string;
+												cn: string;
+											}) => {
+												return [e.cn, e.set];
+											}
+										)
+									]
+								])
 							}
 						]
 					])
@@ -45,7 +55,7 @@
 	V3Store.subscribe((v) => {
 		const tempslot = v.slots.get(slotkey);
 		if (tempslot === undefined) return;
-		const templist = tempslot.sheets.get(sheetkey)
+		const templist = tempslot.sheets.get(sheetkey);
 		if (templist === undefined) return;
 		cardlist = templist.map((c, i) => {
 			if (Array.isArray(c)) {
@@ -122,6 +132,8 @@
 			});
 	}
 	let deletezoneobjects: typeof cardlist = [];
+	let searchText = '';
+	let searchResults: any[] = [];
 </script>
 
 <div class="grid p-2 gap-2" id="draggercomponent">
@@ -137,13 +149,11 @@
 			</div>
 		{/each}
 	</section>
-	<textarea
-		id="textarea"
-		class="border-black border"
-		type="text"
-		disabled
-		value={`[${cardlist.map((e) => `["${e.cn}", "${e.set}"]`)}]`}
-	/>
+	<section class="">
+		<div id="textarea" class="border-black border">
+			{`[${cardlist.map((e) => `["${e.cn}", "${e.set}"]`)}]`}
+		</div>
+	</section>
 	<section
 		class="rounded-lg cardarea bg-red-100"
 		use:dndzone={{ items: deletezoneobjects, flipDurationMs: 50, type: 'healthy' }}
@@ -157,6 +167,36 @@
 			</div>
 		{/each}
 	</section>
+	<section class="grid h-min self-center gap-2 grid-cols-2">
+		<input type="text" bind:value={searchText} />
+		<Button
+			bgColorClass={'bg-green-200'}
+			text={'Search'}
+			on:click={async () => {
+				const text = encodeURIComponent(searchText);
+				const resp = await fetch('https://api.scryfall.com/cards/search?q=' + text, {
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' }
+				})
+					.then((r) => r.json())
+					.then((j) => {
+						searchResults = j.data ?? [];
+					});
+			}}
+		/>
+		<span>{searchResults.length} cards returned in search.</span>
+		<Button
+			bgColorClass={'bg-green-200'}
+			text={'Add'}
+			on:click={() => {
+				const newList = searchResults.map((r) => {
+					return { cardname: r.name, uri: '', id: 999, set: r.set, cn: r.collector_number };
+				});
+				newList.forEach((ne) => cardlist.push(ne));
+				debounceUpdate();
+			}}
+		/>
+	</section>
 </div>
 
 <style>
@@ -166,7 +206,6 @@
 		grid-template-rows: repeat(11, 1fr);
 		max-width: 600px;
 		padding: 5px;
-		max-height: 300px;
 		overflow-y: scroll;
 	}
 	.singlecard {
@@ -174,13 +213,12 @@
 		height: 69.85px;
 	}
 	#textarea {
-		width: 180px;
 		height: 100%;
-		resize: none;
 		font-size: 0.8em;
 	}
 	#draggercomponent {
 		width: fit-content;
-		grid-template-columns: 600px 180px;
+		grid-template-columns: 600px auto;
+		grid-template-rows: 480px auto;
 	}
 </style>
