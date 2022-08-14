@@ -1,91 +1,72 @@
 <script lang="ts">
 	import type { Card } from 'src/types/scryfall';
-
 	import { dndzone } from 'svelte-dnd-action';
 	import Button from '../utilities/button.svelte';
 	import { V3Selection, V3Store, type V3 } from './stores';
-	let cardlist: {
+	import { debounce } from '../utilities/debouncefunc';
+	$: cardlist = [] as {
 		cardname: string;
 		uri: string;
 		id: number;
 		set: string;
 		cn: string;
-	}[] = [];
-	let slotkey = '';
-	let sheetkey = '';
-	V3Selection.subscribe((s) => {
-		slotkey = s.slotkey;
-		sheetkey = s.sheetkey;
-	});
-	let timer: string | number | NodeJS.Timeout | undefined;
-	function debounceUpdate() {
-		clearTimeout(timer);
-		timer = setTimeout(() => {
-			V3Store.update((v) => {
-				return {
-					...v,
-					slots: new Map([
-						...v.slots,
-						[
-							slotkey,
-							{
-								...v.slots.get(slotkey),
-								sheets: new Map([
-									...v.slots.get(slotkey)!.sheets,
-									[
-										sheetkey,
-										cardlist.map(
-											(e: {
-												cardname: string;
-												uri: string;
-												id: number;
-												set: string;
-												cn: string;
-											}) => {
-												return [e.cn, e.set];
-											}
-										)
-									]
-								])
-							}
-						]
-					])
-				} as V3;
-			});
-		}, 3000);
+	}[];
+	let runGetScryfall = debounce(getScryfallImagesForCardlist, 2000);
+	$: {
+		cardlist =
+			$V3Store.slots
+				.get($V3Selection.slotkey)
+				?.sheets.get($V3Selection.sheetkey)
+				?.map((c, i) => {
+					if (Array.isArray(c)) {
+						return {
+							cardname: '',
+							cn: c[0],
+							id: i,
+							set: c[1],
+							uri: ''
+						};
+					}
+					return {
+						cardname: '',
+						cn: c,
+						id: i,
+						set: $V3Store.default_set,
+						uri: ''
+					};
+				}) ?? [];
+		runGetScryfall();
 	}
-	V3Store.subscribe((v) => {
-		const tempslot = v.slots.get(slotkey);
-		if (tempslot === undefined) return;
-		const templist = tempslot.sheets.get(sheetkey);
-		if (templist === undefined) return;
-		cardlist = templist.map((c, i) => {
-			if (Array.isArray(c)) {
-				return {
-					cardname: '',
-					cn: c[0],
-					id: i,
-					set: c[1],
-					uri: ''
-				};
-			}
-			return {
-				cardname: '',
-				cn: c,
-				id: i,
-				set: v.default_set,
-				uri: ''
-			};
-		});
-		getStuff();
-	});
-
 	function handleDndConsider(e: any) {
 		cardlist = e.detail.items;
 	}
 	function handleDndFinalize(e: any) {
 		cardlist = e.detail.items;
-		debounceUpdate();
+		V3Store.update((v) => {
+			return {
+				...v,
+				slots: new Map([
+					...v.slots,
+					[
+						$V3Selection.slotkey,
+						{
+							...v.slots.get($V3Selection.slotkey),
+							sheets: new Map([
+								...v.slots.get($V3Selection.slotkey)!.sheets,
+								[
+									$V3Selection.sheetkey,
+									cardlist.map(
+										(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
+											return [e.cn, e.set];
+										}
+									)
+								]
+							])
+						}
+					]
+				])
+			} as V3;
+		});
 	}
 	function handleDeleteFinalize(e: any) {
 		deletezoneobjects = e.detail.items;
@@ -96,12 +77,36 @@
 					return h.id == q.id && h.cn == q.cn && h.set == q.set;
 				}) === undefined
 		);
-		debounceUpdate();
+		V3Store.update((v) => {
+			return {
+				...v,
+				slots: new Map([
+					...v.slots,
+					[
+						$V3Selection.slotkey,
+						{
+							...v.slots.get($V3Selection.slotkey),
+							sheets: new Map([
+								...v.slots.get($V3Selection.slotkey)!.sheets,
+								[
+									$V3Selection.sheetkey,
+									cardlist.map(
+										(e: { cardname: string; uri: string; id: number; set: string; cn: string }) => {
+											return [e.cn, e.set];
+										}
+									)
+								]
+							])
+						}
+					]
+				])
+			} as V3;
+		});
 	}
 	function handleDeleteConsider(e: any) {
 		deletezoneobjects = e.detail.items;
 	}
-	async function getStuff() {
+	async function getScryfallImagesForCardlist() {
 		let identifiers: { collector_number: string; set: string }[] = [];
 		cardlist.map(async (d) => {
 			identifiers.push({
@@ -148,6 +153,7 @@
 	let searchResults: any[] = [];
 </script>
 
+<span>slot: {$V3Selection.slotkey}, sheet: {$V3Selection.sheetkey}</span>
 <div class="grid p-2 gap-2" id="draggercomponent">
 	<section
 		class="rounded-lg cardarea"
@@ -201,11 +207,13 @@
 			bgColorClass={'bg-green-200'}
 			text={'Add'}
 			on:click={() => {
-				const newList = searchResults.map((r) => {
-					return { cardname: r.name, uri: '', id: 999, set: r.set, cn: r.collector_number };
-				});
-				newList.forEach((ne) => cardlist.push(ne));
-				debounceUpdate();
+				cardlist = [
+					...cardlist,
+					...searchResults.map((r, i) => {
+						return { cardname: r.name, uri: '', id: i + 999, set: r.set, cn: r.collector_number };
+					})
+				];
+				runGetScryfall();
 			}}
 		/>
 	</section>
