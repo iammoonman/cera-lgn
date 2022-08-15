@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Switch from '@smui/switch';
-	import Badge from '../utilities/badge.svelte';
 	import Button from '../utilities/button.svelte';
 	import Numberinput from '../utilities/numberinput.svelte';
 	let slots: Map<
@@ -14,10 +13,16 @@
 			sheets: Map<string, (string | string[])[]>;
 		}
 	> = new Map();
-	import { V3Store, validateStore } from './stores';
+	import { V3Selection, V3Store, validateStore } from './stores';
 	V3Store.subscribe((v) => {
 		slots = v.slots;
 	});
+	let slotkey = '';
+	let sheetkey = '';
+	V3Selection.subscribe(s => {
+		slotkey = s.slotkey;
+		sheetkey = s.sheetkey;
+	})
 </script>
 
 <section id="slots" class="rounded-xl p-1 grid gap-1">
@@ -266,7 +271,11 @@
 					{#each [...s_value.sheets] as [sh, sh_v]}
 						<div class="rounded-xl flex flex-row justify-between p-1 items-center gap-1">
 							<span class="h-min text-center mr-auto">KEY: {sh}</span>
-							<Button text={'Edit'} bgColorClass={'bg-blue-400'} />
+							<Button text={'Edit'} bgColorClass={'bg-blue-400'} on:click={() => {
+								V3Selection.update(old => {
+									return {slotkey: s_key, sheetkey: sh};
+								})
+							}} />
 							<Button
 								text={'Delete'}
 								bgColorClass={'bg-red-400'}

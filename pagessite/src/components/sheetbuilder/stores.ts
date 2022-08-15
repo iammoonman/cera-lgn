@@ -80,3 +80,8 @@ export function validateStore() {
 		return { ...oldstore, distros: newDistros, slots: newslots }
 	})
 }
+
+export const V3Selection = writable({
+	slotkey: '',
+	sheetkey: '',
+})
