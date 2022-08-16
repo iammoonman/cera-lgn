@@ -37,7 +37,7 @@
 
 <style>
 	.tiny-shadow {
-		box-shadow: 0 1px 3px 0 var(--alpha), 0 1px 2px -1px var(--alpha);
+		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
 	}
 	.card-h {
 		background-color: var(--gamma);
@@ -45,14 +45,12 @@
 		width: 468px;
 		height: 336px;
 		border-radius: 3.5% / 4.75%;
-		margin: 15px;
 	}
 	.card-v {
 		background-color: var(--gamma);
 		aspect-ratio: 336 / 468;
 		height: 468px;
 		width: 336px;
-		margin: 15px;
 		border-radius: 4.75% / 3.5%;
 	}
 	.card {
