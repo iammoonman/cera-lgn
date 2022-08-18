@@ -1,32 +1,33 @@
-<script>
+<script lang="ts">
 	import Carddisplay from '../components/carddisplay.svelte';
-	import Masonry from '../components/utilities/masonry.svelte';
+	import DRAFTS from '../types/test.json';
+	const drafts = DRAFTS;
+	const applyFilter = <T, X>(list: Array<T>, filter: (x: T) => boolean) => {
+		return list.filter((x) => filter(x));
+	};
+	const filterList = [{ active: false, filter: (x: unknown) => false }];
+	// filter filterList to get actives
+	// apply filters to array of objects
 </script>
 
 <div
-	class="w-full h-min p-2 mb-2 z-10 relative flex flex-row justify-between shadow-lg shadow-green-700/40 bg-green-200"
+	class="w-full h-min p-2 z-10 relative flex flex-row justify-between shadow-lg shadow-green-700/40 bg-green-200"
 >
 	<span>The Rat Zone</span>
 	<span>Hamburgler</span>
 </div>
-<div class="mx-auto relative gap-1 p-4 shadow-lg masonrygrid rounded-xl border-blue-100">
-	<Carddisplay horizontal={false} />
-	<Carddisplay />
-	<Carddisplay />
-    <Carddisplay />
-    <Carddisplay horizontal={true} />
-    <Carddisplay />
-    <Carddisplay horizontal={false} />
-    <Carddisplay />
-    <Carddisplay />
+<div class="grid grid-catch gap-4">
+	<div class="h-full shadow-lg shadow-blue-400 bg-blue-200">
+		<div>SIDEBAR HEADER</div>
+		<div class="h-full flex flex-col">SIDEBAR ROWS</div>
+	</div>
+	<div class="h-full mt-2">
+		<Carddisplay />
+	</div>
 </div>
 
 <style>
-	.masonrygrid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        place-items: center;
-        max-width: 90%;
+	.grid-catch {
+		grid-template-columns: 1fr 5fr;
 	}
 </style>
