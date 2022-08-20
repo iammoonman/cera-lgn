@@ -75,5 +75,69 @@ type oldtype = {
 
 export function old_to_new(a: oldtype): Draft {
     const newTag = ['ptm', 'omn', 'dps', ''].includes(a.tag) ? a.tag as 'ptm' | 'omn' | 'dps' | '' : '';
-    return { scores: a.players.map((p) => { return { id: parseInt(p.playerID), points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp } }), date: new Date(), id: parseInt(a.draftID), rounds: [], tag: newTag, title: a.title }
+    return {
+        scores: a.players.map((p) => {
+            return { id: parseInt(p.playerID), points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp }
+        }),
+        date: new Date(),
+        id: parseInt(a.draftID),
+        rounds: a.rounds.map((r, i) => {
+            return {
+                r_id: i,
+                title: r.roundNUM,
+                matches: r.matches.map((m) => {
+                    return { p_ids: [], games: new Map(m.players.map((p, i) => [parseInt(p), m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
+                })
+            }
+        }),
+        tag: newTag,
+        title: a.title
+    }
+}
+
+export function new_to_json(a: Draft) {
+    return {
+        ...a,
+        date: a.date.toISOString(),
+        rounds: a.rounds.map(r => {
+            return {
+                ...r, matches: r.matches.map(m => {
+                    return { ...m, games: Object.fromEntries([...m.games]) }
+                })
+            }
+        })
+    }
+}
+
+export function json_to_new(a: {
+    date: string;
+    rounds: {
+        matches: {
+            games: {
+                [k: string]: number | "TIE";
+            };
+            p_ids: number[];
+            bye: boolean;
+            drops: number[];
+        }[];
+        r_id: number;
+        title?: string | undefined;
+    }[];
+    scores: Score[];
+    description?: string | undefined;
+    id: number;
+    tag: "" | 'ptm' | 'omn' | 'dps';
+    title: string;
+}): Draft {
+    return {
+        ...a,
+        date: new Date(),
+        rounds: a.rounds.map(r => {
+            return {
+                ...r, matches: r.matches.map(m => {
+                    return { ...m, games: new Map(Object.entries(m.games).map(([a, b]) => [parseInt(a), b])) }
+                })
+            }
+        })
+    }
 }

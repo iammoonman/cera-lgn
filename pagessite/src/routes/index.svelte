@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Carddisplay from '../components/carddisplay.svelte';
-	import DRAFTS from '../types/test.json';
-	const drafts = DRAFTS;
 	const applyFilter = <T, X>(list: Array<T>, filter: (x: T) => boolean) => {
 		return list.filter((x) => filter(x));
 	};
