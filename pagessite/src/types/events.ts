@@ -141,3 +141,32 @@ export function json_to_new(a: {
         })
     }
 }
+
+export function determine_winner(m: Match) {
+    if (m.bye) return m.p_ids[0];
+    const playerWins = new Map(m.p_ids.map(p => [p, 0]))
+    m.games.forEach((v) => {
+        if (v !== 'TIE') {
+            if (playerWins.get(v) === undefined) throw 'Invalid player entry in match winners';
+            playerWins.set(v, playerWins.get(v)! + 1)
+        }
+    })
+    let max = 0;
+    let winner = 0;
+    playerWins.forEach((v, k) => {
+        if (v > max) {
+            max = v
+            winner = k
+        };
+    })
+    return winner;
+}
+
+export function validate_match(m: Match) {
+    m.games.forEach((v, k) => {
+        if (v !== 'TIE') {
+            if (!m.p_ids.includes(v)) return false;
+        }
+    })
+    return true;
+}
