@@ -86,7 +86,7 @@ export function old_to_new(a: oldtype): Draft {
                 r_id: i,
                 title: r.roundNUM,
                 matches: r.matches.map((m) => {
-                    return { p_ids: [], games: new Map(m.players.map((p, i) => [parseInt(p), m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
+                    return { p_ids: m.players.map(x => parseInt(x)), games: new Map(m.players.map((p, i) => [parseInt(p), m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
                 })
             }
         }),
