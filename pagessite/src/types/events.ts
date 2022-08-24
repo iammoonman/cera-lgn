@@ -7,12 +7,12 @@ export type LimitedEvent = {
 
 export type Draft = {
     scores: Score[];
-    rounds: Round[];
+    rounds: Map<number, Round>;
     description?: string;
 } & LimitedEvent;
 
 export type Score = {
-    id: number;
+    id: string;
     points: number;
     gwp: number;
     ogp: number;
@@ -20,16 +20,15 @@ export type Score = {
 }
 
 export type Round = {
-    r_id: number;
     title?: string;
     matches: Match[];
 }
 
 export type Match = {
-    p_ids: number[];
-    games: Map<number, number | 'TIE'>; // Map<game_num, winner_id>
+    p_ids: string[];
+    games: Map<number, string | 'TIE'>; // Map<game_num, winner_id>
     bye: boolean;
-    drops: number[];
+    drops: string[];
 }
 
 export type TScore = {
@@ -73,33 +72,32 @@ type oldtype = {
     }[];
 }
 
-export function old_to_new(a: oldtype): Draft {
-    const newTag = ['ptm', 'omn', 'dps', ''].includes(a.tag) ? a.tag as 'ptm' | 'omn' | 'dps' | '' : '';
-    return {
-        scores: a.players.map((p) => {
-            return { id: parseInt(p.playerID), points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp }
-        }),
-        date: new Date(),
-        id: parseInt(a.draftID),
-        rounds: a.rounds.map((r, i) => {
-            return {
-                r_id: i,
-                title: r.roundNUM,
-                matches: r.matches.map((m) => {
-                    return { p_ids: m.players.map(x => parseInt(x)), games: new Map(m.players.map((p, i) => [parseInt(p), m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
-                })
-            }
-        }),
-        tag: newTag,
-        title: a.title
-    }
-}
+// export function old_to_new(a: oldtype): Draft {
+//     const newTag = ['ptm', 'omn', 'dps', ''].includes(a.tag) ? a.tag as 'ptm' | 'omn' | 'dps' | '' : '';
+//     return {
+//         scores: a.players.map((p) => {
+//             return { id: p.playerID, points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp }
+//         }),
+//         date: new Date(),
+//         id: parseInt(a.draftID),
+//         rounds: new Map(a.rounds.map((r, i) => {
+//             return [i, {
+//                 title: r.roundNUM,
+//                 matches: r.matches.map((m) => {
+//                     return { p_ids: m.players, games: new Map(m.players.map((p, i) => [p, m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
+//                 })
+//             }]
+//         })),
+//         tag: newTag,
+//         title: a.title
+//     }
+// }
 
 export function new_to_json(a: Draft) {
     return {
         ...a,
         date: a.date.toISOString(),
-        rounds: a.rounds.map(r => {
+        rounds: [...a.rounds].map(([x, r]) => {
             return {
                 ...r, matches: r.matches.map(m => {
                     return { ...m, games: Object.fromEntries([...m.games]) }
@@ -114,11 +112,11 @@ export function json_to_new(a: {
     rounds: {
         matches: {
             games: {
-                [k: string]: number | "TIE";
+                [k: string]: string | "TIE";
             };
-            p_ids: number[];
+            p_ids: string[];
             bye: boolean;
-            drops: number[];
+            drops: string[];
         }[];
         r_id: number;
         title?: string | undefined;
@@ -132,13 +130,13 @@ export function json_to_new(a: {
     return {
         ...a,
         date: new Date(),
-        rounds: a.rounds.map(r => {
-            return {
+        rounds: new Map(a.rounds.map((r, i) => {
+            return [i, {
                 ...r, matches: r.matches.map(m => {
                     return { ...m, games: new Map(Object.entries(m.games).map(([a, b]) => [parseInt(a), b])) }
                 })
-            }
-        })
+            }]
+        }))
     }
 }
 
@@ -152,7 +150,7 @@ export function determine_winner(m: Match) {
         }
     })
     let max = 0;
-    let winner = 0;
+    let winner = "";
     playerWins.forEach((v, k) => {
         if (v > max) {
             max = v
@@ -170,3 +168,5 @@ export function validate_match(m: Match) {
     })
     return true;
 }
+
+const test: Draft = { date: new Date(), id: 0, rounds: new Map([]), scores: [], tag: 'dps', title: 'TEST', description: 'TEST' };
