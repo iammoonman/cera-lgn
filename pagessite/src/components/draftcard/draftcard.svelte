@@ -2,7 +2,7 @@
 	import type { Draft } from 'src/types/events';
 	import Tinygame from './tinygame.svelte';
 	import { PlayerList } from '../../types/playerstore';
-	const D: Draft = {
+	export const D: Draft = {
 		date: new Date(),
 		id: 0,
 		rounds: new Map([
