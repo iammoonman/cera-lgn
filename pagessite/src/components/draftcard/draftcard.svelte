@@ -159,7 +159,7 @@
 		<div class="grid place-items-center">
 			<span class="w-fit text-lg">ROUND {round}</span>
 		</div>
-		<div class="overflow-y-scroll">
+		<div class="">
 			{#each roundHold as m}
 				<Tinygame {m} />
 			{/each}
@@ -177,6 +177,7 @@
 	}
 	.leftside {
 		grid-template-rows: 65px auto;
+		box-shadow: 2px 0px 4px -4px black;
 	}
 	table {
 		text-align: left;
