@@ -8,9 +8,12 @@
 	let scry_link = `https://scryfall.com/card/${set === '' ? 'lea' : set}/${cn === '' ? '1' : cn}`;
 	let image_link = uri === '' ? 'https://picsum.photos/336/468' : uri;
 	import { Motion } from 'svelte-motion';
+	import Fancycardhover from './fancycardhover.svelte';
 </script>
 
-<div class={horizontal ? 'card-h tiny-shadow grid grid-cols-2' : 'card-v tiny-shadow grid grid-cols-1'}>
+<div
+	class={horizontal ? 'card-h tiny-shadow grid grid-cols-2' : 'card-v tiny-shadow grid grid-cols-1'}
+>
 	<section class={`textbox-h ${horizontal ? 'flex-col' : 'flex-row'}`}>
 		<div class="text-lg truncate force-height-title">{title === '' ? 'Animate Wall' : title}</div>
 		<hr />
@@ -23,15 +26,15 @@
 			Are yall mostly concerned about brandishing firearms for no reason?`
 				: description}
 		</p>
-		<footer class='text-xs flex space-x-4'>
+		<footer class="text-xs flex space-x-4">
 			<span>{set === '' ? 'LEA' : set} / {cn === '' ? '1' : cn}</span>
 			<a href={scry_link}>Scryfall</a>
 		</footer>
 	</section>
 	<div class={`cardbox ${horizontal ? 'ml-1 mr-2' : 'ml-9 mr-9 mb-3'}`}>
-		<Motion let:motion whileHover={{ scale: 1.15 }}>
-			<img use:motion class="card tiny-shadow" alt="card" src={image_link} />
-		</Motion>
+		<Fancycardhover height={234} width={168}>
+			<img class="card tiny-shadow" alt="card" src={image_link} />
+		</Fancycardhover>
 	</div>
 </div>
 

@@ -25,10 +25,7 @@
 	<div class="h-full mt-2 grid gap-4 booty">
 		<Carddisplay />
 		<Draftcard />
-		<Draftcard />
-		<Draftcard />
 	</div>
-	<Fancycardhover />
 </div>
 
 <style>
