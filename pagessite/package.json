@@ -16,6 +16,7 @@
 		"@smui/menu": "^6.0.0",
 		"@smui/ripple": "^6.0.0",
 		"@smui/switch": "^6.0.0",
+		"@smui/tooltip": "^6.1.0",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",

@@ -72,26 +72,48 @@ type oldtype = {
     }[];
 }
 
-// export function old_to_new(a: oldtype): Draft {
-//     const newTag = ['ptm', 'omn', 'dps', ''].includes(a.tag) ? a.tag as 'ptm' | 'omn' | 'dps' | '' : '';
-//     return {
-//         scores: a.players.map((p) => {
-//             return { id: p.playerID, points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp }
-//         }),
-//         date: new Date(),
-//         id: parseInt(a.draftID),
-//         rounds: new Map(a.rounds.map((r, i) => {
-//             return [i, {
-//                 title: r.roundNUM,
-//                 matches: r.matches.map((m) => {
-//                     return { p_ids: m.players, games: new Map(m.players.map((p, i) => [p, m.scores[i]])), bye: m.players.find(x => x === "0")?.length == 0 ?? false, drops: [] }
-//                 })
-//             }]
-//         })),
-//         tag: newTag,
-//         title: a.title
-//     }
-// }
+export function old_to_new(a: oldtype): Draft {
+    const newTag = ['ptm', 'omn', 'dps', ''].includes(a.tag) ? a.tag as 'ptm' | 'omn' | 'dps' | '' : '';
+    return {
+        scores: a.players.map((p) => {
+            return { id: p.playerID, points: p.score, gwp: p.gwp, ogp: p.ogp, omp: p.omp }
+        }),
+        date: new Date(),
+        id: parseInt(a.draftID),
+        rounds: new Map(a.rounds.map((r, i) => {
+            return [i, {
+                title: r.roundNUM,
+                matches: r.matches.map((m) => {
+                    const newGames: Map<number, string> = new Map([])
+                    // m.scores = [0, 2] | [2, 0] | [1, 2] | [2, 1]
+                    if (m.scores == [0, 2]) {
+                        newGames.set(0, m.players[1])
+                        newGames.set(1, m.players[1])
+                    } else if (m.scores == [1, 2]) {
+                        newGames.set(0, m.players[0])
+                        newGames.set(1, m.players[1])
+                        newGames.set(2, m.players[1])
+                    } else if (m.scores == [2, 0]) {
+                        newGames.set(0, m.players[0])
+                        newGames.set(1, m.players[0])
+                    } else if (m.scores == [2, 1]) {
+                        newGames.set(0, m.players[1])
+                        newGames.set(1, m.players[0])
+                        newGames.set(2, m.players[0])
+                    }
+                    return {
+                        p_ids: m.players,
+                        games: newGames,
+                        bye: m.players.find(x => x === "0")?.length == 0 ?? false,
+                        drops: []
+                    }
+                })
+            }]
+        })),
+        tag: newTag,
+        title: a.title
+    }
+}
 
 export function new_to_json(a: Draft) {
     return {

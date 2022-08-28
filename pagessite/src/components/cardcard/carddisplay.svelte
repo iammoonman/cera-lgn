@@ -4,7 +4,7 @@
 	export let set = '';
 	export let cn = '';
 	export let uri = '';
-	export let horizontal = true;
+	$: horizontal = description == '';
 	let scry_link = `https://scryfall.com/card/${set === '' ? 'lea' : set}/${cn === '' ? '1' : cn}`;
 	let image_link = uri === '' ? 'https://picsum.photos/336/468' : uri;
 	import { Motion } from 'svelte-motion';

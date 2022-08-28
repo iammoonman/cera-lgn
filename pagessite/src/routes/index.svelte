@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Draftcard from '../components/draftcard/draftcard.svelte';
 	import type { Draft } from 'src/types/events';
+	import Carddisplay from '../components/cardcard/carddisplay.svelte';
+	import Fancycardhover from '../components/cardcard/fancycardhover.svelte';
 	const applyFilter = <T, X>(list: Array<T>, filter: (x: T) => boolean) => {
 		return list.filter((x) => filter(x));
 	};
@@ -20,14 +22,21 @@
 		<div>SIDEBAR HEADER</div>
 		<div class="h-full flex flex-col">SIDEBAR ROWS</div>
 	</div>
-	<div class="h-full mt-2">
-		<!-- <Carddisplay /> -->
+	<div class="h-full mt-2 grid gap-4 booty">
+		<Carddisplay />
+		<Draftcard />
+		<Draftcard />
 		<Draftcard />
 	</div>
+	<Fancycardhover />
 </div>
 
 <style>
 	.grid-catch {
-		grid-template-columns: 1fr 5fr;
+		grid-template-columns: 200px auto;
+	}
+	.booty {
+		grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+		grid-auto-rows: auto;
 	}
 </style>

@@ -2,6 +2,9 @@
 	import type { Draft } from 'src/types/events';
 	import Tinygame from './tinygame.svelte';
 	import { PlayerList } from '../../types/playerstore';
+	import { fly } from 'svelte/transition';
+	import Tooltip, { Wrapper } from '@smui/tooltip';
+	import AnglesRight from '../utilities/angles-right.svelte';
 	export const D: Draft = {
 		date: new Date(),
 		id: 0,
@@ -9,7 +12,6 @@
 			[
 				0,
 				{
-					title: 'TEST',
 					matches: [
 						{
 							p_ids: ['411627939478765568', '237059875073556481'],
@@ -53,7 +55,6 @@
 			[
 				1,
 				{
-					title: 'TEST',
 					matches: [
 						{
 							p_ids: ['320756550992134145', '265851480462852096'],
@@ -86,7 +87,6 @@
 			[
 				2,
 				{
-					title: 'TEST',
 					matches: [
 						{
 							p_ids: ['411627939478765568', '317470784870285323'],
@@ -116,20 +116,27 @@
 		],
 		tag: 'dps',
 		title: 'TEST TITLE',
-		description: 'TEST DESCRIPTION'
+		description:
+			'TEST DESCRIPTION lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum'
 	};
 	$: selectedRound = 0;
-	let roundHold = D.rounds.get(0)?.matches ?? [];
-	let round = D.rounds.get(selectedRound)?.title ?? "0";
+	$: roundHold = [...(D.rounds.get(selectedRound)?.matches ?? [])];
+	$: round = D.rounds.get(selectedRound)?.title ?? `${selectedRound + 1}`;
 </script>
 
 <div class="outercard grid grid-cols-2">
 	<div class="leftside grid p-2">
-		<div class="titlecard">
-			<span class="text-lg text-title">{D.title}</span>
-			<span class="text-xs text-date">{D.date.toLocaleDateString()}</span>
-			<span class="text-xs text-hack">{D.description}</span>
-		</div>
+		<Wrapper>
+			<div class="titlecard">
+				<span class="text-lg text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
+					{D.title ?? ''}
+				</span>
+				<span class="text-xs text-date">{D.date.toLocaleDateString()}</span>
+			</div>
+			<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
+				{D.description ?? 'No description provided.'}
+			</Tooltip>
+		</Wrapper>
 		<div class="mytable overflow-y-hidden">
 			<table class="table-auto">
 				<thead>
@@ -156,12 +163,30 @@
 		</div>
 	</div>
 	<div class="rightside grid grid-cols-1">
-		<div class="grid place-items-center">
+		<div class="flex flex-row place-items-center justify-between">
+			<button
+				on:click={() => {
+					D.rounds.get(selectedRound - 1) ? (selectedRound = selectedRound - 1) : null;
+				}}
+				class={D.rounds.get(selectedRound - 1) ? 'visible' : 'invisible'}
+			>
+				<AnglesRight direction="left" />
+			</button>
 			<span class="w-fit text-lg">ROUND {round}</span>
+			<button
+				on:click={() => {
+					D.rounds.get(selectedRound + 1) ? (selectedRound = selectedRound + 1) : null;
+				}}
+				class={D.rounds.get(selectedRound + 1) ? 'visible' : 'invisible'}
+			>
+				<AnglesRight direction="right" />
+			</button>
 		</div>
-		<div class="">
-			{#each roundHold as m}
-				<Tinygame {m} />
+		<div class="flex flex-col items-center games">
+			{#each roundHold as m (m)}
+				<div in:fly={{ duration: 200, y: 50 }}>
+					<Tinygame {m} />
+				</div>
 			{/each}
 		</div>
 	</div>
@@ -176,8 +201,9 @@
 		box-shadow: 0 0 15px black;
 	}
 	.leftside {
-		grid-template-rows: 65px auto;
+		grid-template-rows: 65px;
 		box-shadow: 2px 0px 4px -4px black;
+		max-height: 336px;
 	}
 	table {
 		text-align: left;
@@ -204,26 +230,31 @@
 	}
 	.titlecard {
 		display: grid;
-		grid-template-areas: 'title date' 'description description';
-		grid-template-columns: auto 55px;
+		grid-template-areas: 'title' 'date';
+		grid-template-columns: auto;
+		align-items: center;
 	}
-	.text-hack {
+	/* .text-hack {
 		grid-area: description;
 		text-overflow: ellipsis;
 		overflow: hidden;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
-	}
+	} */
 	.text-title {
 		grid-area: title;
 	}
 	.text-date {
 		grid-area: date;
-		text-align: center;
+		text-align: left;
 	}
 	.rightside {
 		grid-template-rows: 50px auto;
 		padding: 7px;
+	}
+	.games {
+		padding-bottom: 12px;
+		max-height: 250px;
 	}
 </style>
