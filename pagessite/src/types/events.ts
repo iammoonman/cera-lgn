@@ -3,12 +3,12 @@ export type LimitedEvent = {
     tag: 'ptm' | 'omn' | 'dps' | '';
     date: Date;
     title: string;
+    description?: string;
 }
 
 export type Draft = {
     scores: Score[];
     rounds: Map<number, Round>;
-    description?: string;
 } & LimitedEvent;
 
 export type Score = {
