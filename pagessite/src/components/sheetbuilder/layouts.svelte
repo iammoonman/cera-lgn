@@ -3,18 +3,54 @@
 	// $V3Store;
 	// Small card
 	// For each slot, show how many cards are taken
-    $: option = 0;
+	const f = (d: {
+		slots: Map<string, number>;
+		drops: Map<
+			string,
+			{
+				key: string;
+				count: number;
+				freq: number;
+			}[]
+		>;
+		freq: number;
+	}) => {
+		let out: string[][] = [];
+		// recursive func that calls next option, then next slot
+		const recur = (sk: string[], long: string[]) => {
+			// pop from sk
+			const key = sk.at(-1);
+			if (key === undefined) {
+				// if sk === [], push to out
+				out.push(long);
+				return;
+			}
+			const slot = $V3Store.slots.get(key);
+			// for options in slot
+			slot?.options.forEach((x) => {
+				const temp = long;
+                const hold: string[] = [];
+				// append recur to long
+				[...x.struct].forEach(([yk, yv]) => {
+					[...Array(yv)].forEach(() => hold.push(yk));
+				});
+				recur(sk.slice(0, -1), temp.concat(hold));
+			});
+		};
+		recur([...d.slots.keys()], []);
+		return out;
+	};
 </script>
 
-<div class="flex flex-row gap-1">
-	{#each [...$V3Store.slots] as [k, v]}
-		{#if v.options.length > 0}
-			{#each [...v.options[option].struct] as [sk, sv]}
-				{#each { length: sv } as _}
-					<div class="card">&nbsp;</div>
+<div class="flex flex-col gap-1 h-max">
+	{#each [...$V3Store.distros] as d}
+		{#each f(d) as r}
+			<div class="flex flex-row gap-1">
+				{#each r as c}
+					<div class="card" style={`background-color: #${c};`} />
 				{/each}
-			{/each}
-		{/if}
+			</div>
+		{/each}
 	{/each}
 </div>
 

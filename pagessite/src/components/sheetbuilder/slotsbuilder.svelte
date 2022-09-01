@@ -2,6 +2,7 @@
 	import Switch from '@smui/switch';
 	import Button from '../utilities/button.svelte';
 	import Numberinput from '../utilities/numberinput.svelte';
+	import { random } from '../utilities/randomhexcode';
 	let slots: Map<
 		string,
 		{
@@ -19,10 +20,10 @@
 	});
 	let slotkey = '';
 	let sheetkey = '';
-	V3Selection.subscribe(s => {
+	V3Selection.subscribe((s) => {
 		slotkey = s.slotkey;
 		sheetkey = s.sheetkey;
-	})
+	});
 </script>
 
 <section id="slots" class="rounded-xl p-1 grid gap-1">
@@ -43,7 +44,7 @@
 								slots: newSlots
 							};
 						});
-						validateStore()
+						validateStore();
 					}}
 				/>
 			</div>
@@ -85,7 +86,7 @@
 									slots: newSlots
 								};
 							});
-							validateStore()
+							validateStore();
 						}}
 					/>
 				</div>
@@ -108,7 +109,7 @@
 									slots: newSlots
 								};
 							});
-							validateStore()
+							validateStore();
 						}}
 					/>
 				</div>
@@ -140,7 +141,7 @@
 													slots: newSlots
 												};
 											});
-											validateStore()
+											validateStore();
 										}}
 									/>
 								</div>
@@ -166,7 +167,7 @@
 													slots: newSlots
 												};
 											});
-											validateStore()
+											validateStore();
 										}}
 									/>
 									<Button
@@ -183,7 +184,7 @@
 													slots: newSlots
 												};
 											});
-											validateStore()
+											validateStore();
 										}}
 									/>
 								</div>
@@ -193,7 +194,7 @@
 									<div
 										class="rounded-xl p-1 flex flex-row gap-1 justify-around items-center w-full"
 									>
-										<span class="h-min text-center w-28">KEY: {st}</span>
+										<span class="h-min text-center w-28 rounded-sm" style={`box-shadow: 0 0 3px 3px #${st};`}>KEY: {st}</span>
 										<span class="h-min text-center">
 											NUM:
 											<Numberinput
@@ -215,7 +216,7 @@
 															slots: newSlots
 														};
 													});
-													validateStore()
+													validateStore();
 												}}
 											/>
 										</span>
@@ -236,7 +237,7 @@
 														slots: newSlots
 													};
 												});
-												validateStore()
+												validateStore();
 											}}
 										/>
 									</div>
@@ -255,7 +256,8 @@
 						on:click={() => {
 							const oldStuff = s_value;
 							const newSlots = slots;
-							oldStuff.sheets.set(Math.random().toString(36).slice(2, 7), []);
+							const r = random();
+							oldStuff.sheets.set(r, []);
 							newSlots.set(s_key, oldStuff);
 							V3Store.update((oldstore) => {
 								return {
@@ -263,19 +265,23 @@
 									slots: newSlots
 								};
 							});
-							validateStore()
+							validateStore();
 						}}
 					/>
 				</div>
 				<div class="rounded-xl p-1 grid gap-1">
 					{#each [...s_value.sheets] as [sh, sh_v]}
 						<div class="rounded-xl flex flex-row justify-between p-1 items-center gap-1">
-							<span class="h-min text-center mr-auto">KEY: {sh}</span>
-							<Button text={'Edit'} bgColorClass={'bg-blue-400'} on:click={() => {
-								V3Selection.update(old => {
-									return {slotkey: s_key, sheetkey: sh};
-								})
-							}} />
+							<span class="h-min w-28 text-center mr-auto rounded-sm" style={`box-shadow: 0 0 3px 3px #${sh};`}>KEY: {sh}</span>
+							<Button
+								text={'Edit'}
+								bgColorClass={'bg-blue-400'}
+								on:click={() => {
+									V3Selection.update((old) => {
+										return { slotkey: s_key, sheetkey: sh };
+									});
+								}}
+							/>
 							<Button
 								text={'Delete'}
 								bgColorClass={'bg-red-400'}
@@ -290,7 +296,7 @@
 											slots: newSlots
 										};
 									});
-									validateStore()
+									validateStore();
 								}}
 							/>
 						</div>
@@ -304,15 +310,13 @@
 		text={'ADD NEW SLOT'}
 		on:click={() => {
 			V3Store.update((oldstore) => {
+				const r = random();
 				return {
 					...oldstore,
-					slots: new Map([
-						...oldstore.slots,
-						[Math.random().toString(36).slice(2, 7), { flags: [], options: [], sheets: new Map() }]
-					])
+					slots: new Map([...oldstore.slots, [r, { flags: [], options: [], sheets: new Map() }]])
 				};
 			});
-			validateStore()
+			validateStore();
 		}}
 	/>
 </section>

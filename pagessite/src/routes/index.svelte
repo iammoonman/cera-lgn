@@ -22,7 +22,6 @@
 		<div class="h-full flex flex-col">SIDEBAR ROWS</div> -->
 	</div>
 	<div>
-		<Layouts />
 		<Sheetbuildercomponent />
 	</div>
 	<!-- <div class="h-full mt-2 grid gap-4 booty">
