@@ -238,6 +238,7 @@
 	#textarea {
 		height: 100%;
 		font-size: 0.8em;
+		max-width: 400px;
 	}
 	#draggercomponent {
 		width: fit-content;

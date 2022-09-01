@@ -29,7 +29,7 @@
 <section id="slots" class="rounded-xl p-1 grid gap-1">
 	SLOTS
 	{#each [...slots] as [s_key, s_value]}
-		<div class="rounded-xl p-1 grid grid-cols-1 gap-1">
+		<div class="rounded-xl p-1 grid grid-cols-1 gap-1 shadow-xl">
 			<div class="rounded-xl p-1 flex flex-row justify-between">
 				<span>SLOT: {s_key}</span>
 				<Button
@@ -116,7 +116,7 @@
 				<div class="rounded-xl p-1 grid gap-1">
 					{#each s_value.options as o}
 						<div
-							class="rounded-xl p-1 grid grid-cols-[180px_minmax(100px,_1fr)] gap-1 items-center"
+							class="shadow-xl rounded-xl p-1 grid grid-cols-[180px_minmax(100px,_1fr)] gap-1 items-center"
 						>
 							<div class="rounded-xl p-1 grid grid-cols-1 gap-1 items-center h-min">
 								<div class="grid grid-cols-2 px-3 items-center gap-1 h-min">
