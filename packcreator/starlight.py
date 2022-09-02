@@ -1,16 +1,17 @@
 import json
 import discord
 import pickle
-from . import tts_output
+
+from packcreator import p_caller
 import io
 from discord.ext import commands
+from packcreator import p1p1
 
 set_choices = [
     ["Fifth Edition", "5ed"],
     ["Aether Revolt", "aer"],
     ["Adventures in the Forgotten Realms", "afr"],
     ["Amonkhet", "akh"],
-    # ["Battlebond", "bbd"], # Not ready. V3 candidate.
     ["Battle for Zendikar", "bfz"],
     ["Born of the Gods", "bng"],
     ["Dragon's Maze", "dgm"],
@@ -63,7 +64,12 @@ set_choices = [
     ["Zendikar Rising", "znr"],
 ]
 
-set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"], ["Exodus", "exo"], ["Pauper Masters", "ppm"]]
+set_choices_v3 = [
+    ["Adventures in the Forgotten Realms", "afr"],
+    ["Pauper Masters", "ppm"],
+    ["Urza's Saga", "usg"],
+    ["Dominaria", "dom"],
+]
 
 
 with open("guild.pickle", "rb") as f:
@@ -112,23 +118,17 @@ class Starlight(commands.Cog):
         type=bool,
         default=False,
     )
-    async def pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
-        await ctx.defer(ephemeral=True)
-        raw = tts_output.get_packs(set, num, lands)
-        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
-        await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
-
-    @commands.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
-    @discord.default_permissions(manage_roles=True)
-    @discord.option(name="cc_id", description="CubeCobra ID.")
-    async def cube(self, ctx: discord.ApplicationContext, cc_id: str):
+    async def v2_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
         try:
-            raw = tts_output.get_cube(cc_id)
+            raw = p_caller.get_packs(set, num, lands)
         except:
-            return await ctx.respond("Something went wrong. Contact Moon.", ephemeral=True)
-        cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{self.getSeqID()}.json")
-        await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
+        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
+        await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
     async def get_sets_v3(ctx: discord.AutocompleteContext):
         return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
@@ -156,11 +156,83 @@ class Starlight(commands.Cog):
         type=bool,
         default=False,
     )
-    async def pack_v3(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
+    async def v3_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        raw = tts_output.get_packs_v3(set, num, lands)
+        try:
+            raw = p_caller.get_packs_v3(set, num, lands)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
+
+    @commands.slash_command(guild_ids=[guild], description="Load a pack image for a Pack 1, Pick 1.")
+    @discord.default_permissions(manage_roles=True)
+    @discord.option(
+        name="set",
+        description="Choose the set.",
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10],
+        autocomplete=get_sets_v3,
+        type=str,
+    )
+    async def v3_p1p1(self, ctx: discord.ApplicationContext, set: str):
+        await ctx.defer()
+        real_name = [s[0] for s in set_choices_v3 if s[1] == set][0]
+        try:
+            raw = p1p1.make_p1p1(set)
+            f_o = discord.File(raw, f"p1p1_{set}.png")
+            await ctx.respond(content=f"Pack 1, Pick 1 for {real_name}", file=f_o)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+            )
+        return
+
+    @commands.slash_command(guild_ids=[guild], description="Load a V3 set file and make packs.")
+    @discord.default_permissions(manage_roles=True)
+    @discord.option(name="v3", description="A V3 JSON file.", type=discord.Attachment)
+    @discord.option(
+        name="num",
+        description="Number of packs.",
+        min_value=1,
+        max_value=72,
+        default=36,
+        type=int,
+    )
+    @discord.option(
+        name="lands",
+        description="Include a basic land pack from this set?",
+        type=bool,
+        default=False,
+    )
+    async def v3_upload(self, ctx: discord.ApplicationContext, v3: discord.Attachment, num: int, lands: bool):
+        await ctx.defer(ephemeral=True)
+        f = io.BytesIO(await v3.read())
+        # Verify that v3 is actually in v3 format
+        # Pass into function
+        try:
+            raw = p_caller.get_packs_setfile(f, num, lands)
+        except json.JSONDecodeError as err:
+            return await ctx.respond(
+                f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True
+            )
+        except KeyError as err:
+            return await ctx.respond(
+                f"The file you submitted wasn't properly formed. It is missing the {err} key. If you don't understand what that means, contact Moon.",
+                ephemeral=True,
+            )
+        except:
+            return await ctx.respond(
+                "Something went wrong with your file as it was processing.\nCheck to ensure that all required fields have good values and that the document is valid JSON.\nIf that all checks out, contact Moon.",
+                ephemeral=True,
+            )
+        # Return errors
+        # Return packs
+        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{'your custom set'}_{self.getSeqID()}.json")
+        await ctx.respond(content=f"Here are your {num} packs of {'your custom set'}", file=packs, ephemeral=True)
+        return
 
 
 def setup(bot):
