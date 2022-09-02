@@ -29,29 +29,30 @@ class Draft:
         """Calculates the final scores of the draft and returns a JSON."""
         self.calculate()
         draftobj = {
-            "draftID": self.draftID,
+            "id": self.draftID,
             "tag": self.tag,
             "date": self.date,
             "title": self.title,
             "rounds": [
                 {
-                    "roundNUM": i.title,
-                    "complete": i.completed,
+                    "title": i.title,
                     "matches": [
                         {
-                            "players": [u.player_id for u in q.players],
-                            "winners": q.gwinners,
-                            "drops": q.drops,
+                            "p_ids": [u.player_id for u in q.players],
+                            "games": {i: (q.players[x] if x is not None else "TIE") for i, x in enumerate(q.gwinners)},
+                            "drops": ([q.players[0].player_id] if q.drops[0] else [])
+                            + ([q.players[1].player_id] if q.drops[1] else []),
+                            "bye": False,
                         }
                         for q in i.matches
                     ],
                 }
                 for i in self.rounds
             ],
-            "players": [
+            "scores": [
                 {
-                    "playerID": i.player_id,
-                    "score": i.score,
+                    "id": i.player_id,
+                    "points": i.score,
                     "gwp": f"{i.gwp:.2f}",
                     "ogp": f"{i.ogp:.2f}",
                     "omp": f"{i.omp:.2f}",

@@ -86,16 +86,20 @@ export function old_to_new(a: oldtype): Draft {
                 matches: r.matches.map((m) => {
                     const newGames: Map<number, string> = new Map([])
                     // m.scores = [0, 2] | [2, 0] | [1, 2] | [2, 1]
+                    // @ts-ignore
                     if (m.scores == [0, 2]) {
                         newGames.set(0, m.players[1])
                         newGames.set(1, m.players[1])
+                        // @ts-ignore
                     } else if (m.scores == [1, 2]) {
                         newGames.set(0, m.players[0])
                         newGames.set(1, m.players[1])
                         newGames.set(2, m.players[1])
+                        // @ts-ignore
                     } else if (m.scores == [2, 0]) {
                         newGames.set(0, m.players[0])
                         newGames.set(1, m.players[0])
+                        // @ts-ignore
                     } else if (m.scores == [2, 1]) {
                         newGames.set(0, m.players[1])
                         newGames.set(1, m.players[0])
