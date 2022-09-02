@@ -114,6 +114,9 @@
 				set: d.set
 			});
 		});
+		if (cardlist.length === 0) {
+			return
+		}
 		const resp = await fetch(`https://api.scryfall.com/cards/collection`, {
 			method: 'POST',
 			mode: 'cors',
@@ -235,6 +238,7 @@
 	#textarea {
 		height: 100%;
 		font-size: 0.8em;
+		max-width: 400px;
 	}
 	#draggercomponent {
 		width: fit-content;

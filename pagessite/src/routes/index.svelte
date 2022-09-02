@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Layouts from '../components/sheetbuilder/layouts.svelte';
+
 	import Sheetbuildercomponent from '../components/sheetbuilder/sheetbuildercomponent.svelte';
 	const applyFilter = <T, X>(list: Array<T>, filter: (x: T) => boolean) => {
 		return list.filter((x) => filter(x));
@@ -19,7 +21,9 @@
 		<!-- <div>SIDEBAR HEADER</div>
 		<div class="h-full flex flex-col">SIDEBAR ROWS</div> -->
 	</div>
-	<Sheetbuildercomponent />
+	<div>
+		<Sheetbuildercomponent />
+	</div>
 	<!-- <div class="h-full mt-2 grid gap-4 booty">
 		
 	</div> -->

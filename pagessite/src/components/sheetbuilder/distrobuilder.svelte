@@ -76,7 +76,7 @@
 <section id="distros" class="rounded-xl p-1 grid gap-1">
 	DISTROS
 	{#each $V3Store.distros as distro}
-		<div class="rounded-xl p-1 flex flex-col gap-1">
+		<div class="rounded-xl p-1 flex flex-col gap-1 shadow-xl">
 			<div class="rounded-xl p-1 flex flex-row justify-between">
 				<span>DISTRO</span>
 				<Button
