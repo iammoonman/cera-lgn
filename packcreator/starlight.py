@@ -69,7 +69,8 @@ set_choices_v3 = [
     ["Pauper Masters", "ppm"],
     ["Urza's Saga", "usg"],
     ["Dominaria", "dom"],
-    ["Exodus", "exo"]
+    ["Exodus", "exo"],
+    ["Urza's Legacy", "ulg"]
 ]
 
 
