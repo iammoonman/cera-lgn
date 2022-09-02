@@ -7,6 +7,7 @@ import datetime
 
 taglist = {
     "ptm": "Prime Time With Moon",
+    "dps2": "Draft Progression Series 2"
 }
 bslash = "\n"
 
@@ -20,8 +21,8 @@ class Glintwing(commands.Cog):
         self.drafts: dict[str, Draft] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
-        self.starting_em = lambda d: discord.Embed(
-            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}ENTRY",
+        self.starting_em = lambda draft: discord.Embed(
+            title=f"{draft.name} | {taglist[draft.tag] + ' | ' if draft.tag != '' else ''}ENTRY",
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
@@ -30,8 +31,8 @@ class Glintwing(commands.Cog):
             ],
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
         )
-        self.ig_em = lambda d, r: discord.Embed(
-            title=f"{d.name} | {taglist[d.tag] + ' | ' if d.tag != '' else ''}Round: {(w:=[r for r in d.rounds if not r.completed][0]).title}",
+        self.ig_em = lambda draft, timekeepstamp: discord.Embed(
+            title=f"{draft.name} | {taglist[draft.tag] + ' | ' if draft.tag != '' else ''}Round: {(w:=[r for r in draft.rounds if not r.completed][0]).title}",
             fields=[
                 discord.EmbedField(
                     inline=True,
@@ -42,12 +43,12 @@ class Glintwing(commands.Cog):
                     + (f"{match.players[0]} has dropped.{bslash}" if match.drops[0] else "")
                     + (f"{match.players[1]} has dropped.{bslash}" if match.drops[1] else ""),
                 )
-                for match in current_round.matches
+                for match in w.matches
             ]
             + [
                 discord.EmbedField(
                     name="ROUND TIMER",
-                    value=f"The round ends <t:{int(round_timestamp.timestamp())}:R>.",
+                    value=f"The round ends <t:{int(timekeepstamp.timestamp())}:R>.",
                 )
             ],
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
@@ -157,21 +158,22 @@ class StartingView(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        new_view = IG_View(self.bot)
-        self.bot.drafts[new_view.id] = self.bot.drafts[self.id]
-        self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
-        print(self.id, new_view.id, "BEGIN")
-        self.bot.drafts[new_view.id].do_pairings()
-        self.bot.timekeep[new_view.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
-        await ctx.message.edit(
-            embeds=[
-                self.bot.ig_em(
-                    self.bot.drafts[new_view.id],
-                    self.bot.timekeep[new_view.id],
-                )
-            ],
-            view=new_view,
-        )
+        if self.bot.drafts[self.id].host == int(ctx.user.id):
+            new_view = IG_View(self.bot)
+            self.bot.drafts[new_view.id] = self.bot.drafts[self.id]
+            self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
+            print(self.id, new_view.id, "BEGIN")
+            self.bot.drafts[new_view.id].do_pairings()
+            self.bot.timekeep[new_view.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
+            await ctx.message.edit(
+                embeds=[
+                    self.bot.ig_em(
+                        self.bot.drafts[new_view.id],
+                        self.bot.timekeep[new_view.id],
+                    )
+                ],
+                view=new_view,
+            )
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
