@@ -57,7 +57,7 @@
 	},
 	"flag_data": {
 		"duplicate_control": {
-			"slots_counts": { "r": {"count": 44, "max_length": 1} }
+			"slots_counts": { "r": {"per_pack_count": 1, "max_sheet_length": 44} }
 		}
 	}
 }
