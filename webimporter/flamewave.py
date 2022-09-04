@@ -15,6 +15,18 @@ class Flamewave(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def getSeqID(self):
+        try:
+            with open("counter.pickle", "rb") as f:
+                e = pickle.load(f)
+        except:
+            with open("counter.pickle", "wb") as f:
+                pickle.dump(0, f)
+            e = 0
+        with open("counter.pickle", "wb") as f:
+            pickle.dump(e + 1, f)
+        return str(e + 1)
+
     @commands.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
     @discord.default_permissions(manage_roles=True)
     @discord.option(name="cc_id", description="CubeCobra ID.")

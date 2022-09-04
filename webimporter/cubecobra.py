@@ -1,4 +1,4 @@
-from exporttemplates import tts_output
+from exporttemplates import tts_output, tts_import
 import requests
 import random
 import csv
@@ -22,7 +22,7 @@ def get_cube(cc_id, p_len):
         templist.append([row["Collector Number"], row["Set"]])
         # if row["Finish"] == "Foil":
         #     foil_indexes += [len(templist)]
-    cardinfo = tts_output.ijson_collection(templist)
+    cardinfo = tts_import.ijson_collection(templist)
     cubelist = []
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
     for row in reader:

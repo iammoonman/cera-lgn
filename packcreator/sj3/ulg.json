@@ -17,9 +17,7 @@
 		"c": {
 			"flags": [],
 			"options": [
-				{ "struct": {"a": 2, "b": 5}, "freq": 1 }, 
-				{ "struct": {"a": 1, "b": 6}, "freq": 1 }, 
-				{ "struct": {"a": 2, "b": 6}, "freq": 1 }
+				{ "struct": {"a": 6, "b": 5}, "freq": 1 }
 			],
 			"sheets": {
 				"a": [
@@ -69,7 +67,7 @@
 			"flags": ["foil"],
 			"options": [
 				{ "struct": {"c": 1}, "freq": 0.5 }, { "struct": {"u": 1}, "freq": 0.35 }, 
-				{ "struct": {"rm": 1}, "freq": 0.15 }
+				{ "struct": {"r": 1}, "freq": 0.15 }
 			],
 			"sheets": {
 				"c": [
