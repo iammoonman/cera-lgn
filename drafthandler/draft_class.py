@@ -327,7 +327,7 @@ class Draft:
         for player in self.players:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
-            print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
+            # print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
         for player in self.players:
             player.ogp = sum(h := [p.gwp for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
             player.omp = sum(j := [p.mwp for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
