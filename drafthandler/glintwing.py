@@ -295,6 +295,8 @@ class IG_View(discord.ui.View):
                     )
                 else:
                     print(json.dumps(self.bot.drafts[self.id].tojson()))
+                    with open(f"{self.id}.json", "w") as f:
+                        json.dump(self.bot.drafts[self.id].tojson(), f, ensure_ascii=False, indent=4)
                     await ctx.message.edit(embeds=[self.bot.end_em(self.bot.drafts[self.id])], view=None)
             else:
                 await ctx.message.edit(

@@ -39,7 +39,10 @@ class Draft:
                     "matches": [
                         {
                             "p_ids": [u.player_id for u in q.players],
-                            "games": {i: (q.players[x] if x is not None else "TIE") for i, x in enumerate(q.gwinners)},
+                            "games": {
+                                f"{i}": (q.players[x].player_id if x is not None else "TIE")
+                                for i, x in enumerate(q.gwinners)
+                            },
                             "drops": ([q.players[0].player_id] if q.drops[0] else [])
                             + ([q.players[1].player_id] if q.drops[1] else []),
                             "bye": False,
