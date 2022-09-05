@@ -70,8 +70,7 @@ set_choices_v3 = [
     ["Urza's Saga", "usg"],
     ["Dominaria", "dom"],
     ["Exodus", "exo"],
-    ["Urza's Legacy", "ulg"],
-    ["Test", "tst"],
+    ["Urza's Legacy", "ulg"]
 ]
 
 
