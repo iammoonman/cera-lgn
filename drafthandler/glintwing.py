@@ -162,6 +162,7 @@ class StartingView(discord.ui.View):
             self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
             self.bot.drafts[new_view.id].do_pairings()
             self.bot.timekeep[new_view.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
+            new_view.after_load()
             await ctx.message.edit(
                 embeds=[
                     self.bot.ig_em(
@@ -178,6 +179,8 @@ class IG_View(discord.ui.View):
     def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__(timeout=None)
+
+    def after_load(self):
         for p in self.bot.drafts[self.id].players:
             self.children[3].append_option(discord.SelectOption(label=f"{p.name}", value=f"{p.player_id}"))
 
