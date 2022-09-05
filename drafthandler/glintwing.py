@@ -95,7 +95,7 @@ class Glintwing(commands.Cog):
     ):
         msg = await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
-        print("DRAFT", new_view.id, "BY", ctx.user.id)
+        # print("DRAFT", new_view.id, "BY", ctx.user.id)
         self.drafts[new_view.id] = Draft(
             draftID=new_view.id,
             date=datetime.datetime.today().strftime("%Y-%m-%d"),
@@ -122,7 +122,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("JOIN", self.id, "BY", ctx.user.id)
+        # print("JOIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -138,7 +138,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("DROP", self.id, "BY", ctx.user.id)
+        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -151,13 +151,13 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("BEGIN", self.id, "BY", ctx.user.id)
+        # print("BEGIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id].host == int(ctx.user.id):
             new_view = IG_View(self.bot)
-            print(self.id, new_view.id, "BEGIN")
+            # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = self.bot.drafts[self.id]
             self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
             self.bot.drafts[new_view.id].do_pairings()
@@ -240,7 +240,7 @@ class IG_View(discord.ui.View):
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
-        print("REPORT", self.id, "BY", ctx.user.id)
+        # print("REPORT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -258,7 +258,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("DROP", self.id, "BY", ctx.user.id)
+        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -276,7 +276,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("NEXT", self.id, "BY", ctx.user.id)
+        # print("NEXT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -313,7 +313,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
-        print("TOGGLE_DROP", self.id, "BY", ctx.user.id)
+        # print("TOGGLE_DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -332,7 +332,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("TRIM", self.id, "BY", ctx.user.id)
+        # print("TRIM", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
