@@ -229,7 +229,7 @@ def plus_rarity(rarity):
     elif rarity == "bonus":
         # 9c202b
         return "[9c202b]「B」[-]"
-    return
+    return ""
 
 
 def tts_parse(o):

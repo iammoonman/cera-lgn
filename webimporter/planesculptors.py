@@ -1,6 +1,8 @@
 import requests
 import re
 
+from exporttemplates.tts_import import tts_parse
+
 legal_sets = {
     "dms": "dreamscape",
     "ldo": "lorado",
@@ -13,7 +15,7 @@ legal_sets = {
 
 def decode_rtext(text: str):
     newtext = re.sub("\[(?=.\])", "{", text)
-    newtext = re.sub("(?<=\[.)\]", "}", newtext)
+    newtext = re.sub("(?<=\{.)\]", "}", newtext)
     return (
         newtext.replace("&#8217;", "'")
         .replace("<br>", "")
@@ -40,30 +42,33 @@ def get_ps_set(setcode):
     shapeconvert = {"normal": "normal", "double": "transform", "split": "split"}
     out = []
     for k, v in cards.items():
+        if v["rarity"] == "T":
+            continue
         face_1 = {
             "name": v["name"],
-            "cmc": v["cmc"],
+            "cmc": int(v["cmc"]),
             "type_line": v["types"],
             "power": v["power"] if v["power"] is not None else 0,
             "toughness": v["toughness"] if v["toughness"] is not None else 0,
             "oracle_text": decode_rtext(v["rulesText"]) if v["rulesText"] is not None else "",
             "mana_cost": v["manaCost"].replace("[", "{").replace("]", "}") if v["manaCost"] is not None else "",
+            "loyalty": "",
         }
         face_2 = {
             "name": v["name2"],
-            "cmc": v["cmc"],
+            "cmc": int(v["cmc"]),
             "type_line": v["types2"],
             "power": v["power2"] if v["power2"] is not None else 0,
             "toughness": v["toughness2"] if v["toughness2"] is not None else 0,
             "oracle_text": decode_rtext(v["rulesText2"]) if v["rulesText2"] is not None else "",
             "mana_cost": v["manaCost2"].replace("[", "{").replace("]", "}") if v["manaCost2"] is not None else "",
+            "loyalty": "",
         }
         sc_obj = {
             "oracle_id": "",
             "layout": shapeconvert[v["shape"]],
             "set": setcode,
             "collector_number": v["cardNumber"],
-            "card_faces": [face_1, face_2] if v["shape"] == "double" else [],
             "rarity": v["rarity"].lower(),
             "image_uris": {"png": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
         }
@@ -73,5 +78,28 @@ def get_ps_set(setcode):
             sc_obj["type_line"] = face_1["type_line"] + "//" + face_2["type_line"]
             sc_obj["mana_cost"] = face_1["mana_cost"] + "//" + face_2["mana_cost"]
             sc_obj["card_faces"] = [face_1, face_2]
-        out.append(sc_obj)
+        if v["shape"] == "double":
+            sc_obj["name"] = face_1["name"] + "//" + face_2["name"]
+            sc_obj["type_line"] = face_1["type_line"] + "//" + face_2["type_line"]
+            sc_obj["mana_cost"] = face_1["mana_cost"] + "//" + face_2["mana_cost"]
+            sc_obj["card_faces"] = [face_1, face_2]
+        out.append(tts_parse(sc_obj))
     return out
+
+
+def ps_collection(cardlist, out_dict=False):
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    out = {}
+    for cd in legal_sets:
+        if cd in [x[1] for x in cardlist]:
+            s = get_ps_set(cd)
+            if s:
+                blob_json += [x for x in s if [x["collector_number"], x["set"]] in cardlist]
+                n = {
+                    f"{x['collector_number']}{x['set']}": x for x in s if [x["collector_number"], x["set"]] in cardlist
+                }
+                out = {**out, **n}
+    if out_dict:
+        return out
+    return blob_json
