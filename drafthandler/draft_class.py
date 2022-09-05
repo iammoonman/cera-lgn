@@ -39,7 +39,10 @@ class Draft:
                     "matches": [
                         {
                             "p_ids": [u.player_id for u in q.players],
-                            "games": {i: (q.players[x] if x is not None else "TIE") for i, x in enumerate(q.gwinners)},
+                            "games": {
+                                f"{i}": (q.players[x].player_id if x is not None else "TIE")
+                                for i, x in enumerate(q.gwinners)
+                            },
                             "drops": ([q.players[0].player_id] if q.drops[0] else [])
                             + ([q.players[1].player_id] if q.drops[1] else []),
                             "bye": False,
@@ -327,7 +330,7 @@ class Draft:
         for player in self.players:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
-            print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
+            # print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
         for player in self.players:
             player.ogp = sum(h := [p.gwp for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
             player.omp = sum(j := [p.mwp for p in player.opponents]) / (len(j) if len(j) > 0 else 1)

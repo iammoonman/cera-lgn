@@ -5,10 +5,7 @@ from .draft_class import Draft
 import pickle
 import datetime
 
-taglist = {
-    "ptm": "Prime Time With Moon",
-    "dps2": "Draft Progression Series 2"
-}
+taglist = {"ptm": "Prime Time With Moon", "dp2": "Draft Progression Series 2"}
 bslash = "\n"
 
 with open("guild.pickle", "rb") as f:
@@ -22,7 +19,7 @@ class Glintwing(commands.Cog):
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
         self.starting_em = lambda draft: discord.Embed(
-            title=f"{draft.name} | {taglist[draft.tag] + ' | ' if draft.tag != '' else ''}ENTRY",
+            title=f"{draft.title} | ENTRY",
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
@@ -32,7 +29,7 @@ class Glintwing(commands.Cog):
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
         )
         self.ig_em = lambda draft, timekeepstamp: discord.Embed(
-            title=f"{draft.name} | {taglist[draft.tag] + ' | ' if draft.tag != '' else ''}Round: {(w:=[r for r in draft.rounds if not r.completed][0]).title}",
+            title=f"{draft.title} | Round: {(w:=[r for r in draft.rounds if not r.completed][0]).title}",
             fields=[
                 discord.EmbedField(
                     inline=True,
@@ -98,7 +95,7 @@ class Glintwing(commands.Cog):
     ):
         msg = await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
-        print("DRAFT", new_view.id, "BY", ctx.user.id)
+        # print("DRAFT", new_view.id, "BY", ctx.user.id)
         self.drafts[new_view.id] = Draft(
             draftID=new_view.id,
             date=datetime.datetime.today().strftime("%Y-%m-%d"),
@@ -125,7 +122,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("JOIN", self.id, "BY", ctx.user.id)
+        # print("JOIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -141,7 +138,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("DROP", self.id, "BY", ctx.user.id)
+        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -154,17 +151,18 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("BEGIN 1", self.id, "BY", ctx.user.id)
+        # print("BEGIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id].host == int(ctx.user.id):
             new_view = IG_View(self.bot)
+            # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = self.bot.drafts[self.id]
             self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
-            print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id].do_pairings()
             self.bot.timekeep[new_view.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
+            new_view.after_load()
             await ctx.message.edit(
                 embeds=[
                     self.bot.ig_em(
@@ -181,13 +179,10 @@ class IG_View(discord.ui.View):
     def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__(timeout=None)
-        dyn_sel = discord.ui.Select(
-            placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2
-        )
-        dyn_sel.callback = self.toggle_drop
+
+    def after_load(self):
         for p in self.bot.drafts[self.id].players:
-            dyn_sel.add_option(label=f"{p.name}", value=p.player_id)
-        self.add_item(dyn_sel)
+            self.children[3].append_option(discord.SelectOption(label=f"{p.name}", value=f"{p.player_id}"))
 
     @discord.ui.select(
         placeholder="Report the games you won.",
@@ -245,7 +240,7 @@ class IG_View(discord.ui.View):
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
-        print("REPORT", self.id, "BY", ctx.user.id)
+        # print("REPORT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -263,7 +258,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("DROP", self.id, "BY", ctx.user.id)
+        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -281,7 +276,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        print("NEXT", self.id, "BY", ctx.user.id)
+        # print("NEXT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -300,6 +295,8 @@ class IG_View(discord.ui.View):
                     )
                 else:
                     print(json.dumps(self.bot.drafts[self.id].tojson()))
+                    with open(f"{self.id}.json", "w") as f:
+                        json.dump(self.bot.drafts[self.id].tojson(), f, ensure_ascii=False, indent=4)
                     await ctx.message.edit(embeds=[self.bot.end_em(self.bot.drafts[self.id])], view=None)
             else:
                 await ctx.message.edit(
@@ -314,8 +311,9 @@ class IG_View(discord.ui.View):
                 )
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
+    @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
-        print("TOGGLE_DROP", self.id, "BY", ctx.user.id)
+        # print("TOGGLE_DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
@@ -330,6 +328,16 @@ class IG_View(discord.ui.View):
             ],
             view=self,
         )
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+
+    @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
+    async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        # print("TRIM", self.id, "BY", ctx.user.id)
+        if self.id not in self.bot.drafts.keys():
+            # await ctx.delete_original_message()
+            return
+        if self.bot.drafts[self.id].host == int(ctx.user.id):
+            self.bot.drafts[self.id].max_rounds = len(self.bot.drafts[self.id].rounds)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
