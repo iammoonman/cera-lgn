@@ -2,6 +2,7 @@ import json
 
 from exporttemplates import tts_output, tts_import
 from packcreator import p_creator, point_slicer
+from webimporter import planesculptors
 
 
 def get_packs(setcode, num_packs, land_pack=False):
@@ -74,6 +75,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     for p in all_packs:
         all_cn_sets += p[0]
     set_info = tts_import.ijson_collection(all_cn_sets)
+    set_info = planesculptors.ps_collection(all_cn_sets)
     for p in all_packs:
         # print([a['name'] for a in set_info])
         # print(len(raw_cn_cards))
@@ -115,6 +117,7 @@ def get_p1p1_v3(setcode):
     # Log the seed
     # log["seeds"].append(seed)
     set_info = tts_import.ijson_collection(raw_cn_cards)
+    set_info = planesculptors.ps_collection(raw_cn_cards)
     new_colle = []
     for crd in raw_cn_cards:
         new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
@@ -151,6 +154,7 @@ def get_packs_setfile(setfile, num_packs, land_pack=False):
     for p in all_packs:
         all_cn_sets += p[0]
     set_info = tts_import.ijson_collection(all_cn_sets)
+    set_info = planesculptors.ps_collection(all_cn_sets)
     for p in all_packs:
         # print([a['name'] for a in set_info])
         # print(len(raw_cn_cards))
