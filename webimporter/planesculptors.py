@@ -1,29 +1,25 @@
 import requests
 import re
+import html
 
 from exporttemplates.tts_import import tts_parse
 
 legal_sets = {
-    "dms": "dreamscape",
-    "ldo": "lorado",
-    "ank": "ankheret",
-    "gsc": "ghariv-the-sacred-city",
-    "blr": "blood-like-rivers",
-    "ksv": "karslav",
+    "c_dms": "dreamscape",
+    "c_ldo": "lorado",
+    "c_ank": "ankheret",
+    "c_gsc": "ghariv-the-sacred-city",
+    "c_blr": "blood-like-rivers",
+    "c_ksv": "karslav",
+    "c_alr": "alara",
+    "c_hnn": "high-noon1",
 }
 
 
 def decode_rtext(text: str):
     newtext = re.sub("\[(?=.\])", "{", text)
     newtext = re.sub("(?<=\{.)\]", "}", newtext)
-    return (
-        newtext.replace("&#8217;", "'")
-        .replace("<br>", "")
-        .replace("<i>", "")
-        .replace("</i>", "")
-        .replace("&#8212;", "—")
-        .replace("&#8226;", "•")
-    )
+    return html.unescape(newtext.replace("<br>", "").replace("<i>", "").replace("</i>", ""))
 
 
 def get_ps_set(setcode):
