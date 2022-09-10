@@ -11,7 +11,7 @@ def is_pow(n):
 import datetime
 
 
-class T:
+class Tournament:
     bracket_id = 0
     """Each node has a unique id within this tournament."""
 
@@ -22,8 +22,8 @@ class T:
         self.date: str = datetime.datetime.today().isoformat(timespec="hours")
         """String representation of the date of the event."""
         self.title = title
-        self.players: list[T.P] = []
-        self.nodes: list[T.N] = []
+        self.players: list[Tournament.TournamentPlayer] = []
+        self.nodes: list[Tournament.BracketNode] = []
         return
 
     def node_from_bnid(self, bnid: str):
@@ -139,9 +139,9 @@ class T:
         entrynodes = [u for u in self.nodes if u.bnid not in secondarynodes]
         while len(entrynodes) > 0:
             e = entrynodes.pop()
-            if T.P(id="0", seed=-999) in e.match.players:
+            if Tournament.TournamentPlayer(id="0", seed=-999) in e.match.players:
                 # print("dropping a node")
-                e.match.players.remove(T.P(id="0", seed=-999))
+                e.match.players.remove(Tournament.TournamentPlayer(id="0", seed=-999))
                 theplayer = e.match.players.pop()
                 winnode = next(q for q in self.nodes if q.bnid in e.feeds and not q.loser)
                 if len(winnode.match.players) == 2:
@@ -162,21 +162,21 @@ class T:
 
     def buildBracket(self, dropByes=True):
         """Builds the nodes needed to form a bracket out of the player list."""
-        tempnodes: list[T.N] = []
+        tempnodes: list[Tournament.BracketNode] = []
         tempplayers = self.players[:]
         tempplayers.sort(key=lambda n: n.seed, reverse=True)
         # Sort the players by their seed.
         # Add bogus players AKA byes until there are 4, 8, 16, 32, etc players
         # Makes the bracket evenly distributed
         while not is_pow(len(tempplayers)):
-            tempplayers.append(T.P(id="0", seed=999))
+            tempplayers.append(Tournament.TournamentPlayer(id="0", seed=999))
         tempplayers.sort(key=lambda x: x.seed)
         # Pair the highest seed with the lowest seed
         # The lowest can be a bye. Each of the highest ranked players get byes when possible
         while len(tempplayers) > 0:
             maxplayer = tempplayers.pop()
             minplayer = tempplayers.pop(0)
-            holdnode = T.N(
+            holdnode = Tournament.BracketNode(
                 p1=maxplayer,
                 p2=minplayer,
                 r=0,
@@ -186,9 +186,9 @@ class T:
                 ),
             )
             tempnodes.append(holdnode)
-            if type(maxplayer) == T.N:
+            if type(maxplayer) == Tournament.BracketNode:
                 maxplayer.feeds.append(holdnode.bnid)
-            if type(minplayer) == T.N:
+            if type(minplayer) == Tournament.BracketNode:
                 minplayer.feeds.append(holdnode.bnid)
         for t in tempnodes:
             self.nodes.append(t)
@@ -204,15 +204,15 @@ class T:
                 # Otherwise, feed the two nodes into a new node
                 tempnodes2.sort(key=lambda n: n.min_seed)
                 while len(tempnodes2) > 0:
-                    maxnode: T.N = tempnodes2.pop()
-                    minnode: T.N = tempnodes2.pop(0)
+                    maxnode: Tournament.BracketNode = tempnodes2.pop()
+                    minnode: Tournament.BracketNode = tempnodes2.pop(0)
                     if (
-                        T.P(id="0", seed=999) in maxnode.match.players
-                        and T.P(id="0", seed=999) in minnode.match.players
+                        Tournament.TournamentPlayer(id="0", seed=999) in maxnode.match.players
+                        and Tournament.TournamentPlayer(id="0", seed=999) in minnode.match.players
                     ) and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
-                        nd = T.N(
+                        nd = Tournament.BracketNode(
                             p1=p1,
                             p2=p2,
                             r=ror,
@@ -224,9 +224,9 @@ class T:
                         tempnodes.append(nd)
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
-                    elif T.P(id="0", seed=999) in maxnode.match.players and dropByes:
+                    elif Tournament.TournamentPlayer(id="0", seed=999) in maxnode.match.players and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
-                        nd = T.N(
+                        nd = Tournament.BracketNode(
                             p1=p1,
                             r=ror,
                             min_seed=min([p1.seed, minnode.min_seed]),
@@ -237,9 +237,9 @@ class T:
                         tempnodes.remove(maxnode)
                         tempnodes.remove(minnode)
                         minnode.feeds.append(nd.bnid)
-                    elif T.P(id="0", seed=999) in minnode.match.players and dropByes:
+                    elif Tournament.TournamentPlayer(id="0", seed=999) in minnode.match.players and dropByes:
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
-                        nd = T.N(
+                        nd = Tournament.BracketNode(
                             p2=p2,
                             r=ror,
                             min_seed=min([p2.seed, maxnode.min_seed]),
@@ -251,7 +251,7 @@ class T:
                         tempnodes.remove(minnode)
                         maxnode.feeds.append(nd.bnid)
                     else:
-                        nd = T.N(
+                        nd = Tournament.BracketNode(
                             r=ror,
                             min_seed=min(
                                 [
@@ -296,9 +296,9 @@ class T:
                 tempnodes.sort(key=lambda x: (x.loser, x.min_seed))
                 halfagainnodes = []
                 while len(tempnodes) > 1:
-                    minnode: T.N = tempnodes.pop()
-                    maxnode: T.N = tempnodes.pop(0)
-                    nd = T.N(
+                    minnode: Tournament.BracketNode = tempnodes.pop()
+                    maxnode: Tournament.BracketNode = tempnodes.pop(0)
+                    nd = Tournament.BracketNode(
                         r=r + 0.5,
                         min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
@@ -309,9 +309,9 @@ class T:
                     maxnode.feeds.append(nd.bnid)
                 halfagainnodes.sort(key=lambda x: (x.loser, x.min_seed))
                 while len(halfagainnodes) > 1:
-                    minnode: T.N = halfagainnodes.pop()
-                    maxnode: T.N = halfagainnodes.pop(0)
-                    nd = T.N(
+                    minnode: Tournament.BracketNode = halfagainnodes.pop()
+                    maxnode: Tournament.BracketNode = halfagainnodes.pop(0)
+                    nd = Tournament.BracketNode(
                         r=r + 1,
                         min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
@@ -322,9 +322,9 @@ class T:
             else:
                 while len(tempnodes) > 1:
                     tempnodes.sort(key=lambda x: (x.loser, x.min_seed))
-                    minnode: T.N = tempnodes.pop()
-                    maxnode: T.N = tempnodes.pop(0)
-                    nd = T.N(
+                    minnode: Tournament.BracketNode = tempnodes.pop()
+                    maxnode: Tournament.BracketNode = tempnodes.pop(0)
+                    nd = Tournament.BracketNode(
                         r=r + 1,
                         min_seed=min([minnode.min_seed, maxnode.min_seed]),
                         loser=True,
@@ -336,28 +336,28 @@ class T:
         biground = max([x.round for x in self.nodes])
         n1 = self.nodes[-1]
         n2 = self.nodes[-3]
-        nd = T.N(r=biground, min_seed=min([x.min_seed for x in [n1, n2]]))
+        nd = Tournament.BracketNode(r=biground, min_seed=min([x.min_seed for x in [n1, n2]]))
         n1.feeds.append(nd.bnid)
         n2.feeds.append(nd.bnid)
         self.nodes.append(nd)
         return
 
-    class N:
+    class BracketNode:
         def __init__(self, p1=None, p2=None, r=0, min_seed=None, loser=False):
-            self.bnid = T.bracket_id
+            self.bnid = Tournament.bracket_id
             self.loser = loser
             self.round = r
             self.feeds: list[int] = []
             """BNID pointers to the nodes that this node will feed its winner and loser respectively.
             
             The winner will go to the first feed and the second place will go to the second feed."""
-            self.match: T.M = T.M(p1, p2)
+            self.match: Tournament.Match = Tournament.Match(p1, p2)
             self.min_seed: int = min(
                 p1.seed if p1 is not None else 999,
                 p2.seed if p2 is not None else 999,
                 min_seed if min_seed is not None else 999,
             )
-            T.bracket_id += 1
+            Tournament.bracket_id += 1
             return
 
         def __json__(self):
@@ -372,9 +372,9 @@ class T:
                 "loser": self.loser,
             }
 
-    class M:
+    class Match:
         def __init__(self, p1=None, p2=None):
-            self.players: list[T.P] = [p1, p2]
+            self.players: list[Tournament.TournamentPlayer] = [p1, p2]
             self.scores: list[int] = []
             """Indices of the players who won the Nth game of the match.
             
@@ -428,7 +428,7 @@ class T:
                 return 3
             return self.scores.count(self.players.index(pl))
 
-    class P:
+    class TournamentPlayer:
         def __init__(self, id: str, seed: int = 0):
             self.p_id = id
             """Generally the player's Discord user id."""
