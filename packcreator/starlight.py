@@ -74,6 +74,7 @@ set_choices_v3 = [
     ["Nemesis", "nem"],
     ["Prophecy", "pcy"],
     ["Mercadian Masques", "mmq"],
+    ["Zendikar", "zen"],
 ]
 
 
