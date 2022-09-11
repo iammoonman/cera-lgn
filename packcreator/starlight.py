@@ -98,7 +98,6 @@ class Starlight(commands.Cog):
         return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(guild_ids=[guild], description="Create packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -136,7 +135,6 @@ class Starlight(commands.Cog):
         return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(guild_ids=[guild], description="Create packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -171,7 +169,6 @@ class Starlight(commands.Cog):
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
     @commands.slash_command(guild_ids=[guild], description="Load a pack image for a Pack 1, Pick 1.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -193,7 +190,6 @@ class Starlight(commands.Cog):
         return
 
     @commands.slash_command(guild_ids=[guild], description="Load a V3 set file and make packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(name="v3", description="A V3 JSON file.", type=discord.Attachment)
     @discord.option(
         name="num",

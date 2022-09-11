@@ -28,7 +28,6 @@ class Flamewave(commands.Cog):
         return str(e + 1)
 
     @commands.slash_command(guild_ids=[guild], description="Query CubeCubra for a cube.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(name="cc_id", description="CubeCobra ID.")
     @discord.option(name="len_p", description="Size of the packs.", min=1, max=150, default=15)
     async def cc_cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
@@ -44,7 +43,6 @@ class Flamewave(commands.Cog):
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
     @commands.slash_command(guild_ids=[guild], description="Query CubeCobra for a cube and get a P1P1.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(name="cc_id", description="CubeCobra ID.")
     @discord.option(name="seed", description="Seed for the pack, if you have one.", default="0")
     async def cc_p1p1(self, ctx: discord.ApplicationContext, cc_id: str, seed: str):
@@ -58,7 +56,6 @@ class Flamewave(commands.Cog):
         return await ctx.respond(content=uri)
 
     @commands.slash_command(guild_ids=[guild], description="Get the TTS cards out of MTGADraft.tk")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(name="file", description="The DraftLog file.", type=discord.Attachment)
     async def tk_log(self, ctx: discord.ApplicationContext, file: discord.Attachment):
         await ctx.defer(ephemeral=True)
