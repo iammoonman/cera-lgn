@@ -8,7 +8,7 @@
 	export let width = 336;
 	export let height = 468;
 	let v: HTMLDivElement;
-	$: pos = { x: 0, y: 0 };
+	$: pos = { x: width / 2, y: height / 2 };
 	function handleMM(e: { clientX: any; clientY: any }) {
 		pos = {
 			x: e.clientX - v.getBoundingClientRect().left,
@@ -25,9 +25,9 @@
 		return (x - x_min) / (x_max - x_min);
 	}
 	// --posY = distance from center at 0 normalized to 30
-	$: {
-		console.log(normalize(pos.y - height / 2, height / 2, 0) * 21);
-	}
+	// $: {
+	// 	console.log(normalize(pos.y - height / 2, height / 2, 0) * 21);
+	// }
 </script>
 
 <div class="superparent">
@@ -56,7 +56,7 @@
 	.card_s {
 		will-change: transform;
 		transform-origin: center;
-		transition: transform  100ms;
+		transition: transform 10ms;
 		/* background: linear-gradient(217deg, rgba(255, 0, 0, 0.8), rgba(255, 0, 0, 0) 70.71%),
 			linear-gradient(127deg, rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0) 70.71%),
 			linear-gradient(336deg, rgba(0, 0, 255, 0.8), rgba(0, 0, 255, 0) 70.71%); */
@@ -75,11 +75,14 @@
 			farthest-corner circle at var(--rX) var(--rY),
 			rgba(255, 255, 255, 1) 10%,
 			rgba(255, 255, 255, 0.65) 20%,
-			rgba(0, 0, 0, 0.5) 90%
+			rgba(0, 0, 0, 0.2) 90%
 		);
 		mix-blend-mode: overlay;
-		opacity: 80%;
+		opacity: 0%;
 		filter: brightness(0.8) contrast(1.5);
 		transition: opacity 100ms;
+	}
+	.card_s:hover > .card__glare {
+		opacity: 60%;
 	}
 </style>
