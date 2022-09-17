@@ -249,7 +249,7 @@ def tts_parse(o):
                     "name": i["name"],
                     "type_line": i["type_line"],
                     "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"png": i["image_uris"]["png"], "small": i["image_uris"]["small"]},
+                    "image_uris": {"normal": i["image_uris"]["normal"], "small": i["image_uris"]["small"]},
                     "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                     "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                     "mana_cost": i["mana_cost"],
@@ -262,7 +262,7 @@ def tts_parse(o):
         extra_obj = {
             "type_line": o["type_line"],
             "oracle_text": make_oracle_splitadventure(o),
-            "image_uris": {"png": o["image_uris"]["png"], "small": o["image_uris"]["small"]},
+            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
             "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
             "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
             "mana_cost": o["mana_cost"],
@@ -275,7 +275,7 @@ def tts_parse(o):
                     "name": i["name"],
                     "type_line": i["type_line"],
                     "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"png": o["image_uris"]["png"], "small": o["image_uris"]["small"]},
+                    "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
                     "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                     "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
                     "mana_cost": i["mana_cost"],
@@ -287,7 +287,7 @@ def tts_parse(o):
     elif "card_faces" in o.keys() and o["layout"] in ["adventure"]:
         extra_obj = {
             "oracle_text": make_oracle_splitadventure(o),
-            "image_uris": {"png": o["image_uris"]["png"], "small": o["image_uris"]["small"]},
+            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
             "power": 0,
             "toughness": 0,
             "mana_cost": o["mana_cost"],
@@ -296,7 +296,7 @@ def tts_parse(o):
     elif "layout" == "vanguard":
         extra_obj = {
             "oracle_text": make_oracle_vanguard(o),
-            "image_uris": {"png": o["image_uris"]["png"]},
+            "image_uris": {"normal": o["image_uris"]["normal"]},
             "power": 0,
             "toughness": 0,
             "mana_cost": o["mana_cost"],
@@ -309,7 +309,7 @@ def tts_parse(o):
                     "name": i["name"],
                     "type_line": i["type_line"],
                     "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"png": i["image_uris"]["png"]},
+                    "image_uris": {"normal": i["image_uris"]["normal"]},
                     "power": 0,
                     "toughness": 0,
                     "mana_cost": i["mana_cost"],
@@ -324,7 +324,7 @@ def tts_parse(o):
     else:
         extra_obj = {
             "oracle_text": make_oracle_normal(o),
-            "image_uris": {"png": o["image_uris"]["png"], "small": o["image_uris"]["small"]},
+            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
             "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
             "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
             "mana_cost": o["mana_cost"],

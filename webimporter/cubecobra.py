@@ -35,17 +35,17 @@ def get_cube(cc_id, p_len):
                             {
                                 **c["card_faces"][0],
                                 "image_uris": {
-                                    "png": row["Image URL"]
+                                    "normal": row["Image URL"]
                                     if row["Image URL"] != ""
-                                    else c["card_faces"][0]["image_uris"]["png"]
+                                    else c["card_faces"][0]["image_uris"]["normal"]
                                 },
                             },
                             {
                                 **c["card_faces"][1],
                                 "image_uris": {
-                                    "png": row["Image Back URL"]
+                                    "normal": row["Image Back URL"]
                                     if row["Image Back URL"] != ""
-                                    else c["card_faces"][1]["image_uris"]["png"]
+                                    else c["card_faces"][1]["image_uris"]["normal"]
                                 },
                             },
                         ],
@@ -53,7 +53,7 @@ def get_cube(cc_id, p_len):
                     }
                 else:
                     x = {
-                        "image_uris": {"png": row["Image URL"] if row["Image URL"] != "" else c["image_uris"]["png"]},
+                        "image_uris": {"normal": row["Image URL"] if row["Image URL"] != "" else c["image_uris"]["normal"]},
                         "finish": row["Finish"] == "Foil",
                     }
                 cubelist.append({**c, **x})
