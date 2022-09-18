@@ -19,6 +19,7 @@
 	$: Date2 = '';
 	$: DraftName = '';
 	$: CardName = '';
+	$: DescriptionSearch = '';
 
 	$: filteredDC = [] as typeof CDs;
 	$: {
@@ -38,6 +39,9 @@
 					return false;
 				}
 				if (TagSelect.length > 0 && TagSelect !== 'anti' && x.tag !== TagSelect) {
+					return false;
+				}
+				if (x.description?.toLowerCase().search(DescriptionSearch.toLowerCase()) ?? 1 < 0) {
 					return false;
 				}
 				if (PlayerName !== '') {
@@ -103,6 +107,10 @@
 			<div class="flex flex-row w-full justify-between">
 				<label for="dts">Draft Title</label>
 				<input type="text" name="dts" bind:value={DraftName} />
+			</div>
+			<div class="flex flex-row w-full justify-between">
+				<label for="dds">Draft Description</label>
+				<input type="text" name="dds" bind:value={DescriptionSearch} />
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dts">Card Title</label>
