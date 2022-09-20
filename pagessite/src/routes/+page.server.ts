@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { CardDisplayType } from 'src/types/displaycard';
 import type { Draft } from 'src/types/events';
+import { NODE_ENV } from '$env/static/private';
 export const prerender = true;
 export function load() {
     const CDs: (Draft | CardDisplayType)[] = [];
