@@ -66,7 +66,7 @@ def get_ps_set(setcode):
             "set": setcode,
             "collector_number": v["cardNumber"],
             "rarity": v["rarity"].lower(),
-            "image_uris": {"png": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
+            "image_uris": {"normal": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
         }
         if v["shape"] == "normal":
             sc_obj = {**sc_obj, **face_1}
