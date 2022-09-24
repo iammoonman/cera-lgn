@@ -15,7 +15,6 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
-		prerender: { default: true },
 		paths: { base: '/cera', assets: '' }
 	}
 };

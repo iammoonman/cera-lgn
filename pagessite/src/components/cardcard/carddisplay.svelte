@@ -6,7 +6,6 @@
 		C.cn === '' ? '1' : C.cn
 	}`;
 	let image_link = C.uri === '' ? 'https://picsum.photos/336/468' : C.uri;
-	import { Motion } from 'svelte-motion';
 	import Fancycardhover from './fancycardhover.svelte';
 </script>
 

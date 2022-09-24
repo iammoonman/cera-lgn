@@ -43,7 +43,7 @@
 					};
 				})
 			};
-			console.log(JSON.stringify(newOutput));
+			// console.log(JSON.stringify(newOutput));
 			textcontent = JSON.stringify(newOutput)
 		}}
 	/>

@@ -1,6 +1,6 @@
 export type LimitedEvent = {
     id: number;
-    tag: 'ptm' | 'omn' | 'dps' | '';
+    tag: string; // 'ptm' | 'omn' | 'dps' | '';
     date: Date;
     title: string;
     description?: string;
