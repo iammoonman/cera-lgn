@@ -75,6 +75,8 @@ set_choices_v3 = [
     ["Prophecy", "pcy"],
     ["Mercadian Masques", "mmq"],
     ["Zendikar", "zen"],
+    ["Scars of Mirrodin", "som"],
+    ["Mirrodin Besieged", "mbs"],
 ]
 
 
