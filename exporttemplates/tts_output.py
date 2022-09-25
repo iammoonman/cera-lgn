@@ -134,11 +134,11 @@ class Pack:
                 "FaceURL": re.sub(
                     "\?\d+$",
                     "",
-                    cardData["card_faces"][0]["image_uris"]["png"]
+                    cardData["card_faces"][0]["image_uris"]["normal"]
                     if "card_faces" in cardData.keys()
                     and "adventure" != cardData["layout"]
                     and "split" != cardData["layout"]
-                    else cardData["image_uris"]["png"],
+                    else cardData["image_uris"]["normal"],
                 ),
                 "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                 "NumWidth": 1,
@@ -151,7 +151,7 @@ class Pack:
             self.States = {}
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
-                    "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["png"]),
+                    "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
                     "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                     "NumWidth": 1,
                     "NumHeight": 1,
