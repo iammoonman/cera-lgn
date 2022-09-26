@@ -5,7 +5,7 @@ from .draft_class import Draft
 import pickle
 import datetime
 
-taglist = {"ptm": "Prime Time With Moon", "dp2": "Draft Progression Series 2"}
+taglist = {"ptm": "Prime Time With Moon", "dp2": "Draft Progression Series 2", "": ""}
 bslash = "\n"
 
 with open("guild.pickle", "rb") as f:
