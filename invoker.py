@@ -5,6 +5,7 @@ with open("token.pickle", "rb") as f:
     token = pickle.load(f)
 
 intents = discord.Intents.default()
+intents.members = True
 
 bot = discord.Bot(intents=intents)
 
