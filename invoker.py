@@ -4,7 +4,9 @@ import pickle
 with open("token.pickle", "rb") as f:
     token = pickle.load(f)
 
-bot = discord.Bot()
+intents = discord.Intents.default()
+
+bot = discord.Bot(intents=intents)
 
 
 @bot.event
