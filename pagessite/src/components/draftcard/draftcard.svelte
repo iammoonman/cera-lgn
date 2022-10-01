@@ -6,120 +6,122 @@
 	import Tooltip, { Wrapper } from '@smui/tooltip';
 	import AnglesRight from '../utilities/angles-right.svelte';
 	import Symbol from '../symbols/symbol.svelte';
-	export const D: Draft = {
-		date: new Date(),
-		id: 0,
-		rounds: new Map([
-			[
-				0,
-				{
-					matches: [
-						{
-							p_ids: ['411627939478765568', '237059875073556481'],
-							bye: false,
-							drops: [],
-							games: new Map([
-								[0, '411627939478765568'],
-								[1, '411627939478765568']
-							])
-						},
-						{
-							p_ids: ['320756550992134145', '317470784870285323'],
-							bye: false,
-							drops: [],
-							games: new Map([
-								[0, '320756550992134145'],
-								[1, '320756550992134145']
-							])
-						},
-						{
-							p_ids: ['298561362034950154', '247076572295593984'],
-							bye: false,
-							drops: ['247076572295593984'],
-							games: new Map([
-								[0, '298561362034950154'],
-								[1, '298561362034950154']
-							])
-						},
-						{
-							p_ids: ['250385022106730496', '265851480462852096'],
-							bye: false,
-							drops: ['250385022106730496'],
-							games: new Map([
-								[0, '265851480462852096'],
-								[1, '265851480462852096']
-							])
-						}
-					]
-				}
-			],
-			[
-				1,
-				{
-					matches: [
-						{
-							p_ids: ['320756550992134145', '265851480462852096'],
-							bye: false,
-							drops: ['320756550992134145', '265851480462852096'],
-							games: new Map([
-								[0, '320756550992134145'],
-								[1, '320756550992134145']
-							])
-						},
-						{
-							p_ids: ['411627939478765568', '298561362034950154'],
-							bye: false,
-							drops: ['298561362034950154'],
-							games: new Map([[0, '411627939478765568']])
-						},
-						{
-							p_ids: ['237059875073556481', '317470784870285323'],
-							bye: false,
-							drops: [],
-							games: new Map([
-								[0, '237059875073556481'],
-								[1, '317470784870285323'],
-								[2, '237059875073556481']
-							])
-						}
-					]
-				}
-			],
-			[
-				2,
-				{
-					matches: [
-						{
-							p_ids: ['411627939478765568', '317470784870285323'],
-							bye: false,
-							drops: [],
-							games: new Map([[0, '411627939478765568']])
-						},
-						{
-							p_ids: ['237059875073556481'],
-							bye: true,
-							drops: [],
-							games: new Map([])
-						}
-					]
-				}
-			]
-		]),
-		scores: [
-			{ id: '411627939478765568', points: 9, gwp: 1.0, ogp: 0.4667, omp: 0.5 },
-			{ id: '237059875073556481', points: 6, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
-			{ id: '320756550992134145', points: 6, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
-			{ id: '298561362034950154', points: 3, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
-			{ id: '265851480462852096', points: 3, gwp: 0.5, ogp: 0.6667, omp: 0.6667 },
-			{ id: '317470784870285323', points: 0, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
-			{ id: '247076572295593984', points: 0, gwp: 0, ogp: 0.6667, omp: 0.5 },
-			{ id: '250385022106730496', points: 0, gwp: 0, ogp: 0.5, omp: 0.5 }
-		],
-		tag: 'dps',
-		title: 'TEST TITLE',
-		description:
-			'TEST DESCRIPTION lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum'
-	};
+	export let D: Draft;
+	console.log(D);
+	// {
+	// 	date: new Date(),
+	// 	id: 0,
+	// 	rounds: new Map([
+	// 		[
+	// 			0,
+	// 			{
+	// 				matches: [
+	// 					{
+	// 						p_ids: ['411627939478765568', '237059875073556481'],
+	// 						bye: false,
+	// 						drops: [],
+	// 						games: new Map([
+	// 							[0, '411627939478765568'],
+	// 							[1, '411627939478765568']
+	// 						])
+	// 					},
+	// 					{
+	// 						p_ids: ['320756550992134145', '317470784870285323'],
+	// 						bye: false,
+	// 						drops: [],
+	// 						games: new Map([
+	// 							[0, '320756550992134145'],
+	// 							[1, '320756550992134145']
+	// 						])
+	// 					},
+	// 					{
+	// 						p_ids: ['298561362034950154', '247076572295593984'],
+	// 						bye: false,
+	// 						drops: ['247076572295593984'],
+	// 						games: new Map([
+	// 							[0, '298561362034950154'],
+	// 							[1, '298561362034950154']
+	// 						])
+	// 					},
+	// 					{
+	// 						p_ids: ['250385022106730496', '265851480462852096'],
+	// 						bye: false,
+	// 						drops: ['250385022106730496'],
+	// 						games: new Map([
+	// 							[0, '265851480462852096'],
+	// 							[1, '265851480462852096']
+	// 						])
+	// 					}
+	// 				]
+	// 			}
+	// 		],
+	// 		[
+	// 			1,
+	// 			{
+	// 				matches: [
+	// 					{
+	// 						p_ids: ['320756550992134145', '265851480462852096'],
+	// 						bye: false,
+	// 						drops: ['320756550992134145', '265851480462852096'],
+	// 						games: new Map([
+	// 							[0, '320756550992134145'],
+	// 							[1, '320756550992134145']
+	// 						])
+	// 					},
+	// 					{
+	// 						p_ids: ['411627939478765568', '298561362034950154'],
+	// 						bye: false,
+	// 						drops: ['298561362034950154'],
+	// 						games: new Map([[0, '411627939478765568']])
+	// 					},
+	// 					{
+	// 						p_ids: ['237059875073556481', '317470784870285323'],
+	// 						bye: false,
+	// 						drops: [],
+	// 						games: new Map([
+	// 							[0, '237059875073556481'],
+	// 							[1, '317470784870285323'],
+	// 							[2, '237059875073556481']
+	// 						])
+	// 					}
+	// 				]
+	// 			}
+	// 		],
+	// 		[
+	// 			2,
+	// 			{
+	// 				matches: [
+	// 					{
+	// 						p_ids: ['411627939478765568', '317470784870285323'],
+	// 						bye: false,
+	// 						drops: [],
+	// 						games: new Map([[0, '411627939478765568']])
+	// 					},
+	// 					{
+	// 						p_ids: ['237059875073556481'],
+	// 						bye: true,
+	// 						drops: [],
+	// 						games: new Map([])
+	// 					}
+	// 				]
+	// 			}
+	// 		]
+	// 	]),
+	// 	scores: [
+	// 		{ id: '411627939478765568', points: 9, gwp: 1.0, ogp: 0.4667, omp: 0.5 },
+	// 		{ id: '237059875073556481', points: 6, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
+	// 		{ id: '320756550992134145', points: 6, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
+	// 		{ id: '298561362034950154', points: 3, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
+	// 		{ id: '265851480462852096', points: 3, gwp: 0.5, ogp: 0.6667, omp: 0.6667 },
+	// 		{ id: '317470784870285323', points: 0, gwp: 0.4, ogp: 0.6667, omp: 0.6667 },
+	// 		{ id: '247076572295593984', points: 0, gwp: 0, ogp: 0.6667, omp: 0.5 },
+	// 		{ id: '250385022106730496', points: 0, gwp: 0, ogp: 0.5, omp: 0.5 }
+	// 	],
+	// 	tag: 'dps',
+	// 	title: 'TEST TITLE',
+	// 	description:
+	// 		'TEST DESCRIPTION lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum'
+	// };
 	$: selectedRound = 0;
 	$: roundHold = [...(D.rounds.get(selectedRound)?.matches ?? [])];
 	$: round = D.rounds.get(selectedRound)?.title ?? `${selectedRound + 1}`;
@@ -151,13 +153,13 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each D.scores as s}
+					{#each D.scores.sort( (a, b) => (a.points > b.points ? -1 : b.points > a.points ? 1 : 0) ) as s}
 						<tr>
 							<td>{PlayerList.get(s.id) ?? 'Unknown'}</td>
 							<td class="text-right">{s.points}</td>
-							<td class="text-right">{s.ogp.toFixed(2)}</td>
-							<td class="text-right">{s.gwp.toFixed(2)}</td>
-							<td class="text-right">{s.omp.toFixed(2)}</td>
+							<td class="text-right">{typeof s.ogp === 'string' ? s.ogp : s.ogp.toFixed(2)}</td>
+							<td class="text-right">{typeof s.gwp === 'string' ? s.gwp : s.gwp.toFixed(2)}</td>
+							<td class="text-right">{typeof s.omp === 'string' ? s.omp : s.omp.toFixed(2)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -184,7 +186,10 @@
 				<AnglesRight direction="right" />
 			</button>
 		</div>
-		<div class="flex flex-col items-center games">
+		<div
+			class="flex flex-col items-center games"
+			style={`${roundHold.length == 5 ? 'scale: 0.90; top: -15px' : ''}`}
+		>
 			{#each roundHold as m (m)}
 				<div in:fly={{ duration: 200, y: 50 }}>
 					<Tinygame {m} />
@@ -201,8 +206,10 @@
 		height: 336px;
 		border-radius: 3.5% / 4.75%;
 		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
-		background-color: #7E1515;
+		background-color: #7e1515;
 		color: white;
+		overflow-x: visible;
+		overflow-y: clip;
 	}
 	.leftside {
 		grid-template-rows: 65px;
@@ -259,7 +266,7 @@
 	}
 	.games {
 		padding-bottom: 12px;
-		max-height: 250px;
+		position: relative;
 	}
 	.tagsymbolcontainer {
 		filter: opacity(30%) invert();

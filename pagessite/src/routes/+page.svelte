@@ -81,7 +81,7 @@
 	<span>&nbsp;</span>
 </div>
 <div class="grid grid-catch gap-4">
-	<div class="sticky h-min rounded-lg filterblock">
+	<div class="sticky top-12 h-min rounded-lg filterblock">
 		<div class="flex flex-col sidefilters p-3 gap-2">
 			<div class="text-xl text-center">
 				Filter Controls

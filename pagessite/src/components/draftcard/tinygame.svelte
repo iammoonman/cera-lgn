@@ -26,7 +26,8 @@
 		border-radius: 15px;
 		box-shadow: inset 0 0 0 2px black, inset 0 -2px 0 3px black;
 		/* background-color: white */
-		background: linear-gradient(150deg, #ffed9e99 0%, #c69800 100%);
+		background-image: linear-gradient(150deg, #ffed9e99 0%, #c69800 100%);
+		background-color: #7e1515;
 		padding: 5px 6px 7px 5px;
 		margin-bottom: 1px;
 		width: 203px;
