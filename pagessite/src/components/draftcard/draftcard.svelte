@@ -5,6 +5,7 @@
 	import { fly } from 'svelte/transition';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
 	import AnglesRight from '../utilities/angles-right.svelte';
+	import Symbol from '../symbols/symbol.svelte';
 	export const D: Draft = {
 		date: new Date(),
 		id: 0,
@@ -127,7 +128,8 @@
 <div class="outercard grid grid-cols-2">
 	<div class="leftside grid p-2">
 		<Wrapper>
-			<div class="titlecard">
+			<div class="titlecard relative">
+				<div class="tagsymbolcontainer"><Symbol symbol_name={D.tag} symbol_size={75} /></div>
 				<span class="text-lg text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
 					{D.title ?? ''}
 				</span>
@@ -198,7 +200,9 @@
 		width: 468px;
 		height: 336px;
 		border-radius: 3.5% / 4.75%;
-		box-shadow: 0 0 15px black;
+		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
+		background-color: #7E1515;
+		color: white;
 	}
 	.leftside {
 		grid-template-rows: 65px;
@@ -216,10 +220,10 @@
 		padding: -0.25rem;
 	}
 	th {
-		background: white;
+		background: inherit;
 		position: sticky;
 		top: 0; /* Don't forget this, required for the stickiness */
-		box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+		box-shadow: 0 2px 2px -1px white;
 	}
 	.mytable {
 		font-size: small;
@@ -256,5 +260,12 @@
 	.games {
 		padding-bottom: 12px;
 		max-height: 250px;
+	}
+	.tagsymbolcontainer {
+		filter: opacity(30%) invert();
+		left: 50%;
+		top: 75%;
+		transform: translateX(-50%) translateY(-50%);
+		position: absolute;
 	}
 </style>

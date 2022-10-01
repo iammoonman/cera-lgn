@@ -75,21 +75,24 @@
 </script>
 
 <div
-	class="w-full h-min p-2 z-10 flex flex-row justify-between shadow-lg shadow-green-700/40 bg-green-200 sticky top-0"
+	class="topnav w-full h-min p-2 z-10 flex flex-row justify-between shadow-lg shadow-green-700/40 sticky top-0 text-xl"
 >
 	<span>The Rat Zone</span>
 	<span>&nbsp;</span>
 </div>
 <div class="grid grid-catch gap-4">
-	<div class="shadow-lg shadow-blue-400 bg-blue-200 sticky top-10 h-min">
+	<div class="sticky h-min rounded-lg filterblock">
 		<div class="flex flex-col sidefilters p-3 gap-2">
+			<div class="text-xl text-center">
+				Filter Controls
+			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="ps">Player Search</label>
 				<input type="text" name="ps" bind:value={PlayerName} />
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="tag">Tag</label>
-				<select name="tag" bind:value={TagSelect}>
+				<select name="tag" bind:value={TagSelect} style="width: 201px;">
 					<option value="" />
 					<option value="ptm">Prime Time with Moon</option>
 					<option value="dps">Draft Progression Series</option>
@@ -98,11 +101,11 @@
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dt1">Earliest Date</label>
-				<input type="date" name="dt1" bind:value={Date1} />
+				<input type="date" name="dt1" bind:value={Date1} style="width: 201px;"/>
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dt2">Latest Date</label>
-				<input type="date" name="dt2" bind:value={Date2} />
+				<input type="date" name="dt2" bind:value={Date2} style="width: 201px;"/>
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dts">Draft Title</label>
@@ -138,5 +141,22 @@
 	.booty {
 		grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
 		grid-auto-rows: auto;
+	}
+	.topnav {
+		background-color: #21633F;
+		color: white;
+	}
+	.filterblock {
+		background-color: #3F3663;
+		color: white;
+		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
+	}
+	input {
+		background-color: black;
+		border-radius: 4px;
+	}
+	select, option {
+		background-color: black;
+		border-radius: 4px;
 	}
 </style>

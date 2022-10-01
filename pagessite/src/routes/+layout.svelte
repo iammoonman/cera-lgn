@@ -5,7 +5,7 @@
 	 * @type {any}
 	 */
 	let data;
-	$: console.log(data);
+	// $: console.log(data);
 </script>
 
 <slot />

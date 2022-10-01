@@ -13,10 +13,11 @@
 	import Zeromana from './zeromana.svelte';
 
 	export let symbol_name: string;
+	export let symbol_size: number;
 </script>
 
-<div>
-	{#if symbol_name === 'DPS'}
+<div style={`--size: ${symbol_size}px`}>
+	{#if symbol_name === 'dps'}
 		<Dps />
 	{/if}
 	{#if symbol_name === 'W'}
@@ -56,7 +57,8 @@
 
 <style>
 	div {
-		height: 14px;
-		width: 14px;
+		display: block;
+		height: var(--size);
+		width: var(--size);
 	}
 </style>

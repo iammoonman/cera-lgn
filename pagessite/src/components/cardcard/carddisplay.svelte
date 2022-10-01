@@ -48,6 +48,8 @@
 		width: 468px;
 		height: 336px;
 		border-radius: 3.5% / 4.75%;
+		background-color: #144A76;
+		color: white;
 	}
 	.card-v {
 		background-color: var(--gamma);
@@ -55,6 +57,7 @@
 		height: 468px;
 		width: 336px;
 		border-radius: 4.75% / 3.5%;
+		background-color: #18578C;
 	}
 	.card {
 		background-color: var(--yotta);
