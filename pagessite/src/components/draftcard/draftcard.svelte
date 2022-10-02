@@ -7,7 +7,6 @@
 	import AnglesRight from '../utilities/angles-right.svelte';
 	import Symbol from '../symbols/symbol.svelte';
 	export let D: Draft;
-	console.log(D);
 	// {
 	// 	date: new Date(),
 	// 	id: 0,

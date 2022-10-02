@@ -105,7 +105,7 @@ class Glintwing(commands.Cog):
         self.drafts[new_view.id] = Draft(
             draftID=new_view.id,
             date=datetime.datetime.today().strftime("%Y-%m-%d"),
-            host=int(ctx.author.id),
+            host=str(ctx.author.id),
             tag=tag,
             description=desc,
             title=title,
@@ -113,7 +113,7 @@ class Glintwing(commands.Cog):
         )
         self.drafts[new_view.id].add_player(
             p_name=ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
-            p_id=int(ctx.author.id),
+            p_id=str(ctx.author.id),
             is_host=True,
         )
         self.timekeep[new_view.id] = datetime.datetime.now()
@@ -134,7 +134,7 @@ class StartingView(discord.ui.View):
             return
         self.bot.drafts[self.id].add_player(
             ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
-            int(ctx.user.id),
+            str(ctx.user.id),
         )
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
@@ -148,7 +148,7 @@ class StartingView(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        self.bot.drafts[self.id].drop_player(int(ctx.user.id))
+        self.bot.drafts[self.id].drop_player(str(ctx.user.id))
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id])],
             view=self,
@@ -161,7 +161,7 @@ class StartingView(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        if self.bot.drafts[self.id].host == int(ctx.user.id):
+        if self.bot.drafts[self.id].host == str(ctx.user.id):
             new_view = IG_View(self.bot)
             # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = self.bot.drafts[self.id]
@@ -250,7 +250,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        self.bot.drafts[self.id].parse_match(int(ctx.user.id), select.values[0])
+        self.bot.drafts[self.id].parse_match(str(ctx.user.id), select.values[0])
         await ctx.message.edit(
             embeds=[
                 self.bot.ig_em(
@@ -268,7 +268,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        self.bot.drafts[self.id].drop_player(int(ctx.user.id))
+        self.bot.drafts[self.id].drop_player(str(ctx.user.id))
         await ctx.message.edit(
             embeds=[
                 self.bot.ig_em(
@@ -286,7 +286,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        if self.bot.drafts[self.id].host == int(ctx.user.id):
+        if self.bot.drafts[self.id].host == str(ctx.user.id):
             if self.bot.drafts[self.id].finish_round():
                 if len([r for r in self.bot.drafts[self.id].rounds if not r.completed]) > 0:
                     self.bot.timekeep[self.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
@@ -323,8 +323,8 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        if ctx.user.id == self.bot.drafts[self.id].host or int(select.values[0]) == ctx.user.id:
-            self.bot.drafts[self.id].drop_player(int(select.values[0]))
+        if str(ctx.user.id) == self.bot.drafts[self.id].host or str(select.values[0]) == str(ctx.user.id):
+            self.bot.drafts[self.id].drop_player(str(select.values[0]))
         await ctx.message.edit(
             embeds=[
                 self.bot.ig_em(
@@ -342,7 +342,7 @@ class IG_View(discord.ui.View):
         if self.id not in self.bot.drafts.keys():
             # await ctx.delete_original_message()
             return
-        if self.bot.drafts[self.id].host == int(ctx.user.id):
+        if self.bot.drafts[self.id].host == str(ctx.user.id):
             self.bot.drafts[self.id].max_rounds = len(self.bot.drafts[self.id].rounds)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 

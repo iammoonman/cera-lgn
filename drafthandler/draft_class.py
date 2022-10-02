@@ -15,7 +15,7 @@ class Draft:
         """Unique ID."""
         self.date: str = date
         """Translates to the output JSON."""
-        self.host: int = host
+        self.host: str = host
         """The Discord user ID of the host."""
         self.tag: str = tag
         """Three-character code for the category."""
@@ -66,8 +66,8 @@ class Draft:
         return draftobj
 
     class Player:
-        def __init__(self, n: str, id: int):
-            self.player_id: int = id
+        def __init__(self, n: str, id: str):
+            self.player_id: str = id
             """Discord user ID for the player."""
             self.name: str = n
             """Used for quick access. Not output to JSON."""
@@ -124,10 +124,10 @@ class Draft:
 
             def __init__(self, p=[]):
                 self.players = p
-                self.gwinners: list[int] = []
+                self.gwinners: list[str] = []
                 if p[1] == Draft.Player("Bye", "-1"):
                     # Automatically set score for the bye.
-                    self.gwinners = [0, 0, None]
+                    self.gwinners = ["0", "0", None]
                 self.drops = [False for i in p]
 
     def do_pairings(self):

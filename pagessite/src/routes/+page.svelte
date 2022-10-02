@@ -1,6 +1,21 @@
 <script lang="ts">
 	import fs from 'fs';
-	export let data: { cds: (Draft | CardDisplayType)[] };
+	export let data: {
+		cds: (Draft | CardDisplayType)[];
+		users: Map<
+			string,
+			{
+				id: string;
+				username: string;
+				avatar: any;
+				discriminator: string;
+				public_flags: number;
+				banner: any;
+				banner_color: any;
+				accent_color: any;
+			}
+		>;
+	};
 	let CDs = data.cds;
 	import type { CardDisplayType } from '../types/displaycard';
 	import type { Draft } from '../types/events';
@@ -83,9 +98,7 @@
 <div class="grid grid-catch gap-4">
 	<div class="sticky top-12 h-min rounded-lg filterblock">
 		<div class="flex flex-col sidefilters p-3 gap-2">
-			<div class="text-xl text-center">
-				Filter Controls
-			</div>
+			<div class="text-xl text-center">Filter Controls</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="ps">Player Search</label>
 				<input type="text" name="ps" bind:value={PlayerName} />
@@ -101,11 +114,11 @@
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dt1">Earliest Date</label>
-				<input type="date" name="dt1" bind:value={Date1} style="width: 201px;"/>
+				<input type="date" name="dt1" bind:value={Date1} style="width: 201px;" />
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dt2">Latest Date</label>
-				<input type="date" name="dt2" bind:value={Date2} style="width: 201px;"/>
+				<input type="date" name="dt2" bind:value={Date2} style="width: 201px;" />
 			</div>
 			<div class="flex flex-row w-full justify-between">
 				<label for="dts">Draft Title</label>
@@ -143,11 +156,11 @@
 		grid-auto-rows: auto;
 	}
 	.topnav {
-		background-color: #21633F;
+		background-color: #21633f;
 		color: white;
 	}
 	.filterblock {
-		background-color: #3F3663;
+		background-color: #3f3663;
 		color: white;
 		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
 	}
@@ -155,7 +168,8 @@
 		background-color: black;
 		border-radius: 4px;
 	}
-	select, option {
+	select,
+	option {
 		background-color: black;
 		border-radius: 4px;
 	}

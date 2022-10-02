@@ -1,12 +1,19 @@
 import fs from 'fs';
 import type { CardDisplayType } from 'src/types/displaycard';
 import { json_to_new, type Draft } from '../types/events';
-import { NODE_ENV } from '$env/static/private';
+import { NODE_ENV, DIS_TOKEN } from '$env/static/private';
+import { Client, REST, Routes } from 'discord.js'
 export const prerender = true;
 export function load() {
     const CDs: (Draft | CardDisplayType)[] = [];
+    const users = new Map([])
+    // const rest = new REST({ version: '10' }).setToken(DIS_TOKEN);
+    const client = new Client({ intents: ['GuildMembers'] });
+    client.login(DIS_TOKEN)
+    // let thanos = client.users.fetch('237059875073556481').then(y => { console.log(y); return y })
+    // console.log(thanos)
     fs.readdir('./src/data', (e, fn) => {
-        console.log(e);
+        // console.log(e);
         if (e) {
             return;
         }
@@ -15,12 +22,24 @@ export function load() {
                 if (error) {
                     return;
                 }
-                const cn = JSON.parse(content);
-                CDs.push(json_to_new(cn));
+                const cn: (Draft | CardDisplayType) = json_to_new(JSON.parse(content));
+                if ('date' in cn) {
+                    cn.scores.forEach(async (v, i) => {
+                        if (!users.get(v.id)) {
+                            users.set(v.id, client.users.fetch(`${v.id}`).then(y => y).catch(console.error) ?? {id: `${v.id}`, ursername: 'Unknown', discriminator: '0000'})
+                        }
+                    })
+                }
+                CDs.push(cn);
             });
         });
-    });
-    return { cds: CDs }
+    })
+    // cn.forEach(x => {
+    //     if ('date' in x) {
+    //         x.scores.forEach((v) => users.get(v.id) === undefined ? users.set(v.id, fetchUser(v.id).then((y) => y)) : null)
+    //     }
+    // })
+    return { cds: CDs, users: users }
     // CDs = [
     // 	{
     // 		cn: '1',
@@ -155,4 +174,17 @@ export function load() {
     // 			'TEST DESCRIPTION lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum'
     // 	}
     // ];
+}
+
+const fetchUser = async (id: string) => {
+    const response = await fetch(`https://discord.com/api/v9/users/${id}`, {
+        headers: {
+            Authorization: `Bot ${DIS_TOKEN}`
+        }
+    })
+    if (!response.ok) return `Error status code: ${response.status}`;
+    // console.log(await response.json())
+    let x = await response.json()
+    // console.log(x)
+    return x // JSON.parse(x)
 }
