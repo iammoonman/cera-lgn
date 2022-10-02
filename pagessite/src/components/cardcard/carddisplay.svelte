@@ -1,6 +1,28 @@
 <script lang="ts">
+	import type { User } from 'discord.js';
 	import type { CardDisplayType } from 'src/types/displaycard';
 	export let C: CardDisplayType;
+	export let pn: Record<
+		string,
+		{
+			id: string;
+			bot: boolean;
+			system: boolean;
+			flags: number;
+			username: string;
+			discriminator: string;
+			avatar: string;
+			banner: null;
+			accentColor: null;
+			createdTimestamp: number;
+			defaultAvatarURL: string;
+			hexAccentColor: null;
+			tag: string;
+			avatarURL: string;
+			displayAvatarURL: string;
+			bannerURL: null;
+		}
+	>;
 	$: horizontal = C.description == '';
 	let scry_link = `https://scryfall.com/card/${C.set === '' ? 'lea' : C.set}/${
 		C.cn === '' ? '1' : C.cn
@@ -48,7 +70,7 @@
 		width: 468px;
 		height: 336px;
 		border-radius: 3.5% / 4.75%;
-		background-color: #144A76;
+		background-color: #144a76;
 		color: white;
 	}
 	.card-v {
@@ -57,7 +79,7 @@
 		height: 468px;
 		width: 336px;
 		border-radius: 4.75% / 3.5%;
-		background-color: #18578C;
+		background-color: #18578c;
 	}
 	.card {
 		background-color: var(--yotta);

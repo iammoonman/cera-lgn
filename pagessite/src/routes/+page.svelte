@@ -2,24 +2,33 @@
 	import fs from 'fs';
 	export let data: {
 		cds: (Draft | CardDisplayType)[];
-		users: Map<
+		users: Record<
 			string,
 			{
 				id: string;
+				bot: boolean;
+				system: boolean;
+				flags: number;
 				username: string;
-				avatar: any;
 				discriminator: string;
-				public_flags: number;
-				banner: any;
-				banner_color: any;
-				accent_color: any;
+				avatar: string;
+				banner: null;
+				accentColor: null;
+				createdTimestamp: number;
+				defaultAvatarURL: string;
+				hexAccentColor: null;
+				tag: string;
+				avatarURL: string;
+				displayAvatarURL: string;
+				bannerURL: null;
 			}
 		>;
 	};
-	let CDs = data.cds;
+	let { cds, users } = data;
+	// console.log('on page', cds)
 	import type { CardDisplayType } from '../types/displaycard';
 	import type { Draft } from '../types/events';
-	import { PlayerList } from '../types/playerstore';
+	// import { PlayerList } from '../types/playerstore';
 
 	import Layouts from '../components/sheetbuilder/layouts.svelte';
 
@@ -27,6 +36,7 @@
 	import Carddisplay from '../components/cardcard/carddisplay.svelte';
 	import Draftcard from '../components/draftcard/draftcard.svelte';
 	import { error, json } from '@sveltejs/kit';
+	import type { User } from 'discord.js';
 	// apply filters to array of objects
 	$: PlayerName = '';
 	$: TagSelect = '';
@@ -36,10 +46,12 @@
 	$: CardName = '';
 	$: DescriptionSearch = '';
 
-	$: filteredDC = [] as typeof CDs;
+	$: filteredDC = [] as (Draft | CardDisplayType)[];
 	$: {
+		// console.log(data.users)
+		// PlayerList.set(structuredClone(data.users))
 		// @ts-ignore
-		filteredDC = CDs.filter((x) => {
+		filteredDC = cds.filter((x) => {
 			if ('date' in x) {
 				if (x.date > new Date(Date2)) {
 					return false;
@@ -62,9 +74,18 @@
 				if (PlayerName !== '') {
 					let n = false;
 					x.scores.forEach((y) => {
-						if (PlayerList.get(y.id)?.toLowerCase().search(PlayerName.toLowerCase())) {
-							n = true;
+						if (users[y.id] !== undefined) {
+							if (users[y.id]!.username.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
+								n = true;
+							}
 						}
+						// if (data.users.get(y.id) !== undefined) {
+						// 	if (
+						// 		data.users.get(y.id)!.username.toLowerCase().search(PlayerName.toLowerCase()) > -1
+						// 	) {
+						// 		n = true;
+						// 	}
+						// }
 					});
 					return n;
 				}
@@ -73,11 +94,16 @@
 			if ('p_id' in x) {
 				if (PlayerName !== '') {
 					let n = false;
-					[...PlayerList].forEach(([k, v]) => {
-						if (v.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
+					Object.entries(users).forEach(([k, v]) => {
+						if (v.username.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
 							n = true;
 						}
 					});
+					// [...data.users].forEach(([k, v]) => {
+					// 	if (v.username.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
+					// 		n = true;
+					// 	}
+					// });
 					return n;
 				}
 				if (x.title.toLowerCase().search(CardName.toLowerCase()) < 0) {
@@ -138,10 +164,10 @@
 	<div class="h-full mt-2 grid gap-4 booty">
 		{#each filteredDC as c}
 			{#if 'uri' in c}
-				<Carddisplay C={c} />
+				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
-				<Draftcard D={c} />
+				<Draftcard D={c} pn={users} />
 			{/if}
 		{/each}
 	</div>
