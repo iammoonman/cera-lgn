@@ -10,7 +10,7 @@ taglist = {
     "dp2": "Draft Progression Series 2",
     "fnc": "Friday Night Chaos",
     "pwd": "Sunday Prize Wall Draft",
-    "": "",
+    "anti": "No Tag",
 }
 bslash = "\n"
 
@@ -95,7 +95,7 @@ class Glintwing(commands.Cog):
         self,
         ctx: discord.ApplicationContext,
         title: str,
-        tag: str = "",
+        tag: str = "anti",
         desc: str = "",
         rounds: int = 3,
     ):
