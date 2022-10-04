@@ -117,7 +117,7 @@ class Glintwing(commands.Cog):
             is_host=True,
         )
         self.timekeep[new_view.id] = datetime.datetime.now()
-        await msg.edit_original_message(embeds=[self.starting_em(self.drafts[new_view.id])], content="", view=new_view)
+        await msg.edit_original_response(embeds=[self.starting_em(self.drafts[new_view.id])], content="", view=new_view)
         return
 
 
