@@ -77,6 +77,7 @@ set_choices_v3 = [
     ["Zendikar", "zen"],
     ["Scars of Mirrodin", "som"],
     ["Mirrodin Besieged", "mbs"],
+    ["Blood Like Rivers", "c_blr"],
 ]
 
 
