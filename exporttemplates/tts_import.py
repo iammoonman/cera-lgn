@@ -100,6 +100,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         + (
             f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty"
             if "loyalty" in face_1.keys()
+            and "Planeswalker" in face_1["type_line"]
             else "" + "\n" + "[6E6E6E]"
             if is_reverse
             else "[-]"
@@ -119,7 +120,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
             if ("Creature" in face_2["type_line"] or "Vehicle" in face_2["type_line"])
             else ""
         )
-        + (f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "loyalty" in face_2.keys() else "")
+        + ((f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else "") if "loyalty" in face_2.keys() else "")
         + ("[-]" if is_reverse else "")
     )
     return descriptionHold
@@ -129,6 +130,7 @@ def make_oracle_normal(card_data):
     descriptionHold = (
         "[b]"
         + card_data["name"]
+        + " "
         + card_data["mana_cost"]
         + "[/b]"
         + "\n"
@@ -244,6 +246,7 @@ def tts_parse(o):
     }
     if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
         extra_obj = {
+            "stitched": o["stitched"] if "stitched" in o else False,
             "card_faces": [
                 {
                     "name": i["name"],
