@@ -165,13 +165,13 @@ class Starlight(commands.Cog):
     )
     async def v3_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
-        try:
-            raw = p_caller.get_packs_v3(set, num, lands)
-        except:
-            return await ctx.respond(
-                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
-                ephemeral=True,
-            )
+        # try:
+        raw = p_caller.get_packs_v3(set, num, lands)
+        # except:
+        #     return await ctx.respond(
+        #         "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+        #         ephemeral=True,
+        #     )
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
