@@ -1,6 +1,6 @@
 {
 	"default_set": "ody",
-	"full_name": "Odyessey",
+	"full_name": "Odyssey",
 	"distros": [
 		{ "slots": {"c": 11, "u": 3, "r": 1}, "drops": {}, "freq": 1 }
 	],

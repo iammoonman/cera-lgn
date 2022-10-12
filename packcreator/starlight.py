@@ -80,7 +80,7 @@ set_choices_v3 = [
     ["Blood Like Rivers", "c_blr"],
     ["Apocalypse", "apc"],
     ["Invasion", "inv"],
-    ["Odyessey", "ody"],
+    ["Odyssey", "ody"],
     ["Planeshift", "pls"],
     ["Torment", "tor"],
     ["Judgment", "jud"],
