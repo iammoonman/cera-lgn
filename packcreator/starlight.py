@@ -78,6 +78,12 @@ set_choices_v3 = [
     ["Scars of Mirrodin", "som"],
     ["Mirrodin Besieged", "mbs"],
     ["Blood Like Rivers", "c_blr"],
+    ["Apocalypse", "apc"],
+    ["Invasion", "inv"],
+    ["Odyssey", "ody"],
+    ["Planeshift", "pls"],
+    ["Torment", "tor"],
+    ["Judgment", "jud"],
 ]
 
 

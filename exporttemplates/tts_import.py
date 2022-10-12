@@ -63,7 +63,7 @@ def ijson_collection(cardlist, out_dict=False):
         if [o["collector_number"], o["set"]] in cardlist:
             card_obj = tts_parse(o)
             blob_json.append(card_obj)
-            out[o["collector_number"] + o["set"]] = card_obj
+            out[f'{o["collector_number"]}{o["set"]}'] = card_obj
         if len(blob_json) == len(cardlist):
             break
     f.close()
@@ -83,13 +83,9 @@ def make_oracle_dfc(card_dota, is_reverse=False):
     face_2 = card_dota["card_faces"][1]
     descriptionHold = (
         ("" if is_reverse else "[6E6E6E]")
-        + "[b]"
-        + face_1["name"]
-        + " "
-        + face_1["mana_cost"]
-        + "[/b]\n"
-        + face_1["type_line"]
-        + plus_rarity(card_dota["rarity"])
+        + f'[b]{face_1["name"]} {face_1["mana_cost"]}[\b]'
+        + "\n"
+        + f'{face_1["type_line"]} {plus_rarity(card_dota["rarity"])}'
         + "\n"
         + italicize_reminder(face_1["oracle_text"])
         + (
@@ -99,20 +95,15 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         )
         + (
             f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty"
-            if "loyalty" in face_1.keys()
-            and "Planeswalker" in face_1["type_line"]
+            if "loyalty" in face_1.keys() and "Planeswalker" in face_1["type_line"]
             else "" + "\n" + "[6E6E6E]"
             if is_reverse
             else "[-]"
         )
         + "\n"
-        + "[b]"
-        + face_2["name"]
-        + " "
-        + face_2["mana_cost"]
-        + "[/b]\n"
-        + face_2["type_line"]
-        + plus_rarity(card_dota["rarity"])
+        + '[b]{face_2["name"]} {face_2["mana_cost"]}[/b]'
+        + "\n"
+        + f'{face_2["type_line"]} {plus_rarity(card_dota["rarity"])}'
         + "\n"
         + italicize_reminder(face_2["oracle_text"])
         + (
@@ -120,7 +111,11 @@ def make_oracle_dfc(card_dota, is_reverse=False):
             if ("Creature" in face_2["type_line"] or "Vehicle" in face_2["type_line"])
             else ""
         )
-        + ((f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else "") if "loyalty" in face_2.keys() else "")
+        + (
+            (f"\n[b]{face_2['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in face_2["type_line"] else "")
+            if "loyalty" in face_2.keys()
+            else ""
+        )
         + ("[-]" if is_reverse else "")
     )
     return descriptionHold
@@ -128,14 +123,9 @@ def make_oracle_dfc(card_dota, is_reverse=False):
 
 def make_oracle_normal(card_data):
     descriptionHold = (
-        "[b]"
-        + card_data["name"]
-        + " "
-        + card_data["mana_cost"]
-        + "[/b]"
+        f'[b]{card_data["name"]} {card_data["mana_cost"]}[/b]'
         + "\n"
-        + card_data["type_line"]
-        + plus_rarity(card_data["rarity"])
+        + f'{card_data["type_line"]} {plus_rarity(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["oracle_text"])
         + (
@@ -154,8 +144,7 @@ def make_oracle_splitadventure(card_data):
         "[b]"
         + f'[b]{card_data["card_faces"][0]["name"]} {card_data["card_faces"][0]["mana_cost"]}[/b]'
         + "\n"
-        + card_data["card_faces"][0]["type_line"]
-        + plus_rarity(card_data["rarity"])
+        + f'{card_data["card_faces"][0]["type_line"]} {plus_rarity(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["card_faces"][0]["oracle_text"])
         + (
@@ -166,8 +155,7 @@ def make_oracle_splitadventure(card_data):
         + "\n"
         + f'[b]{card_data["card_faces"][1]["name"]} {card_data["card_faces"][1]["mana_cost"]}[/b]'
         + "\n"
-        + card_data["card_faces"][1]["type_line"]
-        + plus_rarity(card_data["rarity"])
+        + f'{card_data["card_faces"][1]["type_line"]} {plus_rarity(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["card_faces"][1]["oracle_text"])
         + "\n"
@@ -196,17 +184,9 @@ def make_oracle_vanguard(card_data):
         + "\n"
         + italicize_reminder(card_data["oracle_text"])
         + "\n"
-        + "Life: "
-        + card_data["life_modifier"]
-        + " + 20 = [b]"
-        + (20 + int(card_data["life_modifier"]))
-        + "[/b]"
+        + f'Life: {card_data["life_modifier"]} + 20 = [b]{(20 + int(card_data["life_modifier"]))}[/b]'
         + "\n"
-        + "Hand: "
-        + card_data["hand_modifier"]
-        + " + 7 = [b]"
-        + (7 + int(card_data["hand_modifier"]))
-        + "[/b]"
+        + f'Hand: {card_data["hand_modifier"]} + 7 = [b]{(7 + int(card_data["hand_modifier"]))}[/b]'
     )
     return descriptionHold
 
