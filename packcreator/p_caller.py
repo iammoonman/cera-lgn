@@ -27,7 +27,6 @@ def get_packs(setcode, num_packs, land_pack=False):
         new_colle = []
         for crd in p[0]:
             new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
-        # print([a['name'] for a in new_colle])
         pack_to_add = tts_output.Pack()
         pack_to_add.import_cards(
             new_colle,
@@ -74,16 +73,14 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = tts_import.ijson_collection(all_cn_sets)
-    set_info += planesculptors.ps_collection(all_cn_sets)
+    set_info = {**tts_import.ijson_collection(all_cn_sets, True), **planesculptors.ps_collection(all_cn_sets, True)}
     for p in all_packs:
-        # print([a['name'] for a in set_info])
-        # print(len(raw_cn_cards))
-        # print(len(set_info))
         new_colle = []
         for crd in p[0]:
-            new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
-        # print([a['name'] for a in new_colle])
+            if f"{crd[0]}{crd[1]}" in set_info:
+                new_colle += [set_info[f"{crd[0]}{crd[1]}"]]
+            else:
+                raise Exception(f"Card does not exist: {crd[0]} {crd[1]}")
         pack_to_add = tts_output.Pack()
         pack_to_add.import_cards(
             new_colle,
@@ -92,7 +89,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
         save.addObject(pack_to_add)
     if land_pack:
         basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
-        setcode = setJSON['default_set']
+        setcode = setJSON["default_set"]
         pack_to_add = tts_output.Pack()
         basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
         pack_to_add.import_cards(basic_cards)
@@ -116,17 +113,20 @@ def get_p1p1_v3(setcode):
     raw_cn_cards, foil_indexes, seed = p_creator.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
     # Log the seed
     # log["seeds"].append(seed)
-    set_info = tts_import.ijson_collection(raw_cn_cards)
-    set_info += planesculptors.ps_collection(raw_cn_cards)
+    set_info = {**tts_import.ijson_collection(raw_cn_cards, True), **planesculptors.ps_collection(raw_cn_cards, True)}
     new_colle = []
     for crd in raw_cn_cards:
-        new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
+        if f"{crd[0]}{crd[1]}" in set_info:
+            new_colle += [set_info[f"{crd[0]}{crd[1]}"]]
+        else:
+            raise Exception(f"Card does not exist: {crd[0]} {crd[1]}")
     return new_colle, foil_indexes
+
 
 def get_packs_setfile(setfile, num_packs, land_pack=False):
     """Returns a JSON save file for Tabletop Simulator."""
     setJSON = json.load(setfile)
-    setcode = setJSON['default_set']
+    setcode = setJSON["default_set"]
     save = tts_output.Save(name=f"packs of {setJSON['full_name']}")
     # log = {
     #     "seeds": [],
@@ -153,16 +153,14 @@ def get_packs_setfile(setfile, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = tts_import.ijson_collection(all_cn_sets)
-    set_info += planesculptors.ps_collection(all_cn_sets)
+    set_info = {**tts_import.ijson_collection(all_cn_sets, True), **planesculptors.ps_collection(all_cn_sets, True)}
     for p in all_packs:
-        # print([a['name'] for a in set_info])
-        # print(len(raw_cn_cards))
-        # print(len(set_info))
         new_colle = []
         for crd in p[0]:
-            new_colle += [x for x in set_info if x["collector_number"] == crd[0] and x["set"] == crd[1]]
-        # print([a['name'] for a in new_colle])
+            if f"{crd[0]}{crd[1]}" in set_info:
+                new_colle += [set_info[f"{crd[0]}{crd[1]}"]]
+            else:
+                raise Exception(f"Card does not exist: {crd[0]} {crd[1]}")
         pack_to_add = tts_output.Pack()
         pack_to_add.import_cards(
             new_colle,
@@ -171,7 +169,7 @@ def get_packs_setfile(setfile, num_packs, land_pack=False):
         save.addObject(pack_to_add)
     if land_pack:
         basicslist = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
-        setcode = "m21" if setcode in ["ppm"] else setcode
+        setcode = "m21"
         pack_to_add = tts_output.Pack()
         basic_cards = tts_import.scryfall_collection([[setcode, i] for i in basicslist])
         pack_to_add.import_cards(basic_cards)

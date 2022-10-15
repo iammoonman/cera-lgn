@@ -141,7 +141,7 @@ class Pack:
                     else cardData["image_uris"]["normal"],
                 ),
                 "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
-                "NumWidth": 1,
+                "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
                 "BackIsHidden": True,
                 "UniqueBack": False,
@@ -153,7 +153,7 @@ class Pack:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
                     "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
-                    "NumWidth": 1,
+                    "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
                     "BackIsHidden": True,
                     "UniqueBack": False,
@@ -167,7 +167,8 @@ class Pack:
                         "Description": backDescription,
                         "Transform": transformAttrs,
                         "ColorDiffuse": colorAttrs,
-                        "CardID": int((counter * 1000) - 100) * 100,
+                        "CardID": int((counter * 1000) - 100) * 100
+                        + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
                     }
