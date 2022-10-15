@@ -84,6 +84,8 @@ set_choices_v3 = [
     ["Planeshift", "pls"],
     ["Torment", "tor"],
     ["Judgment", "jud"],
+    ["Worldwake", "wwk"],
+    ["Rise of the Eldrazi", "roe"],
 ]
 
 
