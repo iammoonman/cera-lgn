@@ -11,6 +11,7 @@ legal_sets = {
     "c_gsc": "ghariv-the-sacred-city",
     "c_blr": "blood-like-rivers",
     "c_vtm": "villains-the-musical",
+    "c_fmq": "the_fabled_masquerade",
     "c_ksv": "karslav",
     "c_alr": "alara",
     "c_hnn": "high-noon1",
