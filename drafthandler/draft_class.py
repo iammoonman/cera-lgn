@@ -124,10 +124,10 @@ class Draft:
 
             def __init__(self, p=[]):
                 self.players = p
-                self.gwinners: list[str] = []
+                self.gwinners: list[int] = []
                 if p[1] == Draft.Player("Bye", "-1"):
                     # Automatically set score for the bye.
-                    self.gwinners = ["0", "0", None]
+                    self.gwinners = [0, 0, None]
                 self.drops = [False for i in p]
 
     def do_pairings(self):
