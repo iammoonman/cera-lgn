@@ -25,7 +25,7 @@
 		>;
 	};
 	let { cds, users } = data;
-	// console.log('on page', cds)
+	console.log('on page', users, cds)
 	import type { CardDisplayType } from '../types/displaycard';
 	import type { Draft } from '../types/events';
 	// import { PlayerList } from '../types/playerstore';

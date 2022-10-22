@@ -137,6 +137,8 @@
 		background: inherit;
 		position: sticky;
 		top: 0; /* Don't forget this, required for the stickiness */
+	}
+	thead {
 		box-shadow: 0 2px 2px -1px white;
 	}
 	.mytable {
