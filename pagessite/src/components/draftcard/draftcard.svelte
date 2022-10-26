@@ -23,10 +23,10 @@
 	<div class="leftside grid p-2 relative">
 		<Wrapper>
 			<div class="titlecard relative">
-				<span class="text-lg text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
+				<span class="text-lg text-title text-ellipsis overflow-x-hidden whitespace-nowrap pl-1">
 					{D.title ?? ''}
 				</span>
-				<span class="text-xs text-date">{D.date.toLocaleDateString()}</span>
+				<span class="text-xs text-date pl-1">{D.date.toLocaleDateString()}</span>
 			</div>
 			<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
 				{D.description ?? 'No description provided.'}
@@ -263,8 +263,8 @@
 		font-size: 0rem;
 	}
 	.top-three > .player-avatar:nth-child(n + 2) > img {
-		height: 50px;
-		width: 50px;
+		height: 55px;
+		width: 55px;
 	}
 	.top-three > .player-avatar:nth-child(n + 2) {
 		grid-area: 1 / 2;
