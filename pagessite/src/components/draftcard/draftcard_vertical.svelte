@@ -18,104 +18,71 @@
 	);
 </script>
 
-<div class="outercard grid grid-cols-2 relative">
-	<div class="black-border"><div></div><div></div></div>
-	<div class="leftside grid p-2 relative">
-		<Wrapper>
-			<div class="titlecard relative">
-				<span class="text-lg text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
-					{D.title ?? ''}
-				</span>
-				<span class="text-xs text-date">{D.date.toLocaleDateString()}</span>
-			</div>
-			<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
-				{D.description ?? 'No description provided.'}
-			</Tooltip>
-		</Wrapper>
-		<div class="tagsymbolcontainer"><Symbol symbol_name={D.tag} symbol_size={170} /></div>
-		<div class="top-three">
-			<div class="player-avatar">
-				<img src={pn[sortedscores[0].id].avatarURL} alt="player_pfp" />
-				<span>{pn[sortedscores[0].id].username}</span>
-			</div>
-			<div class="player-avatar">
-				<img src={pn[sortedscores[1].id].avatarURL} alt="player_pfp" />
-				<span>{pn[sortedscores[1].id].username}</span>
-			</div>
-			<div class="player-avatar">
-				<img src={pn[sortedscores[2].id].avatarURL} alt="player_pfp" />
-				<span>{pn[sortedscores[2].id].username}</span>
-			</div>
+<div class="outercard grid grid-cols-1 p-2 relative justify-between">
+    <div class="black-border"><div></div><div></div></div>
+	<Wrapper>
+		<div class="titlecard relative">
+			<span class="text-2xl text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
+				{D.title ?? ''}
+			</span>
+			<span class="text-sm text-date">{D.date.toLocaleDateString()}</span>
 		</div>
-		<table>
-			<thead>
-				<tr>
-					<th>Player</th>
-					<th class="text-right">PTS</th>
-					<th class="text-right">OMP</th>
-					<th class="text-right">GWP</th>
-					<th class="text-right">OGP</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each sortedscores as s}
-					<tr>
-						<td>{pn[s.id]?.username ?? 'BYE'}</td>
-						<td class="text-right">{s.points}</td>
-						<td class="text-right">{typeof s.ogp === 'string' ? s.ogp : s.ogp.toFixed(2)}</td>
-						<td class="text-right">{typeof s.gwp === 'string' ? s.gwp : s.gwp.toFixed(2)}</td>
-						<td class="text-right">{typeof s.omp === 'string' ? s.omp : s.omp.toFixed(2)}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-	<div class="rightside grid grid-cols-1">
-		<div class="flex flex-row place-items-center justify-between">
-			<button
-				on:click={() => {
-					D.rounds.get(selectedRound - 1) ? (selectedRound = selectedRound - 1) : null;
-				}}
-				class={D.rounds.get(selectedRound - 1) ? 'visible' : 'invisible'}
-			>
-				<AnglesRight direction="left" fill="white" />
-			</button>
-			<span class="w-fit text-lg">ROUND {round}</span>
-			<button
-				on:click={() => {
-					D.rounds.get(selectedRound + 1) ? (selectedRound = selectedRound + 1) : null;
-				}}
-				class={D.rounds.get(selectedRound + 1) ? 'visible' : 'invisible'}
-			>
-				<AnglesRight direction="right" fill="white" />
-			</button>
+		<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
+			{D.description ?? 'No description provided.'}
+		</Tooltip>
+	</Wrapper>
+	<div class="tagsymbolcontainer"><Symbol symbol_name={D.tag} symbol_size={230} /></div>
+	<div class="top-three">
+		<div class="player-avatar">
+			<img src={pn[sortedscores[0].id].avatarURL} alt="player_pfp" />
+			<span>{pn[sortedscores[0].id].username}</span>
 		</div>
-		<div
-			class="flex flex-col items-center games"
-			style={`${roundHold.length == 5 ? 'scale: 0.85; top: -20px' : ''}`}
-		>
-			{#each roundHold as m (m)}
-				<div in:fly={{ duration: 200, y: 50 }}>
-					<Tinygame {m} {pn} />
-				</div>
-			{/each}
+		<div class="player-avatar">
+			<img src={pn[sortedscores[1].id].avatarURL} alt="player_pfp" />
+			<span>{pn[sortedscores[1].id].username}</span>
+		</div>
+		<div class="player-avatar">
+			<img src={pn[sortedscores[2].id].avatarURL} alt="player_pfp" />
+			<span>{pn[sortedscores[2].id].username}</span>
 		</div>
 	</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th class="text-right">PTS</th>
+                <th class="text-right">OMP</th>
+                <th class="text-right">GWP</th>
+                <th class="text-right">OGP</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each sortedscores as s}
+                <tr>
+                    <td>{pn[s.id]?.username ?? 'BYE'}</td>
+                    <td class="text-right">{s.points}</td>
+                    <td class="text-right">{typeof s.ogp === 'string' ? s.ogp : s.ogp.toFixed(2)}</td>
+                    <td class="text-right">{typeof s.gwp === 'string' ? s.gwp : s.gwp.toFixed(2)}</td>
+                    <td class="text-right">{typeof s.omp === 'string' ? s.omp : s.omp.toFixed(2)}</td>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
 </div>
 
 <style>
-	.black-border {
+    .black-border {
         position: absolute;
         width: 100%;
         height: 100%;
-        border-radius: 3.5% / 4.75% ;
+        border-radius: 4.75% / 3.5%;
         box-shadow: inset 0 0 0 8px black;
         z-index: 0;
     }
-	.black-border:after {
+    .black-border:after {
         position: absolute;
         height: 15px;
-        width: 460px;
+        width: 320px;
         border-radius: 0 0 50% 50%;
         bottom: 0;
         left: 50%;
@@ -139,38 +106,33 @@
         right: 0px;
     }
 	.outercard {
-		aspect-ratio: 468 / 336;
-		width: 468px;
-		height: 336px;
-		border-radius: 3.5% / 4.75%;
+		aspect-ratio: 336 / 468;
+		width: 336px;
+		height: 468px;
+		border-radius: 4.75% / 3.5%;
 		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
 		background-color: #7e1515;
 		color: white;
 		overflow-x: visible;
 		overflow-y: clip;
-	}
-	.leftside {
-		grid-template-rows: 65px;
-		box-shadow: 2px 0px 4px -4px black;
-		max-height: 336px;
+        position: relative
 	}
 	table {
 		display: block;
 		text-align: left;
 		border-collapse: collapse;
-		width: 107%;
 		font-size: small;
-		height: 130px;
-		overflow: auto;
-		background-color: #7e151588;
+		overflow: hidden;
 		z-index: 3;
+        position: relative;
+        left: 0.5rem;
 		scrollbar-gutter: stable;
-		left: 4px;
-		position: relative;
+        height: 200px;
+        overflow: auto;
 	}
 	th,
 	td {
-		padding: -0.25rem;
+		padding-inline: 0.6rem;
 	}
 	thead {
 		position: sticky;
@@ -189,6 +151,7 @@
 		grid-template-rows: auto auto;
 		align-items: center;
 		z-index: 1;
+        padding: 0.2rem;
 	}
 	.text-title {
 		grid-area: title;
@@ -196,17 +159,6 @@
 	.text-date {
 		grid-area: date;
 		text-align: left;
-	}
-	.rightside {
-		grid-template-rows: 50px auto;
-		padding: 7px;
-	}
-	.rightside > div > button {
-		padding-inline: 0.2rem;
-	}
-	.games {
-		padding-bottom: 12px;
-		position: relative;
 	}
 	.tagsymbolcontainer {
 		filter: opacity(15%) invert();
@@ -244,34 +196,34 @@
 		font-size: 1rem;
 	}
 	.top-three > .player-avatar:first-child > img {
-		height: 80px;
-		width: 80px;
-		border-image: url()
+		height: 120px;
+		width: 120px;
+		border-image: url();
 	}
 	.top-three > .player-avatar:nth-child(n + 2) > span {
-		max-width: 70px;
+		max-width: 100px;
 		overflow-x: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
-		font-size: 0rem;
+		font-size: 0.9rem;
 	}
 	.top-three > .player-avatar:nth-child(n + 3) > span {
-		max-width: 70px;
+		max-width: 100px;
 		overflow-x: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
-		font-size: 0rem;
+		font-size: 0.8rem;
 	}
 	.top-three > .player-avatar:nth-child(n + 2) > img {
-		height: 50px;
-		width: 50px;
+		height: 80px;
+		width: 80px;
 	}
 	.top-three > .player-avatar:nth-child(n + 2) {
 		grid-area: 1 / 2;
 	}
 	.top-three > .player-avatar:nth-child(n + 3) > img {
-		height: 40px;
-		width: 40px;
+		height: 50px;
+		width: 50px;
 	}
 	.top-three > .player-avatar:nth-child(n + 3) {
 		grid-area: 2 / 2;

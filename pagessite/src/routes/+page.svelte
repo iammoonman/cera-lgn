@@ -37,6 +37,7 @@
 	import Draftcard from '../components/draftcard/draftcard.svelte';
 	import { error, json } from '@sveltejs/kit';
 	import type { User } from 'discord.js';
+	import DraftcardVertical from '../components/draftcard/draftcard_vertical.svelte';
 	// apply filters to array of objects
 	$: PlayerName = '';
 	$: TagSelect = '';
@@ -167,6 +168,7 @@
 				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
+				<!-- <DraftcardVertical D={c} pn={users} /> -->
 				<Draftcard D={c} pn={users} />
 			{/if}
 		{/each}
