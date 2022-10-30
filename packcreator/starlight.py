@@ -86,6 +86,7 @@ set_choices_v3 = [
     ["Judgment", "jud"],
     ["Worldwake", "wwk"],
     ["Rise of the Eldrazi", "roe"],
+    ["Innistrad", "isd"],
 ]
 
 
