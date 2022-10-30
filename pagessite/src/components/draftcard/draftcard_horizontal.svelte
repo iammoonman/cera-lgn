@@ -75,7 +75,7 @@
 		</table>
 	</div>
 	<div class="rightside grid grid-cols-1">
-		<div class="flex flex-row place-items-center justify-between">
+		<div class="flex flex-row place-items-center justify-around controls-right h-10">
 			<button
 				on:click={() => {
 					D.rounds.get(selectedRound - 1) ? (selectedRound = selectedRound - 1) : null;
@@ -207,6 +207,10 @@
 	.rightside {
 		grid-template-rows: 50px auto;
 		padding: 7px;
+		background-color: #6b1212;
+		border-radius: 0 22px 32px 0;
+		box-shadow: inset 0 0 12px -4px black;
+		height: 336px;
 	}
 	.rightside > div > button {
 		padding-inline: 0.2rem;
@@ -214,6 +218,9 @@
 	.games {
 		padding-bottom: 12px;
 		position: relative;
+	}
+	.controls-right {
+		box-shadow: 0px 2px 4px -4px black;
 	}
 	.tagsymbolcontainer {
 		filter: opacity(15%) invert();
@@ -240,7 +247,7 @@
 		border-radius: 15%;
 	}
 	.player-avatar > img {
-		filter: drop-shadow(0px 2px 3px black);
+		/* filter: drop-shadow(0px 2px 3px goldenrod); */
 		border-radius: 50%;
 	}
 	.top-three > .player-avatar:first-child {
@@ -251,6 +258,7 @@
 		font-size: 1rem;
 	}
 	.top-three > .player-avatar:first-child > img {
+		filter: drop-shadow(0px 2px 4px rgb(238, 206, 118));
 		height: 80px;
 		width: 80px;
 	}
@@ -269,6 +277,7 @@
 		font-size: 0rem;
 	}
 	.top-three > .player-avatar:nth-child(n + 2) > img {
+		filter: drop-shadow(0px 2px 3px silver);
 		height: 55px;
 		width: 55px;
 	}
@@ -276,6 +285,7 @@
 		grid-area: 1 / 2;
 	}
 	.top-three > .player-avatar:nth-child(n + 3) > img {
+		filter: drop-shadow(0px 2px 3px black);
 		height: 40px;
 		width: 40px;
 	}

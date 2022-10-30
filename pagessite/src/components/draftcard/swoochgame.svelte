@@ -13,7 +13,7 @@
 	<Wrapper>
 		<div class="tiltedcontainer" in:fly={{ duration: 200, x: -50 }}>
 			<div class="swoochcontainer">
-				<Swooch fill={'black'} h={20} w={90} />
+				<Swooch fill={'white'} h={20} w={90} />
 			</div>
 			<img src={pn[m.p_ids[0]].avatarURL ?? ''} alt="pfp" />
 			<span>{[...m.games].filter(([k, x]) => x === m.p_ids[0]).length}</span>
@@ -24,7 +24,7 @@
 		<Wrapper>
 			<div class="tiltedcontainer_2" in:fly={{ duration: 200, x: 50, delay: 50 }}>
 				<div class="swoochcontainer_2">
-					<Swooch fill={'black'} h={20} w={90} />
+					<Swooch fill={'white'} h={20} w={90} />
 				</div>
 				<span>{[...m.games].filter(([k, x]) => x === m.p_ids[1]).length}</span>
 				<img src={pn[m.p_ids[1]]?.avatarURL ?? ''} alt="pfp" />
@@ -34,7 +34,7 @@
 	{:else}
 		<div class="tiltedcontainer_2" in:fly={{ duration: 200, x: 50, delay: 50 }}>
 			<div class="swoochcontainer_2">
-				<Swooch fill={'black'} h={20} w={90} />
+				<Swooch fill={'white'} h={20} w={90} />
 			</div>
 			<span>{'BYE'}</span>
 		</div>

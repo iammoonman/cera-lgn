@@ -145,7 +145,7 @@
 				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
-				<Draftcard D={c} pn={users} tapped={false}/>
+				<Draftcard D={c} pn={users} tapped={true}/>
 			{/if}
 		{/each}
 	</div>
