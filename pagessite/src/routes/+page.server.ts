@@ -5,6 +5,7 @@ import { DIS_TOKEN } from '$env/static/private';
 import { Client, type User } from 'discord.js'
 import type { LoadEvent } from '@sveltejs/kit';
 export const prerender = true;
+const pfps = ['https://better-default-discord.netlify.app/Icons/Solid-Red.png', 'https://better-default-discord.netlify.app/Icons/Solid-Orange.png', 'https://better-default-discord.netlify.app/Icons/Solid-Yellow.png', 'https://better-default-discord.netlify.app/Icons/Solid-Green.png', 'https://better-default-discord.netlify.app/Icons/Solid-Indigo.png', 'https://better-default-discord.netlify.app/Icons/Solid-Blue.png', 'https://better-default-discord.netlify.app/Icons/Solid-Violet.png', 'https://better-default-discord.netlify.app/Icons/Solid-Pink.png', 'https://better-default-discord.netlify.app/Icons/Solid-Black.png', 'https://better-default-discord.netlify.app/Icons/Solid-Gray.png'];
 export async function load(event: LoadEvent) {
     let CDs: Promise<(Draft | CardDisplayType)>[] = [];
     await fs.readdir('./src/data').then(async (fnames) => {
@@ -27,8 +28,16 @@ export async function load(event: LoadEvent) {
         }
     })
     let newUsers = await Promise.allSettled(listUsers).then(v => {
-        const newthing: Record<string, unknown> = {}
-        v.forEach(y => { if (y.status === 'fulfilled') { return newthing[y.value.id] = y.value.toJSON() } })
+        const newthing: Record<string, User> = {}
+        v.forEach(y => {
+            if (y.status === 'fulfilled') {
+                newthing[y.value.id] = y.value.toJSON() as User;
+                if (newthing[y.value.id].avatarURL === null) {
+                    // @ts-ignore
+                    newthing[y.value.id].avatarURL = pfps[Math.floor(Math.random() * pfps.length)]
+                }
+            }
+        })
         return newthing
     })
     return { cds: newList, users: newUsers }
