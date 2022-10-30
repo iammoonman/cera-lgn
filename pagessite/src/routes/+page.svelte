@@ -1,5 +1,4 @@
 <script lang="ts">
-	import fs from 'fs';
 	export let data: {
 		cds: (Draft | CardDisplayType)[];
 		users: Record<
@@ -25,19 +24,11 @@
 		>;
 	};
 	let { cds, users } = data;
-	console.log('on page', users, cds)
+	// console.log('on page', users, cds)
 	import type { CardDisplayType } from '../types/displaycard';
 	import type { Draft } from '../types/events';
-	// import { PlayerList } from '../types/playerstore';
-
-	import Layouts from '../components/sheetbuilder/layouts.svelte';
-
-	import Sheetbuildercomponent from '../components/sheetbuilder/sheetbuildercomponent.svelte';
 	import Carddisplay from '../components/cardcard/carddisplay.svelte';
 	import Draftcard from '../components/draftcard/draftcard.svelte';
-	import { error, json } from '@sveltejs/kit';
-	import type { User } from 'discord.js';
-	import DraftcardVertical from '../components/draftcard/draftcard_vertical.svelte';
 	// apply filters to array of objects
 	$: PlayerName = '';
 	$: TagSelect = '';
@@ -49,8 +40,6 @@
 
 	$: filteredDC = [] as (Draft | CardDisplayType)[];
 	$: {
-		// console.log(data.users)
-		// PlayerList.set(structuredClone(data.users))
 		// @ts-ignore
 		filteredDC = cds.filter((x) => {
 			if ('date' in x) {
@@ -80,13 +69,6 @@
 								n = true;
 							}
 						}
-						// if (data.users.get(y.id) !== undefined) {
-						// 	if (
-						// 		data.users.get(y.id)!.username.toLowerCase().search(PlayerName.toLowerCase()) > -1
-						// 	) {
-						// 		n = true;
-						// 	}
-						// }
 					});
 					return n;
 				}
@@ -100,11 +82,6 @@
 							n = true;
 						}
 					});
-					// [...data.users].forEach(([k, v]) => {
-					// 	if (v.username.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
-					// 		n = true;
-					// 	}
-					// });
 					return n;
 				}
 				if (x.title.toLowerCase().search(CardName.toLowerCase()) < 0) {
@@ -162,14 +139,13 @@
 		</div>
 	</div>
 	<!-- <Sheetbuildercomponent /> -->
-	<div class="h-full mt-2 grid gap-4 booty">
+	<div class="h-full mt-2 grid gap-4 booty place-items-center">
 		{#each filteredDC as c}
 			{#if 'uri' in c}
 				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
-				<!-- <DraftcardVertical D={c} pn={users} /> -->
-				<Draftcard D={c} pn={users} />
+				<Draftcard D={c} pn={users} tapped={false}/>
 			{/if}
 		{/each}
 	</div>
