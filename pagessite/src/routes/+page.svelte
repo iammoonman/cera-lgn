@@ -38,6 +38,8 @@
 	$: CardName = '';
 	$: DescriptionSearch = '';
 
+	$: isTapped = false;
+
 	$: filteredDC = [] as (Draft | CardDisplayType)[];
 	$: {
 		// @ts-ignore
@@ -136,16 +138,17 @@
 				<label for="dts">Card Title</label>
 				<input type="text" name="dts" bind:value={CardName} />
 			</div>
+			<button on:click={() => isTapped = !isTapped}>{isTapped ? 'Untap' : 'Tap'} cards</button>
 		</div>
 	</div>
 	<!-- <Sheetbuildercomponent /> -->
-	<div class="h-full mt-2 grid gap-4 booty place-items-center">
+	<div class="h-full mt-2 grid booty place-items-center">
 		{#each filteredDC as c}
 			{#if 'uri' in c}
 				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
-				<Draftcard D={c} pn={users} tapped={true}/>
+				<Draftcard D={c} pn={users} tapped={isTapped}/>
 			{/if}
 		{/each}
 	</div>

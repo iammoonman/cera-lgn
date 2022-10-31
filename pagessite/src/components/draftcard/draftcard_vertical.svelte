@@ -1,18 +1,10 @@
 <script lang="ts">
 	import type { Draft } from 'src/types/events';
-	import Tinygame from './tinygame.svelte';
-	// import { PlayerList } from '../../types/playerstore';
-	import { fly } from 'svelte/transition';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
-	import AnglesRight from '../utilities/angles-right.svelte';
 	import Symbol from '../symbols/symbol.svelte';
-	import type { User } from 'discord.js';
 	import type { PD } from 'src/types/discord';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
-	$: selectedRound = 0;
-	$: roundHold = [...(D.rounds.get(selectedRound)?.matches ?? [])];
-	$: round = D.rounds.get(selectedRound)?.title ?? `${selectedRound + 1}`;
 	const sortedscores = D.scores.sort((a, b) =>
 		a.points > b.points ? -1 : b.points > a.points ? 1 : 0
 	);
@@ -22,12 +14,14 @@
     <div class="black-border"><div></div><div></div></div>
 	<Wrapper>
 		<div class="titlecard relative">
-			<span class="text-2xl text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
+			<span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap">
 				{D.title ?? ''}
 			</span>
-			<span class="text-sm text-date">{D.date.toLocaleDateString()}</span>
+			<span class="text-date">{D.date.toLocaleDateString()}</span>
 		</div>
 		<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
+			{D.title}
+			<hr />
 			{D.description ?? 'No description provided.'}
 		</Tooltip>
 	</Wrapper>
@@ -48,7 +42,7 @@
 	</div>
     <table>
         <thead>
-            <tr>
+            <tr style="background-color: inherit;">
                 <th>Player</th>
                 <th class="text-right">PTS</th>
                 <th class="text-right">OMP</th>
@@ -111,11 +105,12 @@
 		height: 468px;
 		border-radius: 4.75% / 3.5%;
 		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
-		background-color: #7e1515;
+		background-color: #176337;
 		color: white;
 		overflow-x: visible;
 		overflow-y: clip;
-        position: relative
+        position: relative;
+		grid-template-rows: 55px 190px 200px;
 	}
 	table {
 		display: block;
@@ -134,10 +129,13 @@
 	td {
 		padding-inline: 0.6rem;
 	}
+	tr:nth-child(2n + 1) {
+		background-color: #ffffff06;
+	}
 	thead {
 		position: sticky;
 		top: 0; /* Don't forget this, required for the stickiness */
-		background-color: #7e1515;
+		background-color: #176337;
 		box-shadow: 0 2px 2px -2px white;
 		z-index: 0;
 	}
@@ -151,14 +149,19 @@
 		grid-template-rows: auto auto;
 		align-items: center;
 		z-index: 1;
+		box-shadow: 0 1px 3px -3px white;
         padding: 0.2rem;
+		padding-top: 0;
 	}
 	.text-title {
 		grid-area: title;
+		font-size: 1.5rem;
 	}
 	.text-date {
 		grid-area: date;
 		text-align: left;
+		font-size: 0.8rem;
+		height: min-content;
 	}
 	.tagsymbolcontainer {
 		filter: opacity(15%) invert();
@@ -173,15 +176,19 @@
 		align-items: center;
 		grid-template-columns: 60% 40%;
 		gap: 4px;
-		z-index: 3;
+		z-index: 9;
 	}
 	.player-avatar {
 		display: grid;
 		grid-template-rows: auto min-content;
 		place-items: center;
+		transition-property: scale;
+		transition-duration: 70ms;
+		transition-timing-function: ease;
+		z-index: 9;
 	}
 	.player-avatar > span {
-		background-color: #7e151599;
+		background-color: #17633799;
 		border-radius: 15%;
 	}
 	.player-avatar > img {
@@ -227,5 +234,8 @@
 	}
 	.top-three > .player-avatar:nth-child(n + 3) {
 		grid-area: 2 / 2;
+	}
+	.top-three > .player-avatar:hover {
+		scale: 1.3;
 	}
 </style>

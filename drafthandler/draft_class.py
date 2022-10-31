@@ -32,6 +32,7 @@ class Draft:
             "id": self.draftID,
             "tag": self.tag,
             "date": self.date,
+            "description": self.description,
             "title": self.title,
             "rounds": [
                 {
