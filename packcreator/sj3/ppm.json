@@ -1,5 +1,5 @@
 {
-	"default_set": "ppm", 
+	"default_set": "m21", 
 	"full_name": "Pauper Masters", 
 	"distros": [
 		{ "slots": {"c": 15}, "drops": {}, "freq": 1 }
