@@ -22,9 +22,9 @@
 				bannerURL: null;
 			}
 		>;
+		cards: any;
 	};
-	let { cds, users } = data;
-	// console.log('on page', users, cds)
+	let { cds, users, cards } = data;
 	import type { CardDisplayType } from '../types/displaycard';
 	import type { Draft } from '../types/events';
 	import Carddisplay from '../components/cardcard/carddisplay.svelte';
@@ -38,10 +38,12 @@
 	$: CardName = '';
 	$: DescriptionSearch = '';
 
+	$: isTapped = false;
+
 	$: filteredDC = [] as (Draft | CardDisplayType)[];
 	$: {
 		// @ts-ignore
-		filteredDC = cds.filter((x) => {
+		filteredDC = [...cds, ...cards].filter((x) => {
 			if ('date' in x) {
 				if (x.date > new Date(Date2)) {
 					return false;
@@ -63,7 +65,7 @@
 				}
 				if (PlayerName !== '') {
 					let n = false;
-					x.scores.forEach((y) => {
+					x.scores.forEach((y: any) => {
 						if (users[y.id] !== undefined) {
 							if (users[y.id]!.username.toLowerCase().search(PlayerName.toLowerCase()) > -1) {
 								n = true;
@@ -136,16 +138,17 @@
 				<label for="dts">Card Title</label>
 				<input type="text" name="dts" bind:value={CardName} />
 			</div>
+			<button on:click={() => isTapped = !isTapped}>{isTapped ? 'Untap' : 'Tap'} cards</button>
 		</div>
 	</div>
 	<!-- <Sheetbuildercomponent /> -->
-	<div class="h-full mt-2 grid gap-4 booty place-items-center">
+	<div class="h-full mt-2 grid booty place-items-center pb-10">
 		{#each filteredDC as c}
 			{#if 'uri' in c}
 				<Carddisplay C={c} pn={users} />
 			{/if}
 			{#if 'date' in c}
-				<Draftcard D={c} pn={users} tapped={true}/>
+				<Draftcard D={c} pn={users} tapped={isTapped}/>
 			{/if}
 		{/each}
 	</div>

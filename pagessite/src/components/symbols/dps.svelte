@@ -1,4 +1,4 @@
-<svg viewBox="0 0 16.932 9.4707401" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 16.932 9.4707401" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(50%)">
 	<title>Draft Progression Series</title>
 	<path
 		d="M 0.16999996,0.49 H 5.27 L 2.89,5.59 6.8,8.8958466 1.53,6.19 H -3.6666667e-8 L 2.04,2.19 Z"

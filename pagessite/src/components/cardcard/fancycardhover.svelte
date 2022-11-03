@@ -5,10 +5,12 @@
 	// If right, negative y
 	// If left, positive y
 	// Angle proportional to the distance from center
-	export let width = 336;
-	export let height = 468;
+	export let width = 264;
+	export let height = 367;
 	let v: HTMLDivElement;
-	$: pos = { x: width / 2, y: height / 2 };
+	let w: number = 264;
+	let h: number = 367;
+	let pos = { x: (w ?? width) / 2, y: (h ?? height) / 2 };
 	function handleMM(e: { clientX: any; clientY: any }) {
 		pos = {
 			x: e.clientX - v.getBoundingClientRect().left,
@@ -16,7 +18,7 @@
 		};
 	}
 	function handleML() {
-		pos = { x: width / 2, y: height / 2 };
+		pos = { x: (w ?? width) / 2, y: (h ?? height) / 2 };
 	}
 	function distanceToPoint(x1: number, y1: number, x2: number, y2: number) {
 		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -24,21 +26,22 @@
 	function normalize(x: number, x_max: number, x_min: number) {
 		return (x - x_min) / (x_max - x_min);
 	}
-	// --posY = distance from center at 0 normalized to 30
-	// $: {
-	// 	console.log(normalize(pos.y - height / 2, height / 2, 0) * 21);
-	// }
 </script>
 
-<div class="superparent">
+<div
+	class="superparent"
+	on:mousemove={handleMM}
+	on:mouseleave={handleML}
+	bind:offsetWidth={w}
+	bind:offsetHeight={h}
+	bind:this={v}
+>
 	<div
 		class="card_s"
-		on:mousemove={handleMM}
-		on:mouseleave={handleML}
-		style={`--posX: ${-normalize(pos.x - width / 2, width / 2, 0) * 17}deg; --posY: ${
-			normalize(pos.y - height / 2, height / 2, 0) * 13
-		}deg; --rX: ${normalize(pos.x, width, 0) * 100}%; --rY: ${normalize(pos.y, height, 0) * 100}%;`}
-		bind:this={v}
+		style={`--posX: ${-normalize(pos.x - w / 2, w, 0) * 60}deg;
+		--posY: ${normalize(pos.y - h / 2, h, 0) * 45}deg;
+		--rX: ${normalize(pos.x, w, 0) * 100}%;
+		--rY: ${normalize(pos.y, h, 0) * 100}%;`}
 	>
 		<div class="card__glare" />
 		<slot />
@@ -48,7 +51,6 @@
 <style>
 	* {
 		transform-style: preserve-3d;
-		transform: translate3d(0, 0, 0.1px);
 	}
 	.superparent {
 		perspective: 600px;
@@ -56,10 +58,7 @@
 	.card_s {
 		will-change: transform;
 		transform-origin: center;
-		transition: transform 10ms;
-		/* background: linear-gradient(217deg, rgba(255, 0, 0, 0.8), rgba(255, 0, 0, 0) 70.71%),
-			linear-gradient(127deg, rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0) 70.71%),
-			linear-gradient(336deg, rgba(0, 0, 255, 0.8), rgba(0, 0, 255, 0) 70.71%); */
+		transition: transform 0ms;
 		transform: rotateX(var(--posY)) rotateY(var(--posX));
 		box-shadow: 0px 10px 20px -5px black;
 		border-radius: 4.75% / 3.5%;
@@ -83,6 +82,6 @@
 		transition: opacity 100ms;
 	}
 	.card_s:hover > .card__glare {
-		opacity: 60%;
+		opacity: 30%;
 	}
 </style>

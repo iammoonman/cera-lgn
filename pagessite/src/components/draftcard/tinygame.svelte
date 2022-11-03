@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { User } from 'discord.js';
 	import type { Match } from 'src/types/events';
-	// import { PlayerList } from '../../types/playerstore';
 	export let m: Match;
 	export let pn: Record<
 		string,

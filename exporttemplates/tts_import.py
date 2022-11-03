@@ -83,7 +83,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
     face_2 = card_dota["card_faces"][1]
     descriptionHold = (
         ("" if is_reverse else "[6E6E6E]")
-        + f'[b]{face_1["name"]} {face_1["mana_cost"]}[\b]'
+        + f'[b]{face_1["name"]} {face_1["mana_cost"]}[/b]'
         + "\n"
         + f'{face_1["type_line"]} {plus_rarity(card_dota["rarity"])}'
         + "\n"
@@ -101,7 +101,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
             else "[-]"
         )
         + "\n"
-        + '[b]{face_2["name"]} {face_2["mana_cost"]}[/b]'
+        + f'[b]{face_2["name"]} {face_2["mana_cost"]}[/b]'
         + "\n"
         + f'{face_2["type_line"]} {plus_rarity(card_dota["rarity"])}'
         + "\n"

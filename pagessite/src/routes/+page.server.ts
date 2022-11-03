@@ -7,7 +7,17 @@ import type { LoadEvent } from '@sveltejs/kit';
 export const prerender = true;
 const pfps = ['https://better-default-discord.netlify.app/Icons/Solid-Red.png', 'https://better-default-discord.netlify.app/Icons/Solid-Orange.png', 'https://better-default-discord.netlify.app/Icons/Solid-Yellow.png', 'https://better-default-discord.netlify.app/Icons/Solid-Green.png', 'https://better-default-discord.netlify.app/Icons/Solid-Indigo.png', 'https://better-default-discord.netlify.app/Icons/Solid-Blue.png', 'https://better-default-discord.netlify.app/Icons/Solid-Violet.png', 'https://better-default-discord.netlify.app/Icons/Solid-Pink.png', 'https://better-default-discord.netlify.app/Icons/Solid-Black.png', 'https://better-default-discord.netlify.app/Icons/Solid-Gray.png'];
 export async function load(event: LoadEvent) {
-    let CDs: Promise<(Draft | CardDisplayType)>[] = [];
+    let Cards: Promise<CardDisplayType>[] = [];
+    await fs.readdir('./src/carddata').then(async (fnames) => {
+        Cards = await fnames.map((fname) => {
+            return fs.readFile('./src/carddata/' + fname, 'utf-8').then((content) => {
+                console.log(JSON.parse(content))
+                return JSON.parse(content);
+            })
+        });
+    })
+    let newCards = await Promise.allSettled(Cards).then(v => { return v.map(y => { if (y.status === 'fulfilled') return y.value }) })
+    let CDs: Promise<Draft>[] = [];
     await fs.readdir('./src/data').then(async (fnames) => {
         CDs = await fnames.map((fname) => {
             return fs.readFile('./src/data/' + fname, 'utf-8').then((content) => {
@@ -40,5 +50,5 @@ export async function load(event: LoadEvent) {
         })
         return newthing
     })
-    return { cds: newList, users: newUsers }
+    return { cds: newList, users: newUsers, cards: newCards }
 }
