@@ -53,35 +53,36 @@ class Smokespew(commands.Cog):
     @discord.option(name="description", description="A description to show in the tooltip.", type=str)
     async def sw_card(self, ctx: discord.ApplicationContext, title: str, set: str, cn: str, description: str):
         newCard = {
-            "id": ctx.interaction.id,
+            "id": f'{ctx.interaction.id}',
             "title": title,
             "set": set,
             "cn": cn,
             "uri": "",
             "description": description,
-            "p_id": ctx.author.id,
+            "p_id": f'{ctx.author.id}',
         }
         await ctx.defer()
-        full_json = []
         time.sleep(0.25)
         response = requests.get(
             f"https://api.scryfall.com/cards/search?q={quote(f'set:{set} cn:{cn}')}",
             headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
         )
-        full_json += (resjson := response.json())
-        if full_json["object"] == "error":
-            return ctx.respond("That card was not found.")
-        cc = full_json["data"][0]
+        resjson = response.json()
+        if resjson["object"] == "error":
+            return await ctx.respond("That card was not found.")
+        cc = resjson["data"][0]
         try:
             if cc["layout"] == "transform" or cc["layout"] == "reversible-card":
                 newCard["uri"] = cc["card_faces"][0]["image_uris"]["normal"]
             else:
                 newCard["uri"] = cc["image_uris"]["normal"]
         except:
-            return ctx.respond("Please don't put weird cards up, the image won't work.")
+            return await ctx.respond("Please don't put weird cards up, the image won't work.")
         with open(f"pagessite/src/carddata/{newCard['id']}.json", "w") as f:
-            json.dump(self.bot.drafts[self.id].tojson(), f, ensure_ascii=False, indent=4)
-        return ctx.respond(f"A display for {cc['name']} will be added to the site under your name the next time Moon builds the site.")
+            json.dump(newCard, f, ensure_ascii=False, indent=4)
+        return await ctx.respond(
+            f"A display for {cc['name']} will be added to the site under your name the next time Moon builds the site."
+        )
 
 
 def setup(bot):
