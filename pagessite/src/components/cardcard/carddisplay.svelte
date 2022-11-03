@@ -22,19 +22,18 @@
 				{C.title === '' ? 'Animate Wall' : C.title}
 			</div>
 			<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
-				{pn[C.p_id].username}
-				<hr />
 				{C.description ?? ""}
 			</Tooltip>
 			<div class="text-xs flex space-x-4">
-				<span>{C.set === '' ? 'LEA' : C.set} / {C.cn === '' ? '1' : C.cn}</span>
+				<span>{pn[C.p_id].username}</span>
+				<span>{C.set === '' ? 'lea' : C.set} / {C.cn === '' ? '1' : C.cn}</span>
 				<a href={scry_link}>Scryfall</a>
 			</div>
 		</section>
 	</Wrapper>
 	<div class="cardbox ml-9 mr-9 mb-3">
 		<Fancycardhover height={234} width={168}>
-			<img class="card tiny-shadow" alt="card" src={image_link} />
+			<img class="card tiny-shadow" alt="card_image" src={image_link} />
 		</Fancycardhover>
 	</div>
 </div>
