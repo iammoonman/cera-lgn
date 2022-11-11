@@ -8,6 +8,7 @@
 	import Swoochgame from './swoochgame.svelte';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
+	export let setTap: () => void;
 	$: selectedRound = 0;
 	$: roundHold = [...(D.rounds.get(selectedRound)?.matches ?? [])];
 	$: round = D.rounds.get(selectedRound)?.title ?? `${selectedRound + 1}`;
@@ -107,6 +108,9 @@
 			{/each}
 		</div>
 	</div>
+	<button class="absolute tap-icon" on:click={setTap}>
+		<Symbol symbol_name={'T'} symbol_size={20} />
+	</button>
 </div>
 
 <style>
@@ -117,6 +121,7 @@
 		border-radius: 3.5% / 4.75%;
 		box-shadow: inset 0 0 0 8px black;
 		z-index: 1;
+		pointer-events: none;
 	}
 	.black-border:after {
 		position: absolute;
@@ -143,6 +148,12 @@
 		width: 20px;
 		bottom: 12px;
 		right: 0px;
+	}
+	.tap-icon {
+		bottom: 10px;
+		right: 10px;
+		z-index: 4;
+		appearance: none;
 	}
 	.outercard {
 		aspect-ratio: 468 / 336;
@@ -223,6 +234,7 @@
 		border-radius: 0 22px 32px 0;
 		box-shadow: inset 0 0 12px -4px black;
 		height: 336px;
+		z-index: 0;
 	}
 	.rightside > div > button {
 		padding-inline: 0.2rem;

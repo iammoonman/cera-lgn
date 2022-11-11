@@ -5,11 +5,12 @@
 	import DraftcardVertical from './draftcard_vertical.svelte';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
-	export let tapped = false;
+	$: tapped = false;
+	let setTap = () => (tapped = !tapped);
 </script>
 
 {#if tapped}
-    <DraftcardHorizontal {D} {pn} />
+	<DraftcardHorizontal {D} {pn} {setTap} />
 {:else}
-    <DraftcardVertical {D} {pn} />
+	<DraftcardVertical {D} {pn} {setTap} />
 {/if}

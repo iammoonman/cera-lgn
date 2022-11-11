@@ -5,6 +5,7 @@
 	import type { PD } from 'src/types/discord';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
+	export let setTap: () => void;
 	const sortedscores = D.scores.sort((a, b) =>
 		a.points > b.points ? -1 : b.points > a.points ? 1 : 0
 	);
@@ -62,6 +63,9 @@
             {/each}
         </tbody>
     </table>
+	<button class="absolute tap-icon" on:click={setTap}>
+		<Symbol symbol_name={'T'} symbol_size={20} />
+	</button>
 </div>
 
 <style>
@@ -99,6 +103,12 @@
         bottom: 12px;
         right: 0px;
     }
+	.tap-icon {
+		bottom: 10px;
+		right: 10px;
+		z-index: 4;
+		appearance: none;
+	}
 	.outercard {
 		aspect-ratio: 336 / 468;
 		width: 336px;
@@ -236,6 +246,6 @@
 		grid-area: 2 / 2;
 	}
 	.top-three > .player-avatar:hover {
-		scale: 1.3;
+		scale: 1.1;
 	}
 </style>
