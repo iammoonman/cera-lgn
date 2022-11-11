@@ -87,6 +87,7 @@ set_choices_v3 = [
     ["Worldwake", "wwk"],
     ["Rise of the Eldrazi", "roe"],
     ["Innistrad", "isd"],
+    ["FUN 2022", "c_fun2"],
 ]
 
 

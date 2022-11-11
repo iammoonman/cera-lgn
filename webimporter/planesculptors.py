@@ -16,6 +16,7 @@ legal_sets = {
     "c_alr": "alara",
     "c_hnn": "high-noon1",
     "c_vtm": "villains-the-musical",
+    "c_rzp": "rat-zone-promos",
 }
 
 
