@@ -64,6 +64,7 @@
         </tbody>
     </table>
 	<button class="absolute tap-icon" on:click={setTap}>
+		<span>Show Games</span>
 		<Symbol symbol_name={'T'} symbol_size={20} />
 	</button>
 </div>
@@ -74,40 +75,38 @@
         width: 100%;
         height: 100%;
         border-radius: 4.75% / 3.5%;
-        box-shadow: inset 0 0 0 8px black;
+		box-shadow: inset 0 0 0 8px black, inset 0 -8px 0 8px black;
         z-index: 0;
+		pointer-events: none;
     }
-    .black-border:after {
-        position: absolute;
-        height: 15px;
-        width: 320px;
-        border-radius: 0 0 50% 50%;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        content: "";
-        background-color: black;
-    }
-    .black-border > div:first-child {
+    .black-border:before {
         background: radial-gradient(ellipse at 100% 0px, transparent 43%, black 44%);
         position: absolute;
         height: 45px;
         width: 20px;
         bottom: 12px;
+		content: '';
     }
-    .black-border > div:last-child {
+    .black-border:after {
         background: radial-gradient(ellipse at 0px 0px, transparent 43%, black 44%);
         position: absolute;
         height: 45px;
         width: 20px;
         bottom: 12px;
         right: 0px;
+		content: '';
     }
 	.tap-icon {
-		bottom: 10px;
-		right: 10px;
+		bottom: 0px;
+		right: 0px;
 		z-index: 4;
 		appearance: none;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		place-items: center;
+		gap: 4px;
+		font-size: 0.7rem;
 	}
 	.outercard {
 		aspect-ratio: 336 / 468;
