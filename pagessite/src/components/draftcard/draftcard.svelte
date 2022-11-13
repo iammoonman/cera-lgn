@@ -4,7 +4,6 @@
 	import DraftcardHorizontal from './draftcard_horizontal.svelte';
 	import DraftcardVertical from './draftcard_vertical.svelte';
 	import { cubicInOut } from 'svelte/easing';
-	import { fade } from 'svelte/transition';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
 	$: tapped = false;
@@ -50,7 +49,7 @@
 <style>
 	.fakecontainer {
 		display: grid;
-		grid-template-areas: a;
+		grid-template-areas: 'a';
 		place-items: center;
 	}
 	.fakecontainer > div {
