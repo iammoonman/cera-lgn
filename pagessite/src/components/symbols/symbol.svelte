@@ -12,6 +12,7 @@
 	import Twomana from './twomana.svelte';
 	import Whitemana from './whitemana.svelte';
 	import Zeromana from './zeromana.svelte';
+	import ReturnArrow from './return-arrow.svelte';
 
 	export let symbol_name: string;
 	export let symbol_size: number;
@@ -56,6 +57,9 @@
 	{/if}
 	{#if symbol_name === '4'}
 		<Fourmana />
+	{/if}
+	{#if symbol_name === 'T'}
+		<ReturnArrow />
 	{/if}
 </div>
 
