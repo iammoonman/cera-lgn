@@ -30,6 +30,7 @@ export type TTSCard = {
     CustomDeck: Record<number, CustomDeckObject>;
     States: Record<number, TTSCard>;
     AttachedDecals?: Decal[];
+    GMNotes?: string;
 }
 
 export type CustomDeckObject = {
