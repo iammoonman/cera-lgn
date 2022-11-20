@@ -44,8 +44,8 @@ export type CustomDeckObject = {
 
 export type Decal = {
     CustomDecal: { Name: string; ImageURL: string; Size: number };
-    Transform: { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number }
+    Transform: Transform;
 }
 
-type Transform = { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number }
+type Transform = { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number; scaleX: number; scaleY: number; scaleZ: number; }
 type ColorDiffuse = { r: number; g: number; b: number }

@@ -50,17 +50,63 @@
 			});
 			biglist = newList;
 		});
-	$: outlist = [] as TTSCard[];
-	$: biglist = [] as TTSCard[];
+	let outlist = [] as TTSCard[];
+	let biglist = [] as TTSCard[];
+	function outputSave() {
+		if (outlist.length < 2) return alert("Don't export with only one card, that's such a waste of time.");
+		const data: Save = {
+			ObjectStates: [
+				{
+					Name: 'Deck',
+					ColorDiffuse: { b: 0, g: 0, r: 0 },
+					ContainedObjects: outlist.map((c, i) => {
+						return { ...c, CardID: (i + 1) * 100 };
+					}),
+					CustomDeck: Object.fromEntries(
+						outlist.map((v, i) => {
+							return [i + 1, Object.entries(v.CustomDeck)[0][1]];
+						})
+					),
+					DeckIDs: outlist.map((c, i) => (i + 1) * 100),
+					Nickname: '',
+					Transform: {
+						posX: 0,
+						posY: 0,
+						posZ: 0,
+						rotX: 0,
+						rotY: 0,
+						rotZ: 0,
+						scaleX: 1,
+						scaleY: 1,
+						scaleZ: 1
+					}
+				}
+			]
+		};
+		const filename = 'myFile.json';
+		var file = new Blob([JSON.stringify(data)], { type: 'text/json' });
+		// Others
+		var a = document.createElement('a'),
+			url = URL.createObjectURL(file);
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function () {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);
+		}, 0);
+	}
 </script>
 
 <div class="parent">
 	<div class="sidebar">
 		<input type="file" bind:files={files_input} accept="text/json" />
-		<VerticalList items={outlist} />
+		<button on:click={() => outputSave()}>Export</button>
+		<VerticalList items={outlist} on:postChanges={(x) => (outlist = x.detail.items)} />
 	</div>
 	<div class="p-2">
-		<VerticalList items={biglist} />
+		<VerticalList items={biglist} on:postChanges={(x) => (biglist = x.detail.items)} />
 	</div>
 </div>
 
