@@ -4,30 +4,30 @@ export type Save = {
 
 export type TTSBag = {
     Name: "Bag";
-    Transform: string;
+    Transform: Transform;
     Nickname: string;
-    ColorDiffuse: { r: number, g: number, b: number };
+    ColorDiffuse: ColorDiffuse;
     Bag: { Order: 0 }
     ContainedObjects: (TTSDeck | TTSCard)[];
 }
 export type TTSDeck = {
     Name: "Deck";
-    Transform: string;
+    Transform: Transform;
     Nickname: string;
-    ColorDiffuse: { r: number, g: number, b: number };
+    ColorDiffuse: ColorDiffuse;
     DeckIDs: number[];
-    CustomDeck: Record<number, CustomDeckObject>;
+    CustomDeck: Record<string, CustomDeckObject>;
     ContainedObjects: TTSCard[];
 }
 export type TTSCard = {
     Name: "Card";
-    Transform: string;
+    Transform: Transform;
     Nickname: string;
-    ColorDiffuse: { r: number, g: number, b: number };
+    ColorDiffuse: ColorDiffuse;
     Memo: string;
     Description: string;
-    CardID: number;
-    CustomDeck: Record<number, CustomDeckObject>;
+    CardID?: number;
+    CustomDeck: Record<string, CustomDeckObject>;
     States: Record<number, TTSCard>;
     AttachedDecals?: Decal[];
     GMNotes?: string;
@@ -46,3 +46,6 @@ export type Decal = {
     CustomDecal: { Name: string; ImageURL: string; Size: number };
     Transform: { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number }
 }
+
+type Transform = { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number }
+type ColorDiffuse = { r: number; g: number; b: number }
