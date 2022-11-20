@@ -5,8 +5,7 @@
 	import { overrideItemIdKeyNameBeforeInitialisingDndZones } from 'svelte-dnd-action';
 	overrideItemIdKeyNameBeforeInitialisingDndZones('GMNotes');
 
-	let files_input: FileList;
-	$: if (files_input)
+	function handleFileInput() {
 		Promise.allSettled(
 			Array.from(files_input).map((f) => {
 				return f.text().then((tt) => {
@@ -48,19 +47,36 @@
 			result.forEach((r) => {
 				if (r.status === 'fulfilled') newList = [...newList, ...r.value];
 			});
-			biglist = newList;
+			biglist = [...biglist, ...newList];
 		});
+	}
+	let files_input: FileList;
 	let outlist = [] as TTSCard[];
 	let biglist = [] as TTSCard[];
 	function outputSave() {
-		if (outlist.length < 2) return alert("Don't export with only one card, that's such a waste of time.");
+		console.log(
+			Object.fromEntries(
+				outlist.map((v, i) => {
+					return [i + 1, Object.entries(v.CustomDeck)[0][1]];
+				})
+			)
+		);
+		if (outlist.length < 2) return alert("Don't export with one or fewer cards, it breaks things.");
 		const data: Save = {
 			ObjectStates: [
 				{
 					Name: 'Deck',
 					ColorDiffuse: { b: 0, g: 0, r: 0 },
 					ContainedObjects: outlist.map((c, i) => {
-						return { ...c, CardID: (i + 1) * 100 };
+						return {
+							...c,
+							CardID: (i + 1) * 100,
+							CustomDeck: Object.fromEntries(
+								Object.entries(c.CustomDeck).map(([a, b]) => {
+									return [i + 1, b];
+								})
+							)
+						};
 					}),
 					CustomDeck: Object.fromEntries(
 						outlist.map((v, i) => {
@@ -83,7 +99,7 @@
 				}
 			]
 		};
-		const filename = 'myFile.json';
+		const filename = `${prompt('File name:')}.json` ?? 'myCards.json';
 		var file = new Blob([JSON.stringify(data)], { type: 'text/json' });
 		// Others
 		var a = document.createElement('a'),
@@ -101,8 +117,20 @@
 
 <div class="parent">
 	<div class="sidebar">
-		<input type="file" bind:files={files_input} accept="text/json" />
+		<input
+			type="file"
+			bind:files={files_input}
+			accept="text/json"
+			on:change={() => {
+				handleFileInput();
+			}}
+		/>
 		<button on:click={() => outputSave()}>Export</button>
+		<button
+			on:click={() => {
+				outlist = [biglist, (biglist = outlist)][0];
+			}}>Swap</button
+		>
 		<VerticalList items={outlist} on:postChanges={(x) => (outlist = x.detail.items)} />
 	</div>
 	<div class="p-2">
