@@ -49,3 +49,9 @@ export type Decal = {
 
 type Transform = { posX: number; posY: number; posZ: number; rotX: number; rotY: number; rotZ: number; scaleX: number; scaleY: number; scaleZ: number; }
 type ColorDiffuse = { r: number; g: number; b: number }
+
+export type CardWrapper = {
+    id: string;
+    card: TTSCard;
+    highlighted: boolean;
+};

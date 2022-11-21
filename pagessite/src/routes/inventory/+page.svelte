@@ -1,9 +1,7 @@
 <script lang="ts">
-	import type { Save, TTSCard } from 'src/types/tts';
+	import type { CardWrapper, Save, TTSCard } from 'src/types/tts';
 	import VerticalList from './VerticalList.svelte';
-	import { v4 as uuidv4 } from 'uuid';
-	import { overrideItemIdKeyNameBeforeInitialisingDndZones } from 'svelte-dnd-action';
-	overrideItemIdKeyNameBeforeInitialisingDndZones('GMNotes');
+	import { v4 } from 'uuid';
 
 	function handleFileInput() {
 		Promise.allSettled(
@@ -18,12 +16,12 @@
 									output = [
 										...output,
 										...g.ContainedObjects.map((c) => {
-											return { ...c, GMNotes: c.GMNotes ?? uuidv4() };
+											return { ...c };
 										})
 									];
 								}
 								if (g.Name === 'Card') {
-									output = [...output, { ...g, GMNotes: g.GMNotes ?? uuidv4() }];
+									output = [...output, { ...g }];
 								}
 							}
 						}
@@ -31,33 +29,39 @@
 							output = [
 								...output,
 								...f.ContainedObjects.map((c) => {
-									return { ...c, GMNotes: c.GMNotes ?? uuidv4() };
+									return { ...c };
 								})
 							];
 						}
 						if (f.Name === 'Card') {
-							output = [...output, { ...f, GMNotes: f.GMNotes ?? uuidv4() }];
+							output = [...output, { ...f }];
 						}
 					}
 					return output;
 				});
 			})
 		).then((result) => {
-			let newList: TTSCard[] = [];
+			let newList: CardWrapper[] = [];
 			result.forEach((r) => {
-				if (r.status === 'fulfilled') newList = [...newList, ...r.value];
+				if (r.status === 'fulfilled')
+					newList = [
+						...newList,
+						...r.value.map((c) => {
+							return { id: v4(), card: c, highlighted: false };
+						})
+					];
 			});
 			biglist = [...biglist, ...newList];
 		});
 	}
 	let files_input: FileList;
-	let outlist = [] as TTSCard[];
-	let biglist = [] as TTSCard[];
+	let outlist = [] as CardWrapper[];
+	let biglist = [] as CardWrapper[];
 	function outputSave() {
 		console.log(
 			Object.fromEntries(
 				outlist.map((v, i) => {
-					return [i + 1, Object.entries(v.CustomDeck)[0][1]];
+					return [i + 1, Object.entries(v.card.CustomDeck)[0][1]];
 				})
 			)
 		);
@@ -69,10 +73,10 @@
 					ColorDiffuse: { b: 0, g: 0, r: 0 },
 					ContainedObjects: outlist.map((c, i) => {
 						return {
-							...c,
+							...c.card,
 							CardID: (i + 1) * 100,
 							CustomDeck: Object.fromEntries(
-								Object.entries(c.CustomDeck).map(([a, b]) => {
+								Object.entries(c.card.CustomDeck).map(([a, b]) => {
 									return [i + 1, b];
 								})
 							)
@@ -80,7 +84,7 @@
 					}),
 					CustomDeck: Object.fromEntries(
 						outlist.map((v, i) => {
-							return [i + 1, Object.entries(v.CustomDeck)[0][1]];
+							return [i + 1, Object.entries(v.card.CustomDeck)[0][1]];
 						})
 					),
 					DeckIDs: outlist.map((c, i) => (i + 1) * 100),
@@ -113,6 +117,11 @@
 			window.URL.revokeObjectURL(url);
 		}, 0);
 	}
+	$: {
+		biglist.sort((a, b) => {
+			return a.highlighted ? 1 : -1;
+		});
+	}
 </script>
 
 <div class="parent">
@@ -131,6 +140,15 @@
 				outlist = [biglist, (biglist = outlist)][0];
 			}}>Swap</button
 		>
+		<input
+			type="text"
+			on:change={(e) => {
+				// Doesn't work.
+				biglist.map((c) => {
+					return { ...c, highlighted: c.card.Description.includes(e.currentTarget.value) };
+				});
+			}}
+		/>
 		<VerticalList items={outlist} on:postChanges={(x) => (outlist = x.detail.items)} />
 	</div>
 	<div class="p-2">

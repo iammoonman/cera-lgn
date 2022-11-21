@@ -2,9 +2,10 @@
 	import type { TTSCard } from 'src/types/tts';
 
 	export let card: TTSCard;
+	export let highlighted = false;
 </script>
 
-<div class="grid">
+<div class="grid" style={`${highlighted ? 'outline: 1px solid red' : ''}`}>
 	{#each [...Object.entries(card.CustomDeck)] as c}
 		<img src={c[1].FaceURL} alt={card.Nickname.split('\n')[0]} />
 	{/each}
