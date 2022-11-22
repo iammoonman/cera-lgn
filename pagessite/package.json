@@ -19,6 +19,7 @@
 		"@smui/tooltip": "^6.1.0",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
+		"@types/uuid": "^8.3.4",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"autoprefixer": "^10.4.8",
@@ -41,6 +42,7 @@
 		"@splidejs/svelte-splide": "^0.2.9",
 		"@sveltejs/adapter-static": "^1.0.0-next.38",
 		"discord.js": "^14.5.0",
-		"svelte-dnd-action": "^0.9.19"
+		"svelte-dnd-action": "^0.9.19",
+		"uuid": "^9.0.0"
 	}
 }
