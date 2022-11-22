@@ -5,7 +5,7 @@
 	export let highlighted = false;
 </script>
 
-<div class="grid" style={`${highlighted ? 'outline: 1px solid red' : ''}`}>
+<div class="grid" style={`--visible: ${highlighted ? '100%' : '30%'}`}>
 	{#each [...Object.entries(card.CustomDeck)] as c}
 		<img src={c[1].FaceURL} alt={card.Nickname.split('\n')[0]} />
 	{/each}
@@ -17,11 +17,12 @@
 <style>
 	.grid {
 		grid-template-areas: 'a';
+		filter: brightness(var(--visible));
 	}
 	.grid > * {
 		grid-area: a;
 	}
 	img {
-		max-height: 120px;
+		max-height: 170px;
 	}
 </style>
