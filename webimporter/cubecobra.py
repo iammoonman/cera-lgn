@@ -19,13 +19,16 @@ def get_cube(cc_id, p_len):
     templist = []
     # foil_indexes = []
     for row in reader:
-        templist.append([row["Collector Number"], row["Set"]])
+        if not row["Maybeboard"]:
+            templist.append([row["Collector Number"], row["Set"]])
         # if row["Finish"] == "Foil":
         #     foil_indexes += [len(templist)]
     cardinfo = tts_import.ijson_collection(templist)
     cubelist = []
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
     for row in reader:
+        if row["Maybeboard"]:
+            continue
         for c in cardinfo:
             if row["Collector Number"] == c["collector_number"] and row["Set"] == c["set"]:
                 x = {}
