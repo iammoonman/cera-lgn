@@ -1,9 +1,12 @@
+import random
+
+
 class Draft:
     """Represents a single event of a Swiss-system tournament."""
 
     def __init__(
         self,
-        draftID: int,
+        draftID: str,
         date: str,
         host: int,
         tag: str,
@@ -11,7 +14,7 @@ class Draft:
         title: str,
         max_rounds: int = 3,
     ):
-        self.draftID: int = draftID
+        self.draftID: str = draftID
         """Unique ID."""
         self.date: str = date
         """Translates to the output JSON."""
@@ -98,12 +101,11 @@ class Draft:
             Not output to JSON."""
 
         def __lt__(self, other):
-            if self.score != other.score:
-                return self.score < other.score
-            elif self.gpts != other.gpts:
+            if self.score == other.score:
+                if self.gpts == other.gpts:
+                    return random.random() > 0.5
                 return self.gpts < other.gpts
-            else:
-                return self.name < other.name
+            return self.score < other.score
 
         def __repr__(self):
             return f"{self.name} ({self.score})"
@@ -131,6 +133,41 @@ class Draft:
                     self.gwinners = [0, 0, None]
                 self.drops = [False for i in p]
 
+    def minweight_naive_pairings(self):
+        # For each remaining player, define a matrix of weights for their pair against the other players
+        # If the players have met, weight is 1000000. Otherwise, it's the difference between their scores.
+        # Start with the player with the highest weight. Choose their least weighted player and pair off.
+        playerWeights: list[tuple[any, tuple[int, any]]] = []
+        for p in [y for y in self.players if not y.dropped]:
+            localw = [
+                ((10000, z) if p in z.opponents else (abs(z.score - p.score), z))
+                for z in self.players
+                if not z.dropped and z != p
+            ]
+            playerWeights.append((p, localw))
+        pairs = []
+        while playerWeights:
+            playerWeights.sort(lambda x: sum(x[1][0]), reverse=True)
+            highestWeightPlayer = playerWeights.pop()
+            length = len(playerWeights)
+            if length > 0:
+                for lowestWeightedOpponentTuple in highestWeightPlayer[1].sort(lambda n: n[0]):
+                    if lowestWeightedOpponentTuple[1] in [item for sublist in pairs for item in sublist]:
+                        continue
+                    pairs.append([highestWeightPlayer[0], lowestWeightedOpponentTuple[1]])
+                    playerWeights = [o for o in playerWeights if o[0] != lowestWeightedOpponentTuple]
+                    break
+                if len(playerWeights) == length:
+                    # No viable other player, give a bye.
+                    pairs.append([highestWeightPlayer[0], Draft.Player("BYE", "-1")])
+            else:
+                # BYE
+                pairs.append([highestWeightPlayer[0], Draft.Player("BYE", "-1")])
+        new_round = Draft.Round(title=len(self.rounds) + 1)
+        new_round.matches = [new_round.Match(p=i) for i in pairs]
+        self.rounds.append(new_round)
+        return new_round
+
     def do_pairings(self):
         """Generates a new round based on the scores of the previous round. DO NOT CALL without checking for completeness."""
         # Make a temp list of players and pairings
@@ -143,14 +180,12 @@ class Draft:
         # If it fails to find, restart, but then start with that player.
         # NOT SURE if it will fail to find *and* still have a possible correct pairing set.
         temp_pairings = []
-        self.players.sort()
-        temp_players = [y for y in self.players if not y.dropped]
+        temp_players = [y for y in self.players if not y.dropped].sort()
+        print(temp_players)
         while temp_players:
             player1 = temp_players.pop(0)
             try:
-                player2 = [i for i in temp_players if i not in player1.opponents and abs(i.score - player1.score) <= 3][
-                    0
-                ]
+                player2 = [i for i in temp_players if i not in player1.opponents][0]
             except IndexError:
                 # Checking it like this will cause more than one bye in certain situations with people dropping.
                 # That is OK
