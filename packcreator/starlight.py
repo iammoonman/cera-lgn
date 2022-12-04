@@ -88,6 +88,9 @@ set_choices_v3 = [
     ["Rise of the Eldrazi", "roe"],
     ["Innistrad", "isd"],
     ["FUN 2022", "c_fun2"],
+    ["Magic 2013", "m13"],
+    ["Masters 25", "a25"],
+    ["Avacyn Restored", "avr"],
 ]
 
 
