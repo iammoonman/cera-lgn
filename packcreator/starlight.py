@@ -91,6 +91,7 @@ set_choices_v3 = [
     ["Magic 2013", "m13"],
     ["Masters 25", "a25"],
     ["Avacyn Restored", "avr"],
+    ["Battlebond", "bbd"],
 ]
 
 
