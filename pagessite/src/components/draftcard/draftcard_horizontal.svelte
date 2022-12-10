@@ -6,9 +6,10 @@
 	import Symbol from '../symbols/symbol.svelte';
 	import type { PD } from 'src/types/discord';
 	import Swoochgame from './swoochgame.svelte';
+	import { createEventDispatcher } from 'svelte';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
-	export let setTap: () => void;
+	const dispatch = createEventDispatcher();
 </script>
 
 <div class="outercard grid grid-cols-1 relative">
@@ -41,7 +42,7 @@
 			</SplideSlide>
 		{/each}
 	</Splide>
-	<button class="absolute tap-icon" on:click={setTap}>
+	<button class="absolute tap-icon" on:click={() => dispatch('untap',{})}>
 		<span>Hide Games</span>
 		<Symbol symbol_name={'T'} symbol_size={20} />
 	</button>

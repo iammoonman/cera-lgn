@@ -11,7 +11,7 @@ export async function load(event: LoadEvent) {
     await fs.readdir('./src/carddata').then(async (fnames) => {
         Cards = await fnames.map((fname) => {
             return fs.readFile('./src/carddata/' + fname, 'utf-8').then((content) => {
-                console.log(JSON.parse(content))
+                // console.log(JSON.parse(content))
                 return JSON.parse(content);
             })
         });

@@ -3,9 +3,10 @@
 	import Tooltip, { Wrapper } from '@smui/tooltip';
 	import Symbol from '../symbols/symbol.svelte';
 	import type { PD } from 'src/types/discord';
+	import { createEventDispatcher } from 'svelte';
 	export let D: Draft;
 	export let pn: Record<string, PD>;
-	export let setTap: () => void;
+	const dispatch = createEventDispatcher();
 	const sortedscores = D.scores.sort((a, b) =>
 		a.points > b.points ? -1 : b.points > a.points ? 1 : 0
 	);
@@ -63,7 +64,7 @@
             {/each}
         </tbody>
     </table>
-	<button class="absolute tap-icon" on:click={setTap}>
+	<button class="absolute tap-icon" on:click={() => dispatch('untap', {})}>
 		<span>Show Games</span>
 		<Symbol symbol_name={'T'} symbol_size={20} />
 	</button>
@@ -137,6 +138,7 @@
 	th,
 	td {
 		padding-inline: 0.6rem;
+		max-width: 115px;
 	}
 	tr:nth-child(2n + 1) {
 		background-color: #ffffff06;

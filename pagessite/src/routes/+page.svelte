@@ -29,6 +29,7 @@
 	import type { Draft } from '../types/events';
 	import Carddisplay from '../components/cardcard/carddisplay.svelte';
 	import Draftcard from '../components/draftcard/draftcard.svelte';
+	import Deckcard from '../components/deckcard/deckcard.svelte';
 	$: PlayerName = '';
 	$: TagSelect = '';
 	$: Date1 = '2018-01-01';
@@ -146,6 +147,9 @@
 			{#if 'date' in c}
 				<Draftcard D={c} pn={users} />
 			{/if}
+		{/each}
+		{#each Object.entries(users) as [k, p]}
+			<Deckcard {p} />
 		{/each}
 	</div>
 </div>

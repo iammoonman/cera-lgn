@@ -19,7 +19,7 @@ export type PickPack = {
 
 export type PickCard = {
     name: string;
-    image_url?: string; // Might need to pass when the user uploads to CERA
+    image_url: string; // Might need to pass when the user uploads to CERA
     oracle_id?: string; // Comes from Memo
     decal_url?: string;
     description?: string;
