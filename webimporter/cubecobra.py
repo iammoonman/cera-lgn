@@ -3,6 +3,7 @@ import requests
 import random
 import csv
 import copy
+import json
 
 
 def get_cube(cc_id, p_len):
@@ -19,7 +20,7 @@ def get_cube(cc_id, p_len):
     templist = []
     # foil_indexes = []
     for row in reader:
-        if not row["Maybeboard"]:
+        if row["Maybeboard"] == "false":
             templist.append([row["Collector Number"], row["Set"]])
         # if row["Finish"] == "Foil":
         #     foil_indexes += [len(templist)]
@@ -27,7 +28,7 @@ def get_cube(cc_id, p_len):
     cubelist = []
     reader = csv.DictReader(response.content.decode("utf-8").splitlines())
     for row in reader:
-        if row["Maybeboard"]:
+        if row["Maybeboard"] == "true":
             continue
         for c in cardinfo:
             if row["Collector Number"] == c["collector_number"] and row["Set"] == c["set"]:
