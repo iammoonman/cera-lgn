@@ -1,26 +1,16 @@
-import type { Save } from "./tts";
-
 export type Decklist = {
-    // Save is a bag with two decks; first deck is the deck, second deck is the rest of the pool.
-    save: Save;
-    eventID: number;
-    playerID: number;
-    pickOrder?: unknown[];
-}
-// TTS module to save the deck and pool, adding notations in GMNotes for "important cards"
-// and give a deckname
-// Right click a draft message to upload the file, appends that message id as the draft id
-// and the user id as playerid
-
-export type PickPack = {
-    pick: string;
-    pack: PickCard[];
+    playerID: string;
+    cardList: string[];
+    eventID?: number;
+    deckName?: string; // Defaults to "Untitled Deck"
+    sideboard?: string[]; // Additional optional text input
 }
 
-export type PickCard = {
-    name: string;
-    image_url: string; // Might need to pass when the user uploads to CERA
-    oracle_id?: string; // Comes from Memo
-    decal_url?: string;
-    description?: string;
-}
+// TTS module exports a list of oracle_ids from memo
+// User copies text and pastes it into the modal.
+// Maximum length for text in modal is 4000 chars, which is just barely enough for 110 lines
+
+// Modal dropdown for eventID listing the event name as label.
+
+// Error message in TTS if the card doesnt have an oracle_id
+// Error message in TTS if the output would be longer than 4000
