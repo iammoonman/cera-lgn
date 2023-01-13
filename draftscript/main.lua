@@ -118,7 +118,7 @@ function onClickGetBags()
                                 function onLoad()
                                     WebRequest.get('https://raw.githubusercontent.com/iammoonman/cera/master/draftscript/bag.lua',self,'GetFreshScript')
                                 end
-                                function GetFreshScript ()
+                                function GetFreshScript (wr)
                                     self.setLuaScript(wr.text)
                                     self.reload()
                                 end
