@@ -163,20 +163,10 @@ function onObjectLeaveZone(zone, obj)
     DebounceTimer = Wait.time(function()
         if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
             TakenCount = 0
-            self.deal(1, self.getGMNotes())
             -- Deal the cards from the stack dealt and add the right tags
-            Wait.condition(function()
-                local handObjs = Player[self.getGMNotes()].getHandObjects(1)
-                if handObjs[1].type == "Deck" then
-                    for i, handObjObj in ipairs(handObjs[1].getObjects()) do
-                        handObjs[1].takeObject({ position = { x = 0, y = 0, z = 0 },
-                            rotation = self.getRotation() })
-                            .addTag(self.getTags()[1] .. self.getGMNotes())
-                    end
-                end
-            end, function()
-                return #Player[self.getGMNotes()].getHandObjects(1) == 1
-            end, 1)
+            for i, j in ipairs(self.dealToColorWithOffset({ x = 0, y = 0, z = 0 }, true, self.getGMNotes()).spread()) do
+                Wait.time(j.addTag(self.getTags()[1] .. self.getGMNotes()), 1)
+            end
             TimerCount = 0
             -- Start the pick timer.
             TimerIsCounting = true
