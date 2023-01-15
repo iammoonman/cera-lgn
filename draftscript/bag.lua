@@ -72,10 +72,20 @@ function onObjectEnterContainer(container, object)
         DebounceTimer = Wait.time(function()
             if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
                 TakenCount = 0
+                self.deal(1, self.getGMNotes())
                 -- Deal the cards from the stack dealt and add the right tags
-                for _, j in ipairs(yoinkDeck().spread()) do
-                    Wait.time(j.addTag(self.getTags()[1] .. self.getGMNotes()), 1)
-                end
+                Wait.condition(function()
+                    local handObjs = Player[self.getGMNotes()].getHandObjects(1)
+                    if handObjs[1].type == "Deck" then
+                        for i, handObjObj in ipairs(handObjs[1].getObjects()) do
+                            handObjs[1].takeObject({ position = { x = 0, y = 0, z = 0 },
+                                rotation = self.getRotation() })
+                                .addTag(self.getTags()[1] .. self.getGMNotes())
+                        end
+                    end
+                end, function()
+                    return #Player[self.getGMNotes()].getHandObjects(1) == 1
+                end, 1)
                 TimerCount = 0
                 -- Start the pick timer.
                 TimerIsCounting = true
@@ -153,10 +163,20 @@ function onObjectLeaveZone(zone, obj)
     DebounceTimer = Wait.time(function()
         if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
             TakenCount = 0
+            self.deal(1, self.getGMNotes())
             -- Deal the cards from the stack dealt and add the right tags
-            for _, j in ipairs(yoinkDeck().spread()) do
-                Wait.time(j.addTag(self.getTags()[1] .. self.getGMNotes()), 1)
-            end
+            Wait.condition(function()
+                local handObjs = Player[self.getGMNotes()].getHandObjects(1)
+                if handObjs[1].type == "Deck" then
+                    for i, handObjObj in ipairs(handObjs[1].getObjects()) do
+                        handObjs[1].takeObject({ position = { x = 0, y = 0, z = 0 },
+                            rotation = self.getRotation() })
+                            .addTag(self.getTags()[1] .. self.getGMNotes())
+                    end
+                end
+            end, function()
+                return #Player[self.getGMNotes()].getHandObjects(1) == 1
+            end, 1)
             TimerCount = 0
             -- Start the pick timer.
             TimerIsCounting = true
@@ -201,11 +221,4 @@ end
 
 function doNothing(obj, playerColor, alt_click)
     log(StopCounting)
-end
-
-function yoinkDeck()
-    local takenObject = self.takeObject({ position = self.getPosition() + Vector(0, 2, 0) })
-    local handTransform = Player[self.getGMNotes()].getHandTransform()
-    takenObject.setPosition(handTransform.position)
-    return takenObject
 end
