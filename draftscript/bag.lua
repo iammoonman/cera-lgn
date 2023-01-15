@@ -73,7 +73,7 @@ function onObjectEnterContainer(container, object)
             if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
                 TakenCount = 0
                 -- Deal the cards from the stack dealt and add the right tags
-                for _, j in ipairs(self.dealToColorWithOffset(Vector(0, 0, 0), true, self.getGMNotes()).spread()) do
+                for _, j in ipairs(yoinkDeck().spread()) do
                     Wait.time(j.addTag(self.getTags()[1] .. self.getGMNotes()), 1)
                 end
                 TimerCount = 0
@@ -154,7 +154,7 @@ function onObjectLeaveZone(zone, obj)
         if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
             TakenCount = 0
             -- Deal the cards from the stack dealt and add the right tags
-            for _, j in ipairs(self.dealToColorWithOffset(Vector(0, 0, 0), true, self.getGMNotes()).spread()) do
+            for _, j in ipairs(yoinkDeck().spread()) do
                 Wait.time(j.addTag(self.getTags()[1] .. self.getGMNotes()), 1)
             end
             TimerCount = 0
@@ -201,4 +201,11 @@ end
 
 function doNothing(obj, playerColor, alt_click)
     log(StopCounting)
+end
+
+function yoinkDeck()
+    local takenObject = self.takeObject({ position = self.getPosition() + Vector(0, 2, 0) })
+    local handTransform = Player[self.getGMNotes()].getHandTransform()
+    takenObject.setPosition(handTransform.position)
+    return takenObject
 end
