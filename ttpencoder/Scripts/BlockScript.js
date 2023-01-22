@@ -7,11 +7,11 @@ globalEvents.onChatMessage = (sender, message) => {
             fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURI(query)}`).then(r => {
                 return r.json()
             }).then(v => {
-                world.createObjectFromTemplate(refObject.getTemplateId(), sender.getCursorPosition()).setSavedData(v.id, 'sf_id')
+                world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', sender.getCursorPosition()).setSavedData(v.id, 'sf_id')
             })
         }
     }
-    if (message.match(/^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/).+/g)) {
+    if (message.match(/^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/.+/g)) {
         const [mox_id] = message.match(/(?<=^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/).+/) ?? [null]
         if (mox_id !== null) {
             makeMoxfieldDeck(mox_id, sender)
@@ -41,31 +41,69 @@ function makeMoxfieldDeck(deck_id, player) {
         Object.entries(signatureSpells).forEach(([k, v]) => sign_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
         Object.entries(stickers).forEach(([k, v]) => stic_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
 
-        const m = world.createObjectFromTemplate('', player.getCursorPosition().add([0, 0, 0]))
-        break_array_1023(main_deck).map((v, i) => s.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const s = world.createObjectFromTemplate('', player.getCursorPosition().add([1, 0, 0]))
-        break_array_1023(side_deck).map((v, i) => s.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const c = world.createObjectFromTemplate('', player.getCursorPosition().add([2, 0, 0]))
-        break_array_1023(comm_deck).map((v, i) => c.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const p = world.createObjectFromTemplate('', player.getCursorPosition().add([3, 0, 0]))
-        break_array_1023(comp_deck).map((v, i) => p.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const a = world.createObjectFromTemplate('', player.getCursorPosition().add([4, 0, 0]))
-        break_array_1023(attr_deck).map((v, i) => a.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const g = world.createObjectFromTemplate('', player.getCursorPosition().add([5, 0, 0]))
-        break_array_1023(sign_deck).map((v, i) => g.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
-        const t = world.createObjectFromTemplate('', player.getCursorPosition().add([6, 0, 0]))
-        break_array_1023(stic_deck).map((v, i) => t.setSavedData(JSON.stringify(v, `sf_id_${i}`)))
+        const m = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([0, 0, 0]))
+        
+        main_deck.reduce((acc, curr) => {
+            if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+                acc.at(-1).push(curr)
+            } else {
+                acc.push([curr])
+            }
+            return acc
+        }, [[]]).map((v, i) => m.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const s = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([1, 0, 0]))
+        // side_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => s.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const c = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([2, 0, 0]))
+        // comm_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => c.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const p = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([3, 0, 0]))
+        // comp_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => p.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const a = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([4, 0, 0]))
+        // attr_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => a.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const g = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([5, 0, 0]))
+        // sign_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => g.setSavedData(JSON.stringify(v), `sf_id_${i}`))
+        // const t = world.createObjectFromTemplate('31E5DB224CB620FF0B35E79BB7BB8D02', player.getCursorPosition().add([6, 0, 0]))
+        // stic_deck.reduce((acc, curr) => {
+        //     if (JSON.stringify([...acc.at(-1), curr]).length < 900) {
+        //         acc.at(-1).push(curr)
+        //     } else {
+        //         acc.push([curr])
+        //     }
+        //     return acc
+        // }, [[]]).map((v, i) => t.setSavedData(JSON.stringify(v), `sf_id_${i}`))
     })
-}
-
-function break_array_1023(arr) {
-    const collection = []
-    arr.map(e => {
-        if (JSON.stringify([...collection.at(-1), e]).length > 1010) {
-            collection.at(-1).push(e)
-        } else {
-            collection.push([e])
-        }
-    })
-    return collection
 }
