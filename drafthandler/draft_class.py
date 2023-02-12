@@ -1,4 +1,6 @@
 import random
+from typing import TypeVar, Literal, Union
+import networkx as nx
 
 
 class Draft:
@@ -8,7 +10,7 @@ class Draft:
         self,
         draftID: str,
         date: str,
-        host: int,
+        host: str,
         tag: str,
         description: str,
         title: str,
@@ -27,6 +29,9 @@ class Draft:
         self.players: list[Draft.Player] = []
         self.rounds: list[Draft.Round] = []
         self.max_rounds: int = max_rounds
+
+    def get_player_by_id(self, id: str):
+        return next(player for player in self.players if player.player_id == id)
 
     def tojson(self):
         """Calculates the final scores of the draft and returns a JSON."""
@@ -70,13 +75,15 @@ class Draft:
         return draftobj
 
     class Player:
-        def __init__(self, n: str, id: str):
+        def __init__(self, n: str, id: str, s: int = 0):
             self.player_id: str = id
             """Discord user ID for the player."""
+            self.seat: int = s
+            """Players should prefer to play against those farthest from them in the draft seating arrangement."""
             self.name: str = n
             """Used for quick access. Not output to JSON."""
             self.score: int = 0
-            """Final match score. 3 for wins and byes, 1 for tie, 0 for loss."""
+            """Final score. 3 for wins and byes, 1 for tie, 0 for loss."""
             self.gpts: int = 0
             """Games won. Does not increment for byes."""
             self.mpts: int = 0
@@ -89,13 +96,13 @@ class Draft:
             """Used for quick access. Not output to JSON."""
             self.dropped: bool = False
             """Global participation status. Locked in at the end of the round."""
-            self.ogp: float = None
+            self.ogp: Union[float, None] = None
             """Opponent Game-Win Percentage"""
-            self.omp: float = None
+            self.omp: Union[float, None] = None
             """Opponent Match-Win Percentage"""
-            self.gwp: float = None
+            self.gwp: Union[float, None] = None
             """Game-Win Percentage"""
-            self.mwp: float = None
+            self.mwp: Union[float, None] = None
             """Match-Win Percentage
             
             Not output to JSON."""
@@ -127,7 +134,7 @@ class Draft:
 
             def __init__(self, p=[]):
                 self.players = p
-                self.gwinners: list[int] = []
+                self.gwinners: list[Union[int, None]] = []
                 if p[1] == Draft.Player("Bye", "-1"):
                     # Automatically set score for the bye.
                     self.gwinners = [0, 0, None]
@@ -135,23 +142,32 @@ class Draft:
 
     def minweight_naive_pairings(self):
         # For each remaining player, define a matrix of weights for their pair against the other players
-        # If the players have met, weight is 1000000. Otherwise, it's the difference between their scores.
+        # If the players have met, weight is 1000000.
         # Start with the player with the highest weight. Choose their least weighted player and pair off.
-        playerWeights: list[tuple[any, tuple[int, any]]] = []
+        playerWeights: list[tuple[Draft.Player, list[Union[tuple[int, Draft.Player], tuple[float, Draft.Player]]]]] = []
         for p in [y for y in self.players if not y.dropped]:
+            # Distance between seats; more => more likely pairing
+            # Difference between scores; less => more likely pairing
+            half = len(self.players) / 2
             localw = [
-                ((10000, z) if p in z.opponents else (abs(z.score - p.score), z))
+                (
+                    (10000, z)
+                    if p in z.opponents
+                    else (abs(z.score - p.score) + abs(half - abs(z.seat - p.seat)) / half, z)
+                )
                 for z in self.players
                 if not z.dropped and z != p
             ]
             playerWeights.append((p, localw))
-        pairs = []
+        pairs: list[list[Draft.Player]] = []
         while playerWeights:
-            playerWeights.sort(lambda x: sum(x[1][0]), reverse=True)
+            # Pair max weight players first to heuristically avoid byes
+            playerWeights.sort(reverse=True, key=lambda x: sum([g[0] for g in x[1]]))
             highestWeightPlayer = playerWeights.pop()
             length = len(playerWeights)
             if length > 0:
-                for lowestWeightedOpponentTuple in highestWeightPlayer[1].sort(lambda n: n[0]):
+                highestWeightPlayer[1].sort(key=lambda n: n[0])
+                for lowestWeightedOpponentTuple in highestWeightPlayer[1]:
                     if lowestWeightedOpponentTuple[1] in [item for sublist in pairs for item in sublist]:
                         continue
                     pairs.append([highestWeightPlayer[0], lowestWeightedOpponentTuple[1]])
@@ -163,7 +179,34 @@ class Draft:
             else:
                 # BYE
                 pairs.append([highestWeightPlayer[0], Draft.Player("BYE", "-1")])
-        new_round = Draft.Round(title=len(self.rounds) + 1)
+        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
+        new_round.matches = [new_round.Match(p=i) for i in pairs]
+        self.rounds.append(new_round)
+        return new_round
+
+    def blossom_pairings(self):
+        G = nx.Graph()
+        for p in [y for y in self.players if not y.dropped]:
+            for q in [y for y in self.players if not y.dropped]:
+                # Distance between seats; more => more likely pairing
+                # Difference between scores; less => more likely pairing
+                num_p = len(self.players) / 2
+                G.add_edge(
+                    p.player_id,
+                    q.player_id,
+                    weight=-10000
+                    if q in p.opponents
+                    else (-abs(p.score - q.score) - (abs(num_p - abs(p.seat - q.seat)) / num_p)),
+                )
+        pairs = []
+        unused = [y.player_id for y in self.players if not y.dropped]
+        for p in nx.max_weight_matching(G, maxcardinality=True):
+            unused.remove(p[0])
+            unused.remove(p[1])
+            pairs.append([self.get_player_by_id(p[0]), self.get_player_by_id(p[1])])
+        for x in unused:
+            pairs.append([self.get_player_by_id(x), Draft.Player("BYE", "-1")])
+        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [new_round.Match(p=i) for i in pairs]
         self.rounds.append(new_round)
         return new_round
@@ -180,8 +223,8 @@ class Draft:
         # If it fails to find, restart, but then start with that player.
         # NOT SURE if it will fail to find *and* still have a possible correct pairing set.
         temp_pairings = []
-        temp_players = [y for y in self.players if not y.dropped].sort()
-        print(temp_players)
+        temp_players = [y for y in self.players if not y.dropped]
+        temp_players.sort()
         while temp_players:
             player1 = temp_players.pop(0)
             try:
@@ -201,7 +244,7 @@ class Draft:
                 temp_players.remove(player2)
                 player1.opponents.append(player2)
                 player2.opponents.append(player1)
-        new_round = Draft.Round(title=len(self.rounds) + 1)
+        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [new_round.Match(p=i) for i in temp_pairings]
         self.rounds.append(new_round)
         return new_round
@@ -325,7 +368,7 @@ class Draft:
             # Check if it's impossible to make pairings <- may want to just forget about this, easier to force pairings
             # If either of those: somehow signal that the draft is over, dont make pairings
             if len(self.rounds) != self.max_rounds:
-                self.do_pairings()
+                self.blossom_pairings()
             else:
                 self.calculate()
             return True
@@ -340,11 +383,17 @@ class Draft:
         # If there are no rounds, delete player
         if len(self.rounds) == 0:
             hold = None
+            seat = 0
             for q in self.players:
                 if q.player_id == p_id:
                     hold = q
+                    seat = q.seat
                     break
-            self.players.remove(hold)
+            self.players.remove(hold)  # type: ignore
+            # Adjust other player's seating
+            for q in self.players:
+                if q.seat > seat:
+                    q.seat -= 1
         else:
             # If there are rounds, go into their latest match and toggle their index in drops
             player = [p for p in self.players if p.player_id == p_id][0]
@@ -353,11 +402,11 @@ class Draft:
             match.drops[match.players.index(player)] = not match.drops[match.players.index(player)]
         return
 
-    def add_player(self, p_name, p_id, is_host=False):
+    def add_player(self, p_name, p_id, seat=0, is_host=False):
         """Adds a player to the draft. Can't be called mid-draft."""
         if len(self.rounds) > 0:
             return
-        p = Draft.Player(n=p_name, id=p_id)
+        p = Draft.Player(n=p_name, id=p_id, s=seat)
         if p not in self.players:
             self.players.append(p)
         return
@@ -368,6 +417,10 @@ class Draft:
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
             # print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
         for player in self.players:
-            player.ogp = sum(h := [p.gwp for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
-            player.omp = sum(j := [p.mwp for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
+            player.ogp = sum(h := [p.gwp if p.gwp is not None else 0 for p in player.opponents]) / (
+                len(h) if len(h) > 0 else 1
+            )
+            player.omp = sum(j := [p.mwp if p.mwp is not None else 0 for p in player.opponents]) / (
+                len(j) if len(j) > 0 else 1
+            )
         return
