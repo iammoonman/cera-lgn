@@ -77,11 +77,13 @@ function onObjectEnterContainer(container, object)
                 Wait.condition(function()
                     local handObjs = Player[self.getGMNotes()].getHandObjects(1)
                     if handObjs[1].type == "Deck" then
-                        for i, handObjObj in ipairs(handObjs[1].getObjects()) do
-                            handObjs[1].takeObject({ position = { x = 0, y = 0, z = 0 },
-                                rotation = self.getRotation() })
-                                .addTag(self.getTags()[1] .. self.getGMNotes())
-                        end
+                        handObjs[1].spread()
+                        Wait.time(function()
+                            local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
+                            for i, object in ipairs(hand_objects) do
+                                object.addTag(self.getTags()[1] .. self.getGMNotes())
+                            end
+                        end, 0.2)
                     end
                 end, function()
                     return #Player[self.getGMNotes()].getHandObjects(1) == 1
@@ -116,7 +118,7 @@ function onObjectLeaveZone(zone, obj)
                 for i, objectInHand in ipairs(zone.getObjects()) do
                     if indexOf(HandCards, objectInHand.getGUID()) == nil then
                         print(self.getGMNotes() ..
-                            ", return all cards from your pack to your current hand and remove all other objects.")
+                        ", return all cards from your pack to your current hand and remove all other objects.")
                         StopCounting = objectInHand.getGUID() ~= obj.getGUID()
                     end
                 end
@@ -168,11 +170,13 @@ function onObjectLeaveZone(zone, obj)
             Wait.condition(function()
                 local handObjs = Player[self.getGMNotes()].getHandObjects(1)
                 if handObjs[1].type == "Deck" then
-                    for i, handObjObj in ipairs(handObjs[1].getObjects()) do
-                        handObjs[1].takeObject({ position = { x = 0, y = 0, z = 0 },
-                            rotation = self.getRotation() })
-                            .addTag(self.getTags()[1] .. self.getGMNotes())
-                    end
+                    handObjs[1].spread()
+                    Wait.time(function()
+                        local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
+                        for i, object in ipairs(hand_objects) do
+                            object.addTag(self.getTags()[1] .. self.getGMNotes())
+                        end
+                    end, 0.2)
                 end
             end, function()
                 return #Player[self.getGMNotes()].getHandObjects(1) == 1
@@ -221,4 +225,20 @@ end
 
 function doNothing(obj, playerColor, alt_click)
     log(StopCounting)
+end
+
+function SpecialAbilities()
+    -- Leovold's Operative
+    --  Make an extra pick, then pass the next pack with no picks
+    --  Move the "pass" and "pick up pack" processes to their own functions
+    --  Add button to the card itself when picked, "Pick two cards from this pack."
+    --  State boolean for pass the incoming pack immediately
+
+    -- Cogwork Librarian
+    --  Draft an additional card from the pack, then put Librarian into the pack
+    --  A button that toggles this bag's anticheat, only clickable by host.
+
+    -- Agent of Acquisitions
+    --  Draft all the cards from the pack. Skip all other packs.
+    --  Detect when a card with this ID is picked.
 end

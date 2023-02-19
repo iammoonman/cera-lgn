@@ -1,4 +1,4 @@
-mod_name, version = 'Dawnglare', 1.000
+mod_name, version = 'Dawnglare', 1.001
 function onload(state)
     WebRequest.get('https://raw.githubusercontent.com/iammoonman/cera/master/draftscript/main.lua', self,
         'GetFreshVersion')
@@ -48,25 +48,24 @@ end
 
 function onClickChangeTaken(obj, color, alt)
     -- Race Condition
-    if alt and CardsTaken == 1 then CardsTaken = 1 else CardsTaken = 2 end
-    if alt and CardsTaken == 2 then CardsTaken = 1 else CardsTaken = 3 end
-    if alt and CardsTaken == 3 then CardsTaken = 2 else CardsTaken = 3 end
+    local tab = {
+        [1] = function() if alt then CardsTaken = 1 else CardsTaken = 2 end end,
+        [2] = function() if alt then CardsTaken = 1 else CardsTaken = 3 end end,
+        [3] = function() if alt then CardsTaken = 2 else CardsTaken = 3 end end
+    }
+    tab[CardsTaken]()
     obj.editButton({ index = 4, label = CardsTaken, width = 400 })
     UpdateVariables()
 end
 
 function onClickHighlightBags()
     local length = 0
-    local ActiveBags = {}
+    -- local ActiveBags = {}
     for _, ob in ipairs(getObjects()) do
         if ob.hasTag(self.getTags()[1]) then
-            table.insert(ActiveBags, ob)
+            length = length + 1
+            ob.highlightOn('White', 3)
         end
-    end
-    for _, bag in ipairs(ActiveBags) do
-        local bagObject = getObjectFromGUID(bag)
-        bagObject.highlightOn('White', 3)
-        length = length + 1
     end
     log(length .. " bag(s).")
 end
@@ -143,15 +142,10 @@ function doNothing(obj, playerColor, alt_click)
 end
 
 function onClickDestroyBags()
-    local ActiveBags = {}
     for _, ob in ipairs(getObjects()) do
         if ob.hasTag(self.getTags()[1]) then
-            table.insert(ActiveBags, ob)
+            destroyObject(ob)
         end
-    end
-    for _, previousBagGUID in ipairs(ActiveBags) do
-        local prevbag = getObjectFromGUID(previousBagGUID)
-        destroyObject(prevbag)
     end
 end
 
