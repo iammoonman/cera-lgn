@@ -140,6 +140,32 @@ class Draft:
                     self.gwinners = [0, 0, None]
                 self.drops = [False for i in p]
 
+    def rotation_pairings(self):
+        # For each remaining player
+        for p in [y for y in self.players if not y.dropped]:
+            #  make a queuestack list
+            queuestack = []
+            #  For each total players, but start halfway around the list, picking every other player
+            for q in [
+                *[y for y in self.players if not y.dropped][::2],
+                *[y for y in self.players if not y.dropped][1::2],
+            ]:
+                #   If player is dropped, skip
+                #   If player in opponents, skip
+                #   If player has equal score, put at front
+                #   If player has less score, put at back
+                if q == p:
+                    continue
+                elif q in p.opponents:
+                    continue
+                elif p.score == q.score:
+                    queuestack = [q] + queuestack
+                else:
+                    queuestack += [q]
+            queuestack = queuestack + p.opponents
+            print(p, queuestack)
+        return
+
     def minweight_naive_pairings(self):
         # For each remaining player, define a matrix of weights for their pair against the other players
         # If the players have met, weight is 1000000.
@@ -209,6 +235,7 @@ class Draft:
         new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [new_round.Match(p=i) for i in pairs]
         self.rounds.append(new_round)
+        self.rotation_pairings()
         return new_round
 
     def do_pairings(self):

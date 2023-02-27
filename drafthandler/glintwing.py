@@ -185,24 +185,24 @@ class StartingView(discord.ui.View):
             )
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
     
-    @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
-    async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
-        print("ADD", self.id, "BY", ctx.user.id)
-        # print(ctx.data.values) # Contains a list of vlaues and a dict of users
-        if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
-            return
-        if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
-            # self.bot.drafts[self.id][-1].add_player(
-            #     ctx.data.resolved.users.username,
-            #     str(ctx.data.resolved.users),
-            # )
-            pass
-        await ctx.message.edit(
-            embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
-            view=self,
-        )
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
+    # async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
+    #     print("ADD", self.id, "BY", ctx.user.id)
+    #     print(ctx.data.values) # Contains a list of vlaues and a dict of users
+    #     if self.id not in self.bot.drafts.keys():
+    #         # await ctx.delete_original_message()
+    #         return
+    #     if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
+    #         # self.bot.drafts[self.id][-1].add_player(
+    #         #     ctx.data.resolved.users.username,
+    #         #     str(ctx.data.resolved.users),
+    #         # )
+    #         pass
+    #     await ctx.message.edit(
+    #         embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
+    #         view=self,
+    #     )
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
 class IG_View(discord.ui.View):
