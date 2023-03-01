@@ -72,22 +72,8 @@ function onObjectEnterContainer(container, object)
         DebounceTimer = Wait.time(function()
             if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
                 TakenCount = 0
+                -- Look to onObjectEnterZone for dealing logic
                 self.deal(1, self.getGMNotes())
-                -- Deal the cards from the stack dealt and add the right tags
-                Wait.condition(function()
-                    local handObjs = Player[self.getGMNotes()].getHandObjects(1)
-                    if handObjs[1].type == "Deck" then
-                        handObjs[1].spread()
-                        Wait.time(function()
-                            local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
-                            for i, object in ipairs(hand_objects) do
-                                object.addTag(self.getTags()[1] .. self.getGMNotes())
-                            end
-                        end, 0.2)
-                    end
-                end, function()
-                    return #Player[self.getGMNotes()].getHandObjects(1) == 1
-                end, 1)
                 TimerCount = 0
                 -- Start the pick timer.
                 TimerIsCounting = true
@@ -115,7 +101,7 @@ function onObjectLeaveZone(zone, obj)
                 if #zone.getObjects() ~= #HandCards - 1 then
                     StopCounting = true
                 end
-                for i, objectInHand in ipairs(zone.getObjects()) do
+                for _, objectInHand in ipairs(zone.getObjects()) do
                     if indexOf(HandCards, objectInHand.getGUID()) == nil then
                         print(self.getGMNotes() ..
                         ", return all cards from your pack to your current hand and remove all other objects.")
@@ -165,22 +151,8 @@ function onObjectLeaveZone(zone, obj)
     DebounceTimer = Wait.time(function()
         if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
             TakenCount = 0
+            -- Look to onObjectEnterZone for dealing logic
             self.deal(1, self.getGMNotes())
-            -- Deal the cards from the stack dealt and add the right tags
-            Wait.condition(function()
-                local handObjs = Player[self.getGMNotes()].getHandObjects(1)
-                if handObjs[1].type == "Deck" then
-                    handObjs[1].spread()
-                    Wait.time(function()
-                        local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
-                        for i, object in ipairs(hand_objects) do
-                            object.addTag(self.getTags()[1] .. self.getGMNotes())
-                        end
-                    end, 0.2)
-                end
-            end, function()
-                return #Player[self.getGMNotes()].getHandObjects(1) == 1
-            end, 1)
             TimerCount = 0
             -- Start the pick timer.
             TimerIsCounting = true
@@ -210,6 +182,25 @@ function onObjectEnterZone(zone, obj)
                 end
                 self.editButton({ index = 1, label = TakenCount .. " cards picked" })
             end
+        end
+    end
+    if zone.type == 'Hand' and obj.type == 'Deck' then
+        if self.getGMNotes() == zone.getValue() then
+            if #zone.getObjects() > 1 then
+                local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
+                for i, object in ipairs(hand_objects) do
+                    if object.getGUID() ~= obj.getGUID() then
+                        object.setPosition(Vector(0, 0, 0))
+                    end
+                end
+            end
+            obj.spread()
+            Wait.time(function()
+                local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
+                for _, object in ipairs(hand_objects) do
+                    object.addTag(self.getTags()[1] .. self.getGMNotes())
+                end
+            end, 0.2)
         end
     end
 end
