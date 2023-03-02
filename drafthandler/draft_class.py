@@ -132,7 +132,7 @@ class Draft:
         class Match:
             """One match from the round."""
 
-            def __init__(self, p=[]):
+            def __init__(self, p: list = []):
                 self.players = p
                 self.gwinners: list[Union[int, None]] = []
                 if p[1] == Draft.Player("Bye", "-1"):
@@ -141,6 +141,7 @@ class Draft:
                 self.drops = [False for i in p]
 
     def rotation_pairings(self):
+        player_opponents = {}
         # For each remaining player
         for p in [y for y in self.players if not y.dropped]:
             #  make a queuestack list
@@ -163,8 +164,25 @@ class Draft:
                 else:
                     queuestack += [q]
             queuestack = queuestack + p.opponents
-            print(p, queuestack)
-        return
+            # print(p, queuestack)
+            player_opponents[p.player_id] = queuestack
+        sorted_players = [y for y in self.players if not y.dropped]
+        sorted_players.sort(key=lambda p: p.gpts, reverse=True)
+        pairs: list[list[Draft.Player]] = []
+        while sorted_players:
+            is_paired = False
+            player = sorted_players.pop(0)
+            for opp in player_opponents[player.player_id]:
+                if opp in sorted_players:
+                    pairs.append([player, opp])
+                    is_paired = True
+                    break
+            if not is_paired:
+                pairs.append([player, Draft.Player("BYE", "-1")])
+        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
+        new_round.matches = [new_round.Match(p=i) for i in pairs]
+        self.rounds.append(new_round)
+        return new_round
 
     def minweight_naive_pairings(self):
         # For each remaining player, define a matrix of weights for their pair against the other players
@@ -235,7 +253,6 @@ class Draft:
         new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [new_round.Match(p=i) for i in pairs]
         self.rounds.append(new_round)
-        self.rotation_pairings()
         return new_round
 
     def do_pairings(self):
@@ -395,7 +412,8 @@ class Draft:
             # Check if it's impossible to make pairings <- may want to just forget about this, easier to force pairings
             # If either of those: somehow signal that the draft is over, dont make pairings
             if len(self.rounds) != self.max_rounds:
-                self.blossom_pairings()
+                # self.blossom_pairings()
+                self.rotation_pairings()
             else:
                 self.calculate()
             return True
