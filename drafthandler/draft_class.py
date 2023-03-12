@@ -176,6 +176,7 @@ class Draft:
                 if opp in sorted_players:
                     pairs.append([player, opp])
                     is_paired = True
+                    sorted_players.remove(opp)
                     break
             if not is_paired:
                 pairs.append([player, Draft.Player("BYE", "-1")])
