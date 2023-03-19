@@ -1,9 +1,10 @@
-TakenCount = 0 -- Will break if the user saves the game in between the take card and pass card function calls
-TimerCount = 0
+TakenCount = 0    -- Will break if the user saves the game in between the take card and pass card function calls
+PickTimerCount = 0
 NextBagGUID = nil -- This var is passed from the base red block.
 CountToTake = 1
-TimerIsCounting = false
-DraftCardsTaken = {}
+DebouncePickTimer = nil
+DebouncePassing = nil
+CogworkLibrarian = "ec0d964e-ca2c-4252-8551-cf1916576653"
 function onNumberTyped(player_color, number)
     return true
 end
@@ -33,7 +34,11 @@ function onDestroy()
     end
 end
 
-function onLoad()
+function onSave()
+    return JSON.encode({ taken_count = TakenCount, pick_timer = PickTimerCount, next_bag = NextBagGUID })
+end
+
+function onLoad(state)
     self.createButton({
         click_function = "doNothing",
         function_owner = self,
@@ -50,35 +55,24 @@ function onLoad()
         scale = { 2, 2, 2 },
         width = 800
     })
-    -- Count seconds
-    Wait.time(function()
-        if not TimerIsCounting then return end
-        TimerCount = TimerCount + 1
-        local seconds = TimerCount % 60
-        local minutes = math.floor(TimerCount / 60)
-        local outString = string.format("%s:", minutes)
-        if seconds < 10 then
-            outString = outString .. "0"
-        end
-        outString = outString .. seconds
-        self.editButton({ index = 0, label = outString })
-    end, 1, 5999)
+    local script_state = JSON.decode(state)
+    if script_state ~= nil then
+        TakenCount = script_state.taken_count
+        PickTimerCount = script_state.pick_timer
+        NextBagGUID = script_state.next_bag
+    end
 end
 
-DebounceTimer = nil
 function onObjectEnterContainer(container, object)
     if container.getGUID() == self.getGUID() then
-        if DebounceTimer ~= nil then Wait.stop(DebounceTimer) end
-        DebounceTimer = Wait.time(function()
+        if DebouncePassing ~= nil then Wait.stop(DebouncePassing) end
+        DebouncePassing = Wait.time(function()
             if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
                 TakenCount = 0
                 -- Look to onObjectEnterZone for dealing logic
                 self.deal(1, self.getGMNotes())
-                TimerCount = 0
-                -- Start the pick timer.
-                TimerIsCounting = true
             end
-            DebounceTimer = nil
+            DebouncePassing = nil
         end, 2)
     end
 end
@@ -104,7 +98,7 @@ function onObjectLeaveZone(zone, obj)
                 for _, objectInHand in ipairs(zone.getObjects()) do
                     if indexOf(HandCards, objectInHand.getGUID()) == nil then
                         print(self.getGMNotes() ..
-                        ", return all cards from your pack to your current hand and remove all other objects.")
+                            ", return all cards from your pack to your current hand and remove all other objects.")
                         StopCounting = objectInHand.getGUID() ~= obj.getGUID()
                     end
                 end
@@ -120,7 +114,6 @@ function onObjectLeaveZone(zone, obj)
                         end
                     end
                     local handObjects = zone.getObjects()
-                    -- Pass pick info to DraftCardsTaken here
                     local nextBag = getObjectFromGUID(NextBagGUID)
                     if nextBag ~= nil then
                         -- Should prevent the counter from counting all the cards being passed.
@@ -141,23 +134,20 @@ function onObjectLeaveZone(zone, obj)
                         end
                         -- Reset the timer and count, since we passed the cards.
                         TakenCount = 0
-                        TimerIsCounting = false
+                        if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
                     end
                 end
             end
         end
     end
-    if DebounceTimer ~= nil then Wait.stop(DebounceTimer) end
-    DebounceTimer = Wait.time(function()
+    if DebouncePassing ~= nil then Wait.stop(DebouncePassing) end
+    DebouncePassing = Wait.time(function()
         if #Player[self.getGMNotes()].getHandObjects(1) == 0 and #self.getObjects() > 0 then
             TakenCount = 0
             -- Look to onObjectEnterZone for dealing logic
             self.deal(1, self.getGMNotes())
-            TimerCount = 0
-            -- Start the pick timer.
-            TimerIsCounting = true
         end
-        DebounceTimer = nil
+        DebouncePassing = nil
     end, 1)
 end
 
@@ -165,10 +155,16 @@ function onObjectEnterZone(zone, obj)
     if zone.type == 'Hand' and obj.type == 'Card' then
         if self.getGMNotes() == zone.getValue() then
             local HandCards = {}
-            for _, ob in ipairs(getObjects()) do
-                if ob.hasTag(self.getTags()[2]) and ob.type == 'Card' then
+            local isCogwork = false
+            for _, ob in ipairs(getObjectsWithTag(self.getTags()[2])) do
+                if ob.type == 'Card' then
                     table.insert(HandCards, ob.getGUID())
                 end
+            end
+            if obj.memo == CogworkLibrarian and not obj.hasTag(self.getTags()[2]) then
+                table.insert(HandCards, obj.getGUID())
+                obj.addTag(self.getTags()[2])
+                isCogwork = true
             end
             if indexOf(HandCards, obj.getGUID()) == nil and #HandCards > 0 then
                 obj.highlightOn('Red')
@@ -177,7 +173,7 @@ function onObjectEnterZone(zone, obj)
             end
             if not StopCounting then
                 TakenCount = TakenCount - 1
-                if TakenCount < 0 then
+                if TakenCount < 0 and not isCogwork then
                     TakenCount = 0
                 end
                 self.editButton({ index = 1, label = TakenCount .. " cards picked" })
@@ -188,19 +184,37 @@ function onObjectEnterZone(zone, obj)
         if self.getGMNotes() == zone.getValue() then
             if #zone.getObjects() > 1 then
                 local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
-                for i, object in ipairs(hand_objects) do
-                    if object.getGUID() ~= obj.getGUID() then
-                        object.setPosition(Vector(0, 0, 0))
+                for _, object in ipairs(hand_objects) do
+                    if object.getGUID() == obj.getGUID() then
+                        object.setPosition(Vector(0, 10, 0))
+                        return
                     end
                 end
             end
-            obj.spread()
-            Wait.time(function()
-                local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
-                for _, object in ipairs(hand_objects) do
-                    object.addTag(self.getTags()[1] .. self.getGMNotes())
+            obj.setLuaScript(string.format([[
+function onObjectLeaveContainer(container, leave_object)
+    if container.type == "Deck" then
+        leave_object.setTags(container.getTags())
+    end
+end
+            ]]))
+            obj.addTag(self.getTags()[1] .. self.getGMNotes())
+            Wait.frames(function() obj.spread() end, 1)
+            -- Start the pick timer.
+            if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+            -- Count seconds
+            PickTimerCount = 0
+            DebouncePickTimer = Wait.time(function()
+                PickTimerCount = PickTimerCount + 1
+                local seconds = PickTimerCount % 60
+                local minutes = math.floor(PickTimerCount / 60)
+                local outString = string.format("%s:", minutes)
+                if seconds < 10 then
+                    outString = outString .. "0"
                 end
-            end, 0.2)
+                outString = outString .. seconds
+                self.editButton({ index = 0, label = outString })
+            end, 1, 5999)
         end
     end
 end
@@ -224,10 +238,6 @@ function SpecialAbilities()
     --  Move the "pass" and "pick up pack" processes to their own functions
     --  Add button to the card itself when picked, "Pick two cards from this pack."
     --  State boolean for pass the incoming pack immediately
-
-    -- Cogwork Librarian
-    --  Draft an additional card from the pack, then put Librarian into the pack
-    --  A button that toggles this bag's anticheat, only clickable by host.
 
     -- Agent of Acquisitions
     --  Draft all the cards from the pack. Skip all other packs.

@@ -1,21 +1,48 @@
-mod_name, version = 'Dawnglare', 1.001
+mod_name, version = 'Dawnglare', 1.002
 function onload(state)
     WebRequest.get('https://raw.githubusercontent.com/iammoonman/cera/master/draftscript/main.lua', self,
         'GetFreshVersion')
     LocalBounds = self.getBounds()
-    self.createButton({ label = "Create Bags", click_function = "onClickGetBags", function_owner = self, width = 680,
+    self.createButton({
+        label = "Create Bags",
+        click_function = "onClickGetBags",
+        function_owner = self,
+        width = 680,
         rotation = { -90, 0, 0 },
-        position = { x = 0, y = -LocalBounds.size.y / 4, z = LocalBounds.size.z / 2 } })
-    self.createButton({ label = "Reverse Order", click_function = "onClickReverse", function_owner = self, width = 680,
-        rotation = { 0, 0, 0 }, position = { x = 0, y = LocalBounds.size.y / 2, z = 0.3 } })
-    self.createButton({ label = "Highlight Bags", click_function = "onClickHighlightBags", function_owner = self,
+        position = { x = 0, y = -LocalBounds.size.y / 4, z = LocalBounds.size.z / 2 }
+    })
+    self.createButton({
+        label = "Reverse Order",
+        click_function = "onClickReverse",
+        function_owner = self,
         width = 680,
-        rotation = { -90, 0, 0 }, position = { x = 0, y = LocalBounds.size.y / 4, z = LocalBounds.size.z / 2 } })
-    self.createButton({ label = "Destroy Bags", click_function = "onClickDestroyBags", function_owner = self,
+        rotation = { 0, 0, 0 },
+        position = { x = 0, y = LocalBounds.size.y / 2, z = 0.3 }
+    })
+    self.createButton({
+        label = "Highlight Bags",
+        click_function = "onClickHighlightBags",
+        function_owner = self,
         width = 680,
-        rotation = { 0, 0, 180 }, position = { x = 0, y = -LocalBounds.size.y / 2, z = 0 } })
-    self.createButton({ label = "1", click_function = "onClickChangeTaken", function_owner = self, width = 400,
-        rotation = { 0, 0, 0 }, position = { x = 0, y = LocalBounds.size.y / 2, z = -0.3 } })
+        rotation = { -90, 0, 0 },
+        position = { x = 0, y = LocalBounds.size.y / 4, z = LocalBounds.size.z / 2 }
+    })
+    self.createButton({
+        label = "Destroy Bags",
+        click_function = "onClickDestroyBags",
+        function_owner = self,
+        width = 680,
+        rotation = { 0, 0, 180 },
+        position = { x = 0, y = -LocalBounds.size.y / 2, z = 0 }
+    })
+    self.createButton({
+        label = "1",
+        click_function = "onClickChangeTaken",
+        function_owner = self,
+        width = 400,
+        rotation = { 0, 0, 0 },
+        position = { x = 0, y = LocalBounds.size.y / 2, z = -0.3 }
+    })
     if not self.hasAnyTag() then self.addTag(self.getGUID()) end
     UpdateVariables()
 end
@@ -71,15 +98,44 @@ function onClickHighlightBags()
 end
 
 function onClickGetBags()
-    -- Remove old bags (?)
-    -- for _, previousBagGUID in ipairs(ActiveBags) do
-    --     local prevbag = getObjectFromGUID(previousBagGUID)
-    --     destroyObject(prevbag)
-    -- end
-    -- ActiveBags = {}
+    -- Find existing bags
+    local ActiveBags = {}
+    for _, ob in ipairs(getObjectsWithTag(self.getTags()[1])) do
+        local tint = ob.getColorTint()
+        if tint.r == 0.956 and tint.g == 0.392 and tint.b == 0.113 and tint.a == 1 then
+            table.insert(ActiveBags, 'Orange')
+        end
+        if tint.r == 0.856 and tint.g == 0.1 and tint.b == 0.094 and tint.a == 1 then
+            table.insert(ActiveBags, 'Red')
+        end
+        if tint.r == 0.443 and tint.g == 0.231 and tint.b == 0.09 and tint.a == 1 then
+            table.insert(ActiveBags, 'Brown')
+        end
+        if tint.r == 1 and tint.g == 1 and tint.b == 1 and tint.a == 1 then
+            table.insert(ActiveBags, 'White')
+        end
+        if tint.r == 0.96 and tint.g == 0.439 and tint.b == 0.807 and tint.a == 1 then
+            table.insert(ActiveBags, 'Pink')
+        end
+        if tint.r == 0.627 and tint.g == 0.125 and tint.b == 0.941 and tint.a == 1 then
+            table.insert(ActiveBags, 'Purple')
+        end
+        if tint.r == 0.118 and tint.g == 0.53 and tint.b == 1 and tint.a == 1 then
+            table.insert(ActiveBags, 'Blue')
+        end
+        if tint.r == 0.129 and tint.g == 0.694 and tint.b == 0.607 and tint.a == 1 then
+            table.insert(ActiveBags, 'Teal')
+        end
+        if tint.r == 0.192 and tint.g == 0.701 and tint.b == 0.168 and tint.a == 1 then
+            table.insert(ActiveBags, 'Green')
+        end
+        if tint.r == 0.905 and tint.g == 0.898 and tint.b == 0.172 and tint.a == 1 then
+            table.insert(ActiveBags, 'Yellow')
+        end
+    end
     -- Create new bags
     for player_index, player in ipairs(Player.getPlayers()) do
-        if player.color ~= 'Grey' and player.color ~= 'Black' then
+        if player.color ~= 'Grey' and player.color ~= 'Black' and indexOf(ActiveBags, player.color) == nil then
             -- Give player a bag and put it into the table
             local pos = self.getPosition()
             local rot = self.getRotation()
@@ -87,8 +143,7 @@ function onClickGetBags()
                 local NewBag = spawnObjectData({
                     data = {
                         Name = "Bag",
-                        Transform = { posX = 0, posY = 0, pozZ = 0, rotX = 0, rotY = 0, rotZ = 0, scaleX = 1, scaleY = 1,
-                            scaleZ = 1 },
+                        Transform = { posX = 0, posY = 0, pozZ = 0, rotX = 0, rotY = 0, rotZ = 0, scaleX = 1, scaleY = 1, scaleZ = 1 },
                         Nickname = player.color .. "'s bag.",
                         Description = "Don't take cards out of me!",
                         GMNotes = player.color,
@@ -121,7 +176,7 @@ function onClickGetBags()
                                     self.setLuaScript(wr.text)
                                     self.reload()
                                 end
-                            ]],
+                                ]],
                         LuaScriptState = "",
                         ContainedObjects = {},
                     },
