@@ -8,6 +8,7 @@ CogworkLibrarian = "ec0d964e-ca2c-4252-8551-cf1916576653"
 AgentOfAcquisitions = "19047c4b-0106-455d-ab71-68cabfae7404"
 AgentActive = false
 LeovoldsOperative = "8fedb2c2-fb13-4af1-b85e-714832562da7"
+OperativePacksToPass = 0
 function onNumberTyped(player_color, number)
     return true
 end
@@ -37,7 +38,13 @@ function onDestroy()
 end
 
 function onSave()
-    return JSON.encode({ taken_count = TakenCount, pick_timer = PickTimerCount, next_bag = NextBagGUID, agent_active = AgentActive })
+    return JSON.encode({
+        taken_count = TakenCount,
+        pick_timer = PickTimerCount,
+        next_bag = NextBagGUID,
+        agent_active = AgentActive,
+        packs_to_pass = OperativePacksToPass
+    })
 end
 
 function onLoad(state)
@@ -73,12 +80,17 @@ function onLoad(state)
                 width = 800
             })
         end
+        OperativePacksToPass = script_state.packs_to_pass
     end
 end
 
 function onObjectEnterContainer(container, object)
     if container.getGUID() == self.getGUID() then
         if AgentActive then
+            local nextBag = getObjectFromGUID(NextBagGUID)
+            self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
+        elseif OperativePacksToPass > 0 then
+            OperativePacksToPass = OperativePacksToPass - 1
             local nextBag = getObjectFromGUID(NextBagGUID)
             self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
         else
@@ -92,34 +104,31 @@ StopCounting = false
 function onObjectLeaveZone(zone, obj)
     if zone.type == 'Hand' and obj.type == 'Card' then
         if self.getGMNotes() == zone.getValue() and not AgentActive then
-            local HandCards = {}
-            for _, ob in ipairs(getObjectsWithTag(self.getTags()[2])) do
-                if ob.type == 'Card' then
-                    table.insert(HandCards, ob.getGUID())
+            obj.highlightOff('Red')
+            StopCounting = false
+            local isOperative = obj.memo == LeovoldsOperative and not obj.hasTag(self.getTags()[2]) and obj.getGMNotes() == 'operative_used'
+            local operativeInHand = false
+            for _, objectInHand in ipairs(zone.getObjects()) do
+                if objectInHand.getGMNotes() == 'operative_used' then
+                    operativeInHand = true
+                    print(self.getGMNotes() ..
+                            ", please remove your used Leovold's Operative from your hand.")
                 end
-            end
-            if (indexOf(HandCards, obj.getGUID()) == nil or StopCounting) and #HandCards > 0 then
-                StopCounting = false
-                obj.highlightOff('Red')
-                -- Double check that the pack cards are the only thing in the player's hand.
-                if #zone.getObjects() ~= #HandCards - 1 then
+                if not objectInHand.hasTag(self.getTags()[2]) then
                     StopCounting = true
-                end
-                for _, objectInHand in ipairs(zone.getObjects()) do
-                    if indexOf(HandCards, objectInHand.getGUID()) == nil then
-                        print(self.getGMNotes() ..
-                            ", return all cards from your pack to your current hand and remove all other objects.")
-                        StopCounting = objectInHand.getGUID() ~= obj.getGUID()
-                    end
                 end
             end
             if not StopCounting then
-                TakenCount = TakenCount + 1
+                if not isOperative and obj.hasTag(self.getTags()[2]) then
+                    TakenCount = TakenCount + 1
+                end
                 self.editButton({ index = 1, label = TakenCount .. " cards picked" })
                 -- If the player has taken all the cards they needed, pass
-                if TakenCount == CountToTake and NextBagGUID ~= nil then
+                if TakenCount == (CountToTake + OperativePacksToPass) and NextBagGUID ~= nil then
                     if not AgentActive and obj.memo ~= AgentOfAcquisitions then
-                        PassCardsFromHand(zone)
+                        if not operativeInHand then
+                            PassCardsFromHand(zone)
+                        end
                     else
                         AgentActive = true
                         local nextBag = getObjectFromGUID(NextBagGUID)
@@ -149,25 +158,29 @@ end
 function onObjectEnterZone(zone, obj)
     if zone.type == 'Hand' and obj.type == 'Card' then
         if self.getGMNotes() == zone.getValue() then
-            local HandCards = {}
+            local isOperative = false
             local isCogwork = false
-            for _, ob in ipairs(getObjectsWithTag(self.getTags()[2])) do
-                if ob.type == 'Card' then
-                    table.insert(HandCards, ob.getGUID())
-                end
+            if obj.memo == LeovoldsOperative and not obj.hasTag(self.getTags()[2]) and not obj.getGMNotes() == 'operative_used' then
+                isOperative = true
+                OperativePacksToPass = OperativePacksToPass + 1
+                obj.setGMNotes('operative_used')
+                print(self.getGMNotes() ..
+                            ", you have used a Leovold's Operative. Please remove it from your hand.")
             end
             if obj.memo == CogworkLibrarian and not obj.hasTag(self.getTags()[2]) then
-                table.insert(HandCards, obj.getGUID())
                 obj.addTag(self.getTags()[2])
                 isCogwork = true
             end
-            if indexOf(HandCards, obj.getGUID()) == nil and #HandCards > 0 then
+            if not obj.hasTag(self.getTags()[2]) and not isOperative and #zone.getObjects() > 1 then
                 obj.highlightOn('Red')
                 StopCounting = true
-                return
+                print(self.getGMNotes() ..
+                            ", return all cards from your pack to your current hand and remove all other objects.")
             end
-            if not StopCounting then
-                TakenCount = TakenCount - 1
+            if not StopCounting and obj.hasTag(self.getTags()[2]) then
+                if not isOperative then
+                    TakenCount = TakenCount - 1
+                end
                 if TakenCount < 0 and not isCogwork then
                     TakenCount = 0
                 end
@@ -186,7 +199,8 @@ function onObjectEnterZone(zone, obj)
                     end
                 end
             end
-            obj.setLuaScript("function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
+            obj.setLuaScript(
+                "function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
             obj.addTag(self.getTags()[1] .. self.getGMNotes())
             Wait.frames(function() obj.spread() end, 1)
             -- Start the pick timer.
@@ -226,14 +240,6 @@ function doAgent(obj, playerColor, alt_click)
         AgentActive = false
         self.removeButton(2)
     end
-end
-
-function SpecialAbilities()
-    -- Leovold's Operative
-    --  Make an extra pick, then pass the next pack with no picks
-    --  Move the "pass" and "pick up pack" processes to their own functions
-    --  Add button to the card itself when picked, "Pick two cards from this pack."
-    --  State boolean for pass the incoming pack immediately
 end
 
 function PassCardsFromHand(zone)
