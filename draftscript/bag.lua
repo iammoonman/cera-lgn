@@ -9,6 +9,7 @@ AgentOfAcquisitions = "19047c4b-0106-455d-ab71-68cabfae7404"
 AgentActive = false
 LeovoldsOperative = "8fedb2c2-fb13-4af1-b85e-714832562da7"
 OperativePacksToPass = 0
+DebounceSkipping = nil
 function onNumberTyped(player_color, number)
     return true
 end
@@ -81,18 +82,18 @@ function onLoad(state)
             })
         end
         OperativePacksToPass = script_state.packs_to_pass
+        if OperativePacksToPass > 0 then
+            if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
+            DebounceSkipping = Wait.time(SkipPack, 1, OperativePacksToPass)
+        end
     end
 end
 
 function onObjectEnterContainer(container, object)
-    if container.getGUID() == self.getGUID() then
-        if AgentActive then
-            local nextBag = getObjectFromGUID(NextBagGUID)
-            self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
-        elseif OperativePacksToPass > 0 then
-            OperativePacksToPass = OperativePacksToPass - 1
-            local nextBag = getObjectFromGUID(NextBagGUID)
-            self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
+    if container.getGUID() == self.getGUID() and #self.getObjects() == 1 then
+        if AgentActive or OperativePacksToPass > 0 then
+            if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
+            DebounceSkipping = Wait.time(SkipPack, 1, OperativePacksToPass)
         else
             DealCardsToHand()
         end
@@ -100,19 +101,18 @@ function onObjectEnterContainer(container, object)
 end
 
 -- These two update the taken counter.
-StopCounting = false
 function onObjectLeaveZone(zone, obj)
     if zone.type == 'Hand' and obj.type == 'Card' then
         if self.getGMNotes() == zone.getValue() and not AgentActive then
             obj.highlightOff('Red')
-            StopCounting = false
+            local StopCounting = false
             local isOperative = obj.memo == LeovoldsOperative and not obj.hasTag(self.getTags()[2]) and obj.getGMNotes() == 'operative_used'
             local operativeInHand = false
             for _, objectInHand in ipairs(zone.getObjects()) do
                 if objectInHand.getGMNotes() == 'operative_used' then
                     operativeInHand = true
                     print(self.getGMNotes() ..
-                            ", please remove your used Leovold's Operative from your hand.")
+                            ", remove the used Leovold's Operative from your hand. Return all other cards from this pack to it and pick once.")
                 end
                 if not objectInHand.hasTag(self.getTags()[2]) then
                     StopCounting = true
@@ -125,18 +125,13 @@ function onObjectLeaveZone(zone, obj)
                 self.editButton({ index = 1, label = TakenCount .. " cards picked" })
                 -- If the player has taken all the cards they needed, pass
                 if TakenCount == (CountToTake + OperativePacksToPass) and NextBagGUID ~= nil then
-                    if not AgentActive and obj.memo ~= AgentOfAcquisitions then
-                        if not operativeInHand then
-                            PassCardsFromHand(zone)
-                        end
+                    if not AgentActive and obj.memo ~= AgentOfAcquisitions and not operativeInHand then
+                        PassCardsFromHand(zone)
                     else
                         AgentActive = true
-                        local nextBag = getObjectFromGUID(NextBagGUID)
-                        local handObjects = zone.getObjects()
-                        group(handObjects)
-                        for _i, _v in ipairs(self.getObjects()) do
-                            self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
-                        end
+                        group(zone.getObjects())
+                        if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
+                        DebounceSkipping = Wait.time(SkipPack, 1, #self.getObjects())
                         self.createButton({
                             click_function = "doAgent",
                             function_owner = self,
@@ -146,12 +141,20 @@ function onObjectLeaveZone(zone, obj)
                             width = 800
                         })
                     end
+                    -- Stop the pick timer.
+                    if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+                    PickTimerCount = 0
                 end
             end
         end
+        if not AgentActive then
+            DealCardsToHand()
+        end
     end
-    if not AgentActive then
-        DealCardsToHand()
+    if zone.type == 'Hand' and obj.type == 'Card' then
+        if self.getGMNotes() == zone.getValue() then
+            obj.highlightOff('Red')
+        end
     end
 end
 
@@ -160,24 +163,25 @@ function onObjectEnterZone(zone, obj)
         if self.getGMNotes() == zone.getValue() then
             local isOperative = false
             local isCogwork = false
-            if obj.memo == LeovoldsOperative and not obj.hasTag(self.getTags()[2]) and not obj.getGMNotes() == 'operative_used' then
+            if obj.memo == LeovoldsOperative and (not obj.hasTag(self.getTags()[2])) and obj.getGMNotes() ~= 'operative_used' then
                 isOperative = true
                 OperativePacksToPass = OperativePacksToPass + 1
                 obj.setGMNotes('operative_used')
                 print(self.getGMNotes() ..
-                            ", you have used a Leovold's Operative. Please remove it from your hand.")
+                            ", you have used a Leovold's Operative. Please remove it from your hand. You will pass the next " .. OperativePacksToPass .. " packs.")
             end
             if obj.memo == CogworkLibrarian and not obj.hasTag(self.getTags()[2]) then
                 obj.addTag(self.getTags()[2])
                 isCogwork = true
+                print(self.getGMNotes() ..
+                            ", you have used a Cogwork Librarian. You may make an additional pick from this pack.")
             end
             if not obj.hasTag(self.getTags()[2]) and not isOperative and #zone.getObjects() > 1 then
                 obj.highlightOn('Red')
-                StopCounting = true
                 print(self.getGMNotes() ..
                             ", return all cards from your pack to your current hand and remove all other objects.")
             end
-            if not StopCounting and obj.hasTag(self.getTags()[2]) then
+            if obj.hasTag(self.getTags()[2]) or isCogwork then
                 if not isOperative then
                     TakenCount = TakenCount - 1
                 end
@@ -191,33 +195,14 @@ function onObjectEnterZone(zone, obj)
     if zone.type == 'Hand' and obj.type == 'Deck' then
         if self.getGMNotes() == zone.getValue() then
             if #zone.getObjects() > 1 then
-                local hand_objects = Player[self.getGMNotes()].getHandObjects(1)
-                for _, object in ipairs(hand_objects) do
-                    if object.getGUID() == obj.getGUID() then
-                        object.setPosition(Vector(0, 10, 0))
-                        return
-                    end
-                end
+                obj.highlightOn('Red')
+                print(self.getGMNotes() .. ", take the deck of cards out of your hand before proceeding.")
+                return
             end
             obj.setLuaScript(
                 "function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
             obj.addTag(self.getTags()[1] .. self.getGMNotes())
             Wait.frames(function() obj.spread() end, 1)
-            -- Start the pick timer.
-            if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
-            -- Count seconds
-            PickTimerCount = 0
-            DebouncePickTimer = Wait.time(function()
-                PickTimerCount = PickTimerCount + 1
-                local seconds = PickTimerCount % 60
-                local minutes = math.floor(PickTimerCount / 60)
-                local outString = string.format("%s:", minutes)
-                if seconds < 10 then
-                    outString = outString .. "0"
-                end
-                outString = outString .. seconds
-                self.editButton({ index = 0, label = outString })
-            end, 1, 5999)
         end
     end
 end
@@ -252,19 +237,10 @@ function PassCardsFromHand(zone)
     local nextBag = getObjectFromGUID(NextBagGUID)
     if nextBag ~= nil then
         -- Should prevent the counter from counting all the cards being passed.
-        StopCounting = true
-        Wait.time(function() StopCounting = false end, 0.3)
-        for _, o in ipairs(handObjects) do
-            o.flip()
-        end
-        local groupdObj = group(handObjects)
-        if #groupdObj == 0 then
-            for _, occObj in ipairs(handObjects) do
-                if occObj.name == "Card" then
-                    nextBag.putObject(occObj)
-                end
-            end
-        else
+        if #handObjects == 1 then
+            nextBag.putObject(handObjects[1])
+        elseif #handObjects > 1 then
+            local groupdObj = group(handObjects)
             nextBag.putObject(groupdObj[1])
         end
         -- Reset the timer and count, since we passed the cards.
@@ -281,6 +257,35 @@ function DealCardsToHand()
             -- Look to onObjectEnterZone for dealing logic
             self.deal(1, self.getGMNotes())
         end
-        DebouncePassing = nil
     end, 2)
+    -- Start the pick timer.
+    if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+    -- Count seconds
+    PickTimerCount = 0
+    DebouncePickTimer = Wait.time(function()
+        PickTimerCount = PickTimerCount + 1
+        local seconds = PickTimerCount % 60
+        local minutes = math.floor(PickTimerCount / 60)
+        local outString = string.format("%s:", minutes)
+        if seconds < 10 then
+            outString = outString .. "0"
+        end
+        outString = outString .. seconds
+        self.editButton({ index = 0, label = outString })
+    end, 1, 5999)
+end
+
+function SkipPack()
+    if #self.getObjects() == 0 then return end
+    if OperativePacksToPass > 0 then
+        OperativePacksToPass = OperativePacksToPass - 1
+        local nextBag = getObjectFromGUID(NextBagGUID)
+        self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
+        print(self.getGMNotes().." has skipped a pack for Leovold's Operative. "..OperativePacksToPass.." skipped packs remaining.")
+        return
+    end
+    if AgentActive then
+        local nextBag = getObjectFromGUID(NextBagGUID)
+        self.takeObject({ callback_function = function(object) nextBag.putObject(object) end })
+    end
 end
