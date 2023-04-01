@@ -85,7 +85,7 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         ("" if is_reverse else "[6E6E6E]")
         + f'[b]{face_1["name"]} {face_1["mana_cost"]}[/b]'
         + "\n"
-        + f'{face_1["type_line"]} {plus_rarity(card_dota["rarity"])}'
+        + f'{face_1["type_line"]} {rarity_icon(card_dota["rarity"])}'
         + "\n"
         + italicize_reminder(face_1["oracle_text"])
         + (
@@ -96,14 +96,19 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         + (
             f"\n[b]{face_1['loyalty']}[/b] Starting Loyalty"
             if "loyalty" in face_1.keys() and "Planeswalker" in face_1["type_line"]
-            else "" + "\n" + "[6E6E6E]"
-            if is_reverse
-            else "[-]"
+            else ""
         )
+        + (
+            f"\n[b]{face_1['defense']}[/b] Starting Defense"
+            if "defense" in face_1.keys() and "Battle" in face_1["type_line"]
+            else ""
+        )
+        + "\n"
+        + ("[6E6E6E]" if is_reverse else "[-]")
         + "\n"
         + f'[b]{face_2["name"]} {face_2["mana_cost"]}[/b]'
         + "\n"
-        + f'{face_2["type_line"]} {plus_rarity(card_dota["rarity"])}'
+        + f'{face_2["type_line"]} {rarity_icon(card_dota["rarity"])}'
         + "\n"
         + italicize_reminder(face_2["oracle_text"])
         + (
@@ -116,6 +121,11 @@ def make_oracle_dfc(card_dota, is_reverse=False):
             if "loyalty" in face_2.keys()
             else ""
         )
+        + (
+            f"\n[b]{face_2['defense']}[/b] Starting Defense"
+            if "defense" in face_2.keys() and "Battle" in face_2["type_line"]
+            else ""
+        )
         + ("[-]" if is_reverse else "")
     )
     return descriptionHold
@@ -125,7 +135,7 @@ def make_oracle_normal(card_data):
     descriptionHold = (
         f'[b]{card_data["name"]} {card_data["mana_cost"]}[/b]'
         + "\n"
-        + f'{card_data["type_line"]} {plus_rarity(card_data["rarity"])}'
+        + f'{card_data["type_line"]} {rarity_icon(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["oracle_text"])
         + (
@@ -135,6 +145,11 @@ def make_oracle_normal(card_data):
             else ""
         )
         + (f"\n[b]{card_data['loyalty']}[/b] Starting Loyalty" if "Planeswalker" in card_data["type_line"] else "")
+        + (
+            f"\n[b]{card_data['defense']}[/b] Starting Defense"
+            if "defense" in card_data.keys() and "Battle" in card_data["type_line"]
+            else ""
+        )
     )
     return descriptionHold
 
@@ -144,7 +159,7 @@ def make_oracle_splitadventure(card_data):
         "[b]"
         + f'[b]{card_data["card_faces"][0]["name"]} {card_data["card_faces"][0]["mana_cost"]}[/b]'
         + "\n"
-        + f'{card_data["card_faces"][0]["type_line"]} {plus_rarity(card_data["rarity"])}'
+        + f'{card_data["card_faces"][0]["type_line"]} {rarity_icon(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["card_faces"][0]["oracle_text"])
         + (
@@ -155,7 +170,7 @@ def make_oracle_splitadventure(card_data):
         + "\n"
         + f'[b]{card_data["card_faces"][1]["name"]} {card_data["card_faces"][1]["mana_cost"]}[/b]'
         + "\n"
-        + f'{card_data["card_faces"][1]["type_line"]} {plus_rarity(card_data["rarity"])}'
+        + f'{card_data["card_faces"][1]["type_line"]} {rarity_icon(card_data["rarity"])}'
         + "\n"
         + italicize_reminder(card_data["card_faces"][1]["oracle_text"])
         + "\n"
@@ -180,7 +195,7 @@ def make_oracle_vanguard(card_data):
         + "[/b]"
         + "\n"
         + card_data["type_line"]
-        + plus_rarity(card_data["rarity"])
+        + rarity_icon(card_data["rarity"])
         + "\n"
         + italicize_reminder(card_data["oracle_text"])
         + "\n"
@@ -191,127 +206,132 @@ def make_oracle_vanguard(card_data):
     return descriptionHold
 
 
-def plus_rarity(rarity):
+def rarity_icon(rarity):
     # Colors scraped from Scryfall
     if rarity == "mythic":
-        # f64800
         return "[f64800]「M」[-]"
     elif rarity == "rare":
-        # c5b37c
         return "[c5b37c]「R」[-]"
     elif rarity == "uncommon":
-        # 6c848c
         return "[6c848c]「U」[-]"
     elif rarity == "common":
-        # 16161d
-        return "「C」"
+        return "[ffffff]「C」[-]"
     elif rarity == "special":
-        # 905d98
         return "[905d98]「S」[-]"
     elif rarity == "bonus":
-        # 9c202b
         return "[9c202b]「B」[-]"
     return ""
 
 
-def tts_parse(o):
+def tts_parse(card):
     card_obj = {
-        "oracle_id": o["oracle_id"] if "oracle_id" in o.keys() else "",
-        "cmc": o["cmc"] if "cmc" in o.keys() else 0,
-        "type_line": o["type_line"] if "type_line" in o.keys() else "",
-        "layout": o["layout"],
-        "set": o["set"],
-        "name": o["name"],
-        "collector_number": o["collector_number"],
+        "oracle_id": card["oracle_id"] if "oracle_id" in card.keys() else "",
+        "cmc": card["cmc"] if "cmc" in card.keys() else 0,
+        "type_line": card["type_line"] if "type_line" in card.keys() else "",
+        "layout": card["layout"],
+        "set": card["set"],
+        "name": card["name"],
+        "collector_number": card["collector_number"],
     }
-    if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
+    if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle"]:
         extra_obj = {
-            "stitched": o["stitched"] if "stitched" in o else False,
+            "stitched": card["stitched"] if "stitched" in card else False,
             "card_faces": [
                 {
-                    "name": i["name"],
-                    "type_line": i["type_line"],
-                    "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"normal": i["image_uris"]["normal"], "small": i["image_uris"]["small"]},
-                    "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
-                    "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
-                    "mana_cost": i["mana_cost"],
-                    "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
+                    "name": face["name"],
+                    "type_line": face["type_line"],
+                    "oracle_text": make_oracle_dfc(card, side == 0),
+                    "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "mana_cost": face["mana_cost"],
+                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else 0,
                 }
-                for c, i in enumerate(o["card_faces"])
+                for side, face in enumerate(card["card_faces"])
             ],
         }
-    elif "card_faces" in o.keys() and o["layout"] in ["split"]:
+    elif card["layout"] in ["battle"]:
         extra_obj = {
-            "type_line": o["type_line"],
-            "oracle_text": make_oracle_splitadventure(o),
-            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
-            "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
-            "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
-            "mana_cost": o["mana_cost"],
-            "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
+            "name": card["name"],
+            "type_line": card["type_line"],
+            "oracle_text": make_oracle_normal(card),
+            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "mana_cost": card["mana_cost"],
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
-    elif "card_faces" in o.keys() and o["layout"] in ["flip"]:
+    elif card["layout"] in ["split"]:
+        extra_obj = {
+            "type_line": card["type_line"],
+            "oracle_text": make_oracle_splitadventure(card),
+            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "mana_cost": card["mana_cost"],
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
+        }
+    elif card["layout"] in ["flip"]:
         extra_obj = {
             "card_faces": [
                 {
-                    "name": i["name"],
-                    "type_line": i["type_line"],
-                    "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
-                    "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
-                    "toughness": i["toughness"] if "power" in i.keys() and "toughness" in i.keys() else 0,
-                    "mana_cost": i["mana_cost"],
-                    "loyalty": i["loyalty"] if "loyalty" in i.keys() else 0,
+                    "name": face["name"],
+                    "type_line": face["type_line"],
+                    "oracle_text": make_oracle_dfc(card, side == 0),
+                    "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "mana_cost": face["mana_cost"],
+                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else 0,
                 }
-                for c, i in enumerate(o["card_faces"])
+                for side, face in enumerate(card["card_faces"])
             ],
         }
-    elif "card_faces" in o.keys() and o["layout"] in ["adventure"]:
+    elif card["layout"] in ["adventure"]:
         extra_obj = {
-            "oracle_text": make_oracle_splitadventure(o),
-            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
+            "oracle_text": make_oracle_splitadventure(card),
+            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
             "power": 0,
             "toughness": 0,
-            "mana_cost": o["mana_cost"],
-            "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
+            "mana_cost": card["mana_cost"],
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
-    elif "layout" == "vanguard":
+    elif card["layout"] in ["vanguard"]:
         extra_obj = {
-            "oracle_text": make_oracle_vanguard(o),
-            "image_uris": {"normal": o["image_uris"]["normal"]},
+            "oracle_text": make_oracle_vanguard(card),
+            "image_uris": {"normal": card["image_uris"]["normal"]},
             "power": 0,
             "toughness": 0,
-            "mana_cost": o["mana_cost"],
+            "mana_cost": card["mana_cost"],
             "loyalty": 0,
         }
-    elif "reversible_card" in o["layout"]:
+    elif card["layout"] in ["reversible_card"]:
         extra_obj = {
             "card_faces": [
                 {
-                    "name": i["name"],
-                    "type_line": i["type_line"],
-                    "oracle_text": make_oracle_dfc(o, c == 0),
-                    "image_uris": {"normal": i["image_uris"]["normal"]},
+                    "name": face["name"],
+                    "type_line": face["type_line"],
+                    "oracle_text": make_oracle_dfc(card, side == 0),
+                    "image_uris": {"normal": face["image_uris"]["normal"]},
                     "power": 0,
                     "toughness": 0,
-                    "mana_cost": i["mana_cost"],
+                    "mana_cost": face["mana_cost"],
                     "loyalty": 0,
                 }
-                for c, i in enumerate(o["card_faces"])
+                for side, face in enumerate(card["card_faces"])
             ],
-            "type_line": o["card_faces"][0]["type_line"] + " // " + o["card_faces"][1]["type_line"],
-            "cmc": o["card_faces"][0]["cmc"],
-            "oracle_id": o["card_faces"][0]["oracle_id"],
+            "type_line": card["card_faces"][0]["type_line"] + " // " + card["card_faces"][1]["type_line"],
+            "cmc": card["card_faces"][0]["cmc"],
+            "oracle_id": card["card_faces"][0]["oracle_id"],
         }
     else:
         extra_obj = {
-            "oracle_text": make_oracle_normal(o),
-            "image_uris": {"normal": o["image_uris"]["normal"], "small": o["image_uris"]["small"]},
-            "power": o["power"] if "power" in o.keys() and "toughness" in o.keys() else 0,
-            "toughness": o["toughness"] if "power" in o.keys() and "toughness" in o.keys() else 0,
-            "mana_cost": o["mana_cost"],
-            "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
+            "oracle_text": make_oracle_normal(card),
+            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "mana_cost": card["mana_cost"],
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
     card_obj = {**card_obj, **extra_obj}
     return card_obj
