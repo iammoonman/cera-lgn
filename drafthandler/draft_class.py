@@ -1,6 +1,5 @@
 import random
-from typing import TypeVar, Literal, Union
-import networkx as nx
+from typing import Union
 
 
 class Draft:
@@ -143,29 +142,30 @@ class Draft:
     def rotation_pairings(self):
         player_opponents = {}
         # For each remaining player
-        for p in [y for y in self.players if not y.dropped]:
+        for first_player in (playerList := [y for y in self.players if not y.dropped]):
             #  make a queuestack list
-            queuestack = []
+            opp_queuestack = []
             #  For each total players, but start halfway around the list, picking every other player
-            for q in [
-                *[y for y in self.players if not y.dropped][::2],
-                *[y for y in self.players if not y.dropped][1::2],
+            for opponent in [
+                *playerList[(len(playerList) / 2) :: 2],
+                *playerList[(len(playerList) / 2) + 1 :: 2],
+                *playerList[: (len(playerList) / 2) : 2],
+                *playerList[1 : (len(playerList) / 2) + 1 : 2],
             ]:
                 #   If player is dropped, skip
                 #   If player in opponents, skip
                 #   If player has equal score, put at front
                 #   If player has less score, put at back
-                if q == p:
+                if opponent == first_player:
                     continue
-                elif q in p.opponents:
+                elif opponent in first_player.opponents:
                     continue
-                elif p.score == q.score:
-                    queuestack = [q] + queuestack
+                elif first_player.score == opponent.score:
+                    opp_queuestack = [opponent] + opp_queuestack
                 else:
-                    queuestack += [q]
-            queuestack = queuestack + p.opponents
-            # print(p, queuestack)
-            player_opponents[p.player_id] = queuestack
+                    opp_queuestack += [opponent]
+            opp_queuestack = opp_queuestack + first_player.opponents
+            player_opponents[first_player.player_id] = opp_queuestack
         sorted_players = [y for y in self.players if not y.dropped]
         sorted_players.sort(key=lambda p: p.gpts, reverse=True)
         pairs: list[list[Draft.Player]] = []
@@ -182,115 +182,6 @@ class Draft:
                 pairs.append([player, Draft.Player("BYE", "-1")])
         new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [new_round.Match(p=i) for i in pairs]
-        self.rounds.append(new_round)
-        return new_round
-
-    def minweight_naive_pairings(self):
-        # For each remaining player, define a matrix of weights for their pair against the other players
-        # If the players have met, weight is 1000000.
-        # Start with the player with the highest weight. Choose their least weighted player and pair off.
-        playerWeights: list[tuple[Draft.Player, list[Union[tuple[int, Draft.Player], tuple[float, Draft.Player]]]]] = []
-        for p in [y for y in self.players if not y.dropped]:
-            # Distance between seats; more => more likely pairing
-            # Difference between scores; less => more likely pairing
-            half = len(self.players) / 2
-            localw = [
-                (
-                    (10000, z)
-                    if p in z.opponents
-                    else (abs(z.score - p.score) + abs(half - abs(z.seat - p.seat)) / half, z)
-                )
-                for z in self.players
-                if not z.dropped and z != p
-            ]
-            playerWeights.append((p, localw))
-        pairs: list[list[Draft.Player]] = []
-        while playerWeights:
-            # Pair max weight players first to heuristically avoid byes
-            playerWeights.sort(reverse=True, key=lambda x: sum([g[0] for g in x[1]]))
-            highestWeightPlayer = playerWeights.pop()
-            length = len(playerWeights)
-            if length > 0:
-                highestWeightPlayer[1].sort(key=lambda n: n[0])
-                for lowestWeightedOpponentTuple in highestWeightPlayer[1]:
-                    if lowestWeightedOpponentTuple[1] in [item for sublist in pairs for item in sublist]:
-                        continue
-                    pairs.append([highestWeightPlayer[0], lowestWeightedOpponentTuple[1]])
-                    playerWeights = [o for o in playerWeights if o[0] != lowestWeightedOpponentTuple]
-                    break
-                if len(playerWeights) == length:
-                    # No viable other player, give a bye.
-                    pairs.append([highestWeightPlayer[0], Draft.Player("BYE", "-1")])
-            else:
-                # BYE
-                pairs.append([highestWeightPlayer[0], Draft.Player("BYE", "-1")])
-        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
-        new_round.matches = [new_round.Match(p=i) for i in pairs]
-        self.rounds.append(new_round)
-        return new_round
-
-    def blossom_pairings(self):
-        G = nx.Graph()
-        for p in [y for y in self.players if not y.dropped]:
-            for q in [y for y in self.players if not y.dropped]:
-                # Distance between seats; more => more likely pairing
-                # Difference between scores; less => more likely pairing
-                num_p = len(self.players) / 2
-                G.add_edge(
-                    p.player_id,
-                    q.player_id,
-                    weight=-10000
-                    if q in p.opponents
-                    else (-abs(p.score - q.score) - (abs(num_p - abs(p.seat - q.seat)) / num_p)),
-                )
-        pairs = []
-        unused = [y.player_id for y in self.players if not y.dropped]
-        for p in nx.max_weight_matching(G, maxcardinality=True):
-            unused.remove(p[0])
-            unused.remove(p[1])
-            pairs.append([self.get_player_by_id(p[0]), self.get_player_by_id(p[1])])
-        for x in unused:
-            pairs.append([self.get_player_by_id(x), Draft.Player("BYE", "-1")])
-        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
-        new_round.matches = [new_round.Match(p=i) for i in pairs]
-        self.rounds.append(new_round)
-        return new_round
-
-    def do_pairings(self):
-        """Generates a new round based on the scores of the previous round. DO NOT CALL without checking for completeness."""
-        # Make a temp list of players and pairings
-        # Sort the list of players by score.
-        # For each player, get the next player who:
-        #  Isn't in that player's opponents list
-        #  Is within 3 points of this player's score
-        #  Has not dropped
-        # Set up that pairing in the temp list
-        # If it fails to find, restart, but then start with that player.
-        # NOT SURE if it will fail to find *and* still have a possible correct pairing set.
-        temp_pairings = []
-        temp_players = [y for y in self.players if not y.dropped]
-        temp_players.sort()
-        while temp_players:
-            player1 = temp_players.pop(0)
-            try:
-                player2 = [i for i in temp_players if i not in player1.opponents][0]
-            except IndexError:
-                # Checking it like this will cause more than one bye in certain situations with people dropping.
-                # That is OK
-                player2 = Draft.Player("BYE", "-1")
-                # Recommended to just pick someone. In a weird niche situation, ignore the point restriction.
-                if player1.score == max([u.score for u in self.players]):
-                    try:
-                        player2 = [i for i in temp_players if i not in player1.opponents][0]
-                    except IndexError:
-                        player2 = Draft.Player("BYE", "-1")
-            temp_pairings.append([player1, player2])
-            if player2.player_id != "-1":
-                temp_players.remove(player2)
-                player1.opponents.append(player2)
-                player2.opponents.append(player1)
-        new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
-        new_round.matches = [new_round.Match(p=i) for i in temp_pairings]
         self.rounds.append(new_round)
         return new_round
 
