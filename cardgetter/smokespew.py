@@ -25,6 +25,7 @@ class Smokespew(commands.Cog):
     async def sc_search(self, ctx: discord.ApplicationContext, query: str):
         await ctx.defer()
         full_json = []
+        full_set_json = []
         time.sleep(0.25)
         response = requests.get(
             f"https://api.scryfall.com/cards/search?q={quote(query)}",
