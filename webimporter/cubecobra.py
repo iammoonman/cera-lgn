@@ -16,7 +16,7 @@ def get_cube(cc_id, p_len):
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
-    cardinfo = tts_import.ijson_collection(
+    cardinfo = tts_import.mm_collection(
         [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
         out_dict=True,
     )

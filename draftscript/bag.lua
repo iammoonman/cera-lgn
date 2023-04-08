@@ -202,7 +202,7 @@ function onObjectEnterZone(zone, obj)
             obj.setLuaScript(
                 "function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
             obj.addTag(self.getTags()[1] .. self.getGMNotes())
-            Wait.frames(function() obj.spread() end, 1)
+            Wait.frames(function() obj.spread() end, 5)
         end
     end
 end

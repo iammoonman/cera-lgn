@@ -1,7 +1,8 @@
+import mmap
 import time
+import orjson
 import requests
 import ijson
-import json
 import re
 
 
@@ -56,11 +57,12 @@ def scryfall_set(setcode):
 def ijson_collection(cardlist, out_dict=False):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
     blob_json = []
+    str_l = [f"{a[0]}{a[1]}" for a in cardlist]
     out = {}
     f = open("default-cards.json", "rb")
     objects = ijson.items(f, "item")
     for o in objects:
-        if [o["collector_number"], o["set"]] in cardlist:
+        if f'{o["collector_number"]}{o["set"]}' in str_l:
             card_obj = tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}{o["set"]}'] = card_obj
@@ -315,3 +317,35 @@ def tts_parse(o):
         }
     card_obj = {**card_obj, **extra_obj}
     return card_obj
+
+
+def mm_collection(cardlist, out_dict):
+    def file_parse_generator():
+        with open("default-cards.json", mode="r") as f:
+            with mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_READ) as m:
+                for line in iter(m.readline, b""):
+                    L = line.strip().decode("utf-8")
+                    if len(L) > 5: # We assume that the lines are nicely formed.
+                        if L.endswith(","):
+                            yield orjson.loads(L[:-1])
+                        else:
+                            yield orjson.loads(L)
+                    else:
+                        continue
+
+    generator = file_parse_generator()
+    string_list = [f"{a[0]}{a[1]}" for a in cardlist]
+    blob_json = []
+    out = {}
+    while True:
+        try:
+            card = next(generator)
+            if f'{card["collector_number"]}{card["set"]}' in string_list:
+                card_obj = tts_parse(card)
+                blob_json.append(card_obj)
+                out[f'{card["collector_number"]}{card["set"]}'] = card_obj
+        except:
+            break
+    if out_dict:
+        return out
+    return blob_json
