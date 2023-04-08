@@ -92,6 +92,7 @@ set_choices_v3 = [
     ["Masters 25", "a25"],
     ["Avacyn Restored", "avr"],
     ["Dominaria Remastered", "dmr"],
+    ["Splinters of Novanda", "c_son"]
 ]
 
 
