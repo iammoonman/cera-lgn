@@ -203,6 +203,22 @@ function onObjectEnterZone(zone, obj)
                 "function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
             obj.addTag(self.getTags()[1] .. self.getGMNotes())
             Wait.frames(function() obj.spread() end, 5)
+            -- Start the pick timer.
+            if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+            -- Count seconds
+            PickTimerCount = 0
+            DebouncePickTimer = Wait.time(function()
+                PickTimerCount = PickTimerCount + 1
+                local seconds = PickTimerCount % 60
+                local minutes = math.floor(PickTimerCount / 60)
+                local outString = string.format("%s:", minutes)
+                if seconds < 10 then
+                    outString = outString .. "0"
+                end
+                outString = outString .. seconds
+                self.editButton({ index = 0, label = outString })
+                if PickTimerCount % 30 == 0 and PickTimerCount ~= 0 then printToColor("Pick time: "..outString, self.getGMNotes()) end
+            end, 1, 5999)
         end
     end
 end
@@ -258,21 +274,6 @@ function DealCardsToHand()
             self.deal(1, self.getGMNotes())
         end
     end, 2)
-    -- Start the pick timer.
-    if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
-    -- Count seconds
-    PickTimerCount = 0
-    DebouncePickTimer = Wait.time(function()
-        PickTimerCount = PickTimerCount + 1
-        local seconds = PickTimerCount % 60
-        local minutes = math.floor(PickTimerCount / 60)
-        local outString = string.format("%s:", minutes)
-        if seconds < 10 then
-            outString = outString .. "0"
-        end
-        outString = outString .. seconds
-        self.editButton({ index = 0, label = outString })
-    end, 1, 5999)
 end
 
 function SkipPack()
