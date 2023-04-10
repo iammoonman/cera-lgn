@@ -225,6 +225,7 @@ def tts_parse(o):
         "set": o["set"],
         "name": o["name"],
         "collector_number": o["collector_number"],
+        "planar": "Battle " in o["type_line"] or "Plane " in o["type_line"] if "type_line" in o else False,
     }
     if "card_faces" in o.keys() and o["layout"] in ["transform", "modal_dfc"]:
         extra_obj = {
@@ -233,6 +234,7 @@ def tts_parse(o):
                 {
                     "name": i["name"],
                     "type_line": i["type_line"],
+                    "planar": "Battle " in i["type_line"] or "Plane " in i["type_line"] if "type_line" in i else False,
                     "oracle_text": make_oracle_dfc(o, c == 0),
                     "image_uris": {"normal": i["image_uris"]["normal"], "small": i["image_uris"]["small"]},
                     "power": i["power"] if "power" in i.keys() and "toughness" in i.keys() else 0,
@@ -278,7 +280,7 @@ def tts_parse(o):
             "mana_cost": o["mana_cost"],
             "loyalty": o["loyalty"] if "loyalty" in o.keys() else 0,
         }
-    elif "layout" == "vanguard":
+    elif o["layout"] == "Vanguard" or o["layout"] == "vanguard":
         extra_obj = {
             "oracle_text": make_oracle_vanguard(o),
             "image_uris": {"normal": o["image_uris"]["normal"]},
@@ -340,12 +342,12 @@ def mm_collection(cardlist, out_dict):
     while True:
         try:
             card = next(generator)
-            if f'{card["collector_number"]}{card["set"]}' in string_list:
-                card_obj = tts_parse(card)
-                blob_json.append(card_obj)
-                out[f'{card["collector_number"]}{card["set"]}'] = card_obj
         except:
             break
+        if f'{card["collector_number"]}{card["set"]}' in string_list:
+            card_obj = tts_parse(card)
+            blob_json.append(card_obj)
+            out[f'{card["collector_number"]}{card["set"]}'] = card_obj
     if out_dict:
         return out
     return blob_json
