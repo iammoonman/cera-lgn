@@ -1,3 +1,4 @@
+import math
 import random
 from typing import Union
 
@@ -31,6 +32,9 @@ class Draft:
 
     def get_player_by_id(self, id: str):
         return next(player for player in self.players if player.player_id == id)
+
+    def get_player_by_seat(self, seat: int):
+        return next(filter(lambda x: x.seat == seat, self.players))
 
     def tojson(self):
         """Calculates the final scores of the draft and returns a JSON."""
@@ -141,43 +145,39 @@ class Draft:
 
     def rotation_pairings(self):
         player_opponents = {}
-        # For each remaining player
-        for first_player in (playerList := [y for y in self.players if not y.dropped]):
-            #  make a queuestack list
-            opp_queuestack = []
-            #  For each total players, but start halfway around the list, picking every other player
-            for opponent in [
-                *playerList[(len(playerList) / 2) :: 2],
-                *playerList[(len(playerList) / 2) + 1 :: 2],
-                *playerList[: (len(playerList) / 2) : 2],
-                *playerList[1 : (len(playerList) / 2) + 1 : 2],
-            ]:
-                #   If player is dropped, skip
-                #   If player in opponents, skip
-                #   If player has equal score, put at front
-                #   If player has less score, put at back
-                if opponent == first_player:
-                    continue
-                elif opponent in first_player.opponents:
-                    continue
-                elif first_player.score == opponent.score:
-                    opp_queuestack = [opponent] + opp_queuestack
-                else:
-                    opp_queuestack += [opponent]
-            opp_queuestack = opp_queuestack + first_player.opponents
-            player_opponents[first_player.player_id] = opp_queuestack
+        leng = len(self.players)
+        for first_player in self.players:
+            # Players have a hierarchy of who they want to play against.
+            # It starts with the player with the highest distance from them.
+            # Continues with half that distance away from each of those two players.
+            # Then half again away from the player and their first opponent.
+            halfway_around = (first_player.seat + math.ceil(leng / 2)) % leng
+            indices = [halfway_around]
+            for div in [2, 4, 8, 16]:
+                indices.append((halfway_around + math.ceil(leng / div)) % leng)
+                indices.append((halfway_around - math.floor(leng / div)) % leng)
+                indices.append((first_player.seat + math.ceil(leng / div)) % leng)
+                indices.append((first_player.seat - math.floor(leng / div)) % leng)
+            player_opponents[first_player.player_id] = [
+                self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n]] if x != 0
+            ]
+            # print(player_opponents[first_player.player_id])
         sorted_players = [y for y in self.players if not y.dropped]
         sorted_players.sort(key=lambda p: p.gpts, reverse=True)
         pairs: list[list[Draft.Player]] = []
         while sorted_players:
             is_paired = False
             player = sorted_players.pop(0)
-            for opp in player_opponents[player.player_id]:
-                if opp in sorted_players:
-                    pairs.append([player, opp])
-                    is_paired = True
-                    sorted_players.remove(opp)
-                    break
+            sorted_opps = player_opponents[player.player_id]
+            sorted_opps.sort(key=lambda p: p.gpts, reverse=True)
+            for opp in [x for x in sorted_opps if x in sorted_players]:
+                if opp in player.opponents:
+                    continue
+                pairs.append([player, opp])
+                is_paired = True
+                sorted_players.remove(opp)
+                player.opponents.append(opp)
+                break
             if not is_paired:
                 pairs.append([player, Draft.Player("BYE", "-1")])
         new_round = Draft.Round(title=f"{len(self.rounds) + 1}")
@@ -261,12 +261,13 @@ class Draft:
         # Parse drops into player list
         # Toggle completed
         # do_pairings
-        round = [r for r in self.rounds if not r.completed][0]
-        if round:
-            for match in round.matches:
+        incomplete_rounds = [r for r in self.rounds if not r.completed]
+        if len(incomplete_rounds) != 0 and len(self.rounds) != 0:
+            next_incomplete_round = incomplete_rounds[0]
+            for match in next_incomplete_round.matches:
                 if match.gwinners == []:
                     return False
-            for match in round.matches:
+            for match in next_incomplete_round.matches:
                 wasTie = len(set(match.gwinners)) == len(match.gwinners)
                 wasBye = "-1" in [o.player_id for o in match.players]
                 for ind, player in enumerate(match.players):
@@ -299,15 +300,19 @@ class Draft:
                         player.mpts += 3 if won else 0
                         player.gpts += len([i for i in match.gwinners if i == ind])
                         player.dropped = match.drops[ind]
-            round.completed = True
+            next_incomplete_round.completed = True
             # Check if it's the max number of rounds
             # Check if it's impossible to make pairings <- may want to just forget about this, easier to force pairings
             # If either of those: somehow signal that the draft is over, dont make pairings
-            if len(self.rounds) != self.max_rounds:
+            if len(self.rounds) < self.max_rounds:
                 # self.blossom_pairings()
                 self.rotation_pairings()
             else:
                 self.calculate()
+            return True
+        else:
+            # Beginning the draft.
+            self.rotation_pairings()
             return True
 
     def drop_player(self, p_id):

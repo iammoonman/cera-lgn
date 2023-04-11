@@ -8,9 +8,7 @@ import datetime
 
 taglist = {
     "ptm": "Prime Time With Moon",
-    "dp2": "Draft Progression Series 2",
-    "fnc": "Friday Night Chaos",
-    "pwd": "Sunday Prize Wall Draft",
+    "ths": "Thursday Night Draft",
     "anti": "No Tag",
 }
 bslash = "\n"
@@ -171,7 +169,7 @@ class StartingView(discord.ui.View):
             # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = [self.bot.drafts[self.id][-1]]
             self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
-            self.bot.drafts[new_view.id][-1].do_pairings()
+            self.bot.drafts[new_view.id][-1].finish_round()
             self.bot.timekeep[new_view.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
             new_view.after_load()
             await ctx.message.edit(
