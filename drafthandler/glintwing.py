@@ -116,6 +116,7 @@ class Glintwing(commands.Cog):
             p_name=ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
             p_id=str(ctx.author.id),
             is_host=True,
+            seat=0,
         )
         self.timekeep[new_view.id] = datetime.datetime.now()
         await msg.edit_original_response(
@@ -129,6 +130,28 @@ class StartingView(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
+    async def change_seat(self, select: discord.ui.Select, ctx: discord.Interaction):
+        if self.id not in self.bot.drafts.keys():
+            # await ctx.delete_original_message()
+            return
+        thisdraft = self.bot.drafts[self.id][-1]
+        try:
+            selection = int(select.values[0])
+            assert selection > 0 and selection < len(thisdraft.players)
+        except:
+            return await ctx.response.send_message(content="That is not a valid selection.", ephemeral=True)
+        this_player = thisdraft.get_player_by_id(str(ctx.user.id))
+        try:
+            thisdraft.get_player_by_seat(selection).seat = this_player.seat
+        except:
+            pass
+        this_player.seat = selection
+        await ctx.message.edit(
+            embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
+            view=self,
+        )
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         # print("JOIN", self.id, "BY", ctx.user.id)
@@ -136,9 +159,23 @@ class StartingView(discord.ui.View):
             # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].add_player(
-            ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
-            str(ctx.user.id),
+            ctx.user.nick if ctx.user.nick is not None else ctx.user.name, str(ctx.user.id), seat=-1
         )
+        item = self.get_item("SEAT")
+        if item is not None:
+            self.remove_item("SEAT")
+            x = discord.ui.Select(
+                options=[
+                    discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
+                    for i in range(len(self.bot.drafts[self.id][-1].players))
+                ],
+                custom_id="SEAT",
+                max_values=1,
+                min_values=1,
+                select_type=discord.ComponentType.string_select,
+            )
+            x.callback = self.change_seat
+            self.add_item(x)
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
             view=self,
@@ -152,6 +189,21 @@ class StartingView(discord.ui.View):
             # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].drop_player(str(ctx.user.id))
+        item = self.get_item("SEAT")
+        if item is not None:
+            self.remove_item("SEAT")
+            x = discord.ui.Select(
+                options=[
+                    discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
+                    for i in range(len(self.bot.drafts[self.id][-1].players))
+                ],
+                custom_id="SEAT",
+                max_values=1,
+                min_values=1,
+                select_type=discord.ComponentType.string_select,
+            )
+            x.callback = self.change_seat
+            self.add_item(x)
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
             view=self,
@@ -165,6 +217,8 @@ class StartingView(discord.ui.View):
             # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
+            if not all(x.seat > -1 for x in self.bot.drafts[self.id][-1].players):
+                return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
             new_view = IG_View(self.bot)
             # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = [self.bot.drafts[self.id][-1]]
@@ -183,23 +237,23 @@ class StartingView(discord.ui.View):
             )
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
-    async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
-        # print("ADD", self.id, "BY", ctx.user.id)
-        if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
-            return
-        if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
-            user = ctx.data["resolved"]["users"][ctx.data["values"][-1]]
-            self.bot.drafts[self.id][-1].add_player(
-                user["nick"] if "nick" in user else user["username"],
-                str(user["id"]),
-            )
-        await ctx.message.edit(
-            embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
-            view=self,
-        )
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
+    # async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
+    #     # print("ADD", self.id, "BY", ctx.user.id)
+    #     if self.id not in self.bot.drafts.keys():
+    #         # await ctx.delete_original_message()
+    #         return
+    #     if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
+    #         user = ctx.data["resolved"]["users"][ctx.data["values"][-1]]
+    #         self.bot.drafts[self.id][-1].add_player(
+    #             user["nick"] if "nick" in user else user["username"],
+    #             str(user["id"]),
+    #         )
+    #     await ctx.message.edit(
+    #         embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
+    #         view=self,
+    #     )
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
 class IG_View(discord.ui.View):
@@ -379,6 +433,7 @@ class IG_View(discord.ui.View):
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
             self.bot.drafts[self.id][-1].max_rounds = len(self.bot.drafts[self.id][-1].rounds)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(Glintwing(bot))
