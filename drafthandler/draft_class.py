@@ -52,7 +52,7 @@ class Draft:
                         {
                             "p_ids": [u.player_id if u.player_id != "-1" else "BYE" for u in q.players],
                             "games": [(x if x is not None else "TIE") for x in q.gwinners]
-                            if "-1" not in q.gwinners
+                            if "-1" not in [p.player_id for p in q.players]
                             else [],
                             "drops": {k: v for (k, v) in q.drops.items() if k != "-1"},
                             # "bye": "-1" in [p.player_id for p in q.players],
@@ -62,8 +62,8 @@ class Draft:
                 }
                 for i in self.rounds
             ],
-            "scores": [
-                {
+            "scores": {
+                i.player_id: {
                     "id": i.player_id,
                     "points": i.score,
                     "gwp": f"{i.gwp:.2f}",
@@ -71,37 +71,40 @@ class Draft:
                     "omp": f"{i.omp:.2f}",
                 }
                 for i in self.players
-            ],
+            },
         }
         return draftobj
 
     def rotation_pairings(self):
         player_opponents = {}
         leng = len(self.players)
-        for first_player in [p for p in self.players if not p.dropped]:
+        players_sorted = [p for p in self.players if not p.dropped]
+        players_sorted.sort(key=lambda p: (p.score, p.gpts), reverse=True)
+        print(players_sorted)
+        for first_player in players_sorted:
             # Players have a hierarchy of who they want to play against.
             # It starts with the player with the highest distance from them.
             # Continues with half that distance away from each of those two players.
             # Then half again away from the player and their first opponent.
             halfway_around = (first_player.seat + math.ceil(leng / 2)) % leng
             indices = [halfway_around]
-            for div in [2, 4, 8, 16]:
+            for div in [2, 4, 8, 16, 32]:
                 indices.append((halfway_around + math.ceil(leng / div)) % leng)
                 indices.append((halfway_around - math.floor(leng / div)) % leng)
                 indices.append((first_player.seat + math.ceil(leng / div)) % leng)
                 indices.append((first_player.seat - math.floor(leng / div)) % leng)
             player_opponents[first_player.player_id] = [
-                self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n] and i != 0]
+                self.get_player_by_seat(x)
+                for x in [i for n, i in enumerate(indices) if i not in indices[:n] and i != 0]
             ]
-            # print(player_opponents[first_player.player_id])
         sorted_players = [y for y in self.players if not y.dropped]
-        sorted_players.sort(key=lambda p: p.gpts, reverse=True)
+        sorted_players.sort(key=lambda p: (p.score, p.gpts), reverse=True)
         pairs: list[list[Player]] = []
         while sorted_players:
             is_paired = False
             player = sorted_players.pop(0)
             sorted_opps = player_opponents[player.player_id]
-            sorted_opps.sort(key=lambda p: p.gpts, reverse=True)
+            sorted_opps.sort(key=lambda p: (p.score, p.gpts), reverse=True)
             for opp in [x for x in sorted_opps if x in sorted_players]:
                 if opp in player.opponents:
                     continue
@@ -168,9 +171,9 @@ class Draft:
             elif result_code == "7":
                 match.gwinners = [o_id, p_id]
             elif result_code == "8":
-                match.gwinners = [o_id, None]
+                match.gwinners = [o_id]
             elif result_code == "9":
-                match.gwinners = [p_id, None]
+                match.gwinners = [p_id]
             elif result_code == "-1" and match.drops[o_id] == True:
                 self.get_player_by_id(o_id).dropped = True
                 match.players = [p_id, Player("Bye", "-1")]

@@ -50,10 +50,11 @@ print('---------------')
 test_draft_2.drop_player('2')
 test_draft_2.finish_round()
 for match in test_draft_2.rounds[1].matches:
-    test_draft_2.parse_match(match.players[0].player_id, "5")
+    test_draft_2.parse_match(match.players[0].player_id, "7")
     print(f"{match.players} {match.gwinners}")
 print('---------------')
 test_draft_2.drop_player('3')
+test_draft_2.drop_player('4')
 test_draft_2.finish_round()
 for match in test_draft_2.rounds[2].matches:
     test_draft_2.parse_match(match.players[0].player_id, "0")
