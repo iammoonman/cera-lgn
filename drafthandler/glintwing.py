@@ -28,7 +28,7 @@ class Glintwing(commands.Cog):
             fields=[
                 discord.EmbedField(
                     name="PLAYERS",
-                    value=f"{bslash.join([p.name for p in draft.players])}",
+                    value=f"{bslash.join([f'{p.name} | Seat: {p.seat}' for p in draft.players])}",
                 )
             ],
             description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
@@ -164,18 +164,18 @@ class StartingView(discord.ui.View):
         item = self.get_item("SEAT")
         if item is not None:
             self.remove_item("SEAT")
-            x = discord.ui.Select(
-                options=[
-                    discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
-                    for i in range(len(self.bot.drafts[self.id][-1].players))
-                ],
-                custom_id="SEAT",
-                max_values=1,
-                min_values=1,
-                select_type=discord.ComponentType.string_select,
-            )
-            x.callback = self.change_seat
-            self.add_item(x)
+        x = discord.ui.Select(
+            options=[
+                discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
+                for i in range(len(self.bot.drafts[self.id][-1].players))
+            ],
+            custom_id="SEAT",
+            max_values=1,
+            min_values=1,
+            select_type=discord.ComponentType.string_select,
+        )
+        x.callback = self.change_seat
+        self.add_item(x)
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
             view=self,
