@@ -321,7 +321,7 @@ def tts_parse(o):
     return card_obj
 
 
-def mm_collection(cardlist, out_dict):
+def mm_collection(cardlist, out_dict=False):
     def file_parse_generator():
         with open("default-cards.json", mode="r") as f:
             with mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_READ) as m:
