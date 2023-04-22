@@ -37,7 +37,7 @@ function makeMoxfieldDeck(deck_id, player) {
 
 			const { mainboard, sideboard, commanders, companions, attractions, signatureSpells, stickers } = v;
 
-			Object.entries(mainboard).forEach(([k, v]) => main_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)));
+			Object.entries(mainboard).forEach(([k, v]) => (v.printingData === undefined ? main_deck.push(...Array(v.quantity).fill({ scryfall_id: v.card.scryfall_id })) : main_deck.push(...Array(v.printingData[0].quantity).fill({ scryfall_id: v.printingData[0].card.scryfall_id }), ...Array(v.printingData[1].quantity).fill({ scryfall_id: v.printingData[1].card.scryfall_id }))));
 			// Object.entries(sideboard).forEach(([k, v]) => side_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
 			// Object.entries(commanders).forEach(([k, v]) => comm_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
 			// Object.entries(companions).forEach(([k, v]) => comp_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
@@ -45,15 +45,15 @@ function makeMoxfieldDeck(deck_id, player) {
 			// Object.entries(signatureSpells).forEach(([k, v]) => sign_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
 			// Object.entries(stickers).forEach(([k, v]) => stic_deck.push(...Array(v.quantity).fill(v.card.scryfall_id)))
 
-			main_deck.map((v, i) => {
-				fetch(`https://api.scryfall.com/cards/${v}`)
+			main_deck.map(({ scryfall_id }, i) => {
+				fetch(`https://api.scryfall.com/cards/${scryfall_id}`)
 					.then((r) => r.json())
 					.then((r) => {
 						const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", player.getCursorPosition().add([0, 0, 0]));
-						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host"].includes(r["layout"])) {
-							q.setTextureOverrideURL(r["image_uris"]["normal"]);
+						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host"].includes(r.layout)) {
+							q.setTextureOverrideURL(r.image_uris.normal.concat(`&scryfall_id=${scryfall_id}`));
 						} else {
-							q.setTextureOverrideURL(r["card_faces"][0]["image_uris"]["normal"]);
+							q.setTextureOverrideURL(r.card_faces[0].image_uris.normal.concat(`&scryfall_id=${scryfall_id}`));
 						}
 					});
 			});
