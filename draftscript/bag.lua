@@ -121,7 +121,7 @@ function onObjectEnterZone(zone, obj)
             if (obj.hasTag(TrackerTag)) then
                 TakenCount = TakenCount - 1
                 if TakenCount < 0 then TakenCount = 0 end
-                if TakenCount > 0 then self.editButton({ index = 1, label = TakenCount .. " cards picked" }) end
+                self.editButton({ index = 1, label = TakenCount .. " cards picked" })
             else
                 local isOperative = false
                 local isCogwork = false
