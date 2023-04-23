@@ -13,7 +13,7 @@ globalEvents.onChatMessage = (sender, message) => {
 				});
 		}
 	}
-	if (message.match(/^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/.+/g)) {
+	if (message.match(/^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/.+/)) {
 		const [mox_id] = message.match(/(?<=^Frostwind\shttps:\/\/www\.moxfield\.com\/decks\/).+/) ?? [null];
 		if (mox_id !== null) {
 			makeMoxfieldDeck(mox_id, sender);
@@ -23,9 +23,7 @@ globalEvents.onChatMessage = (sender, message) => {
 
 function makeMoxfieldDeck(deck_id, player) {
 	fetch(`https://api2.moxfield.com/v2/decks/all/${deck_id}`)
-		.then((r) => {
-			return r.json();
-		})
+		.then((r) => r.json())
 		.then((v) => {
 			const main_deck = [];
 			// const side_deck = []
