@@ -63,21 +63,23 @@ function onLoad(state)
 end
 
 function onObjectEnterContainer(container, object)
-    if container.getGUID() == self.getGUID() and #self.getObjects() == 1 then
-        if AgentActive or OperativePacksToPass > 0 then
-            if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
-            DebounceSkipping = Wait.time(SkipPack, 1, OperativePacksToPass)
-        else
-            DealCardsToHand()
+    if container.getGUID() == self.getGUID() then
+        if #self.getObjects() == 1 then
+            if AgentActive or OperativePacksToPass > 0 then
+                if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
+                DebounceSkipping = Wait.time(SkipPack, 1, OperativePacksToPass)
+            else
+                DealCardsToHand()
+            end
         end
     end
 end
 
 -- These two update the taken counter.
 function onObjectLeaveZone(zone, obj)
+    if ThisColor ~= zone.getValue() then return end
     if zone.type == 'Hand' and obj.type == 'Card' then
-        if ThisColor == zone.getValue() and not AgentActive then
-            obj.highlightOff('Red')
+        if not AgentActive then
             local StopCounting = false
             local isOperative = obj.memo == LeovoldsOperative and not obj.hasTag(TrackerTag) and obj.getGMNotes() == 'operative_used'
             local operativeInHand = false
@@ -88,93 +90,86 @@ function onObjectLeaveZone(zone, obj)
                 end
                 if not objectInHand.hasTag(TrackerTag) then StopCounting = true end
             end
-            if not StopCounting then
-                if not isOperative and obj.hasTag(TrackerTag) then TakenCount = TakenCount + 1 end
-                self.editButton({ index = 1, label = TakenCount .. " cards picked" })
-                -- If the player has taken all the cards they needed, pass
-                if TakenCount == (CountToTake + OperativePacksToPass) and NextBagGUID ~= nil then
-                    if not AgentActive and obj.memo ~= AgentOfAcquisitions and not operativeInHand then
-                        PassCardsFromHand(zone)
-                    else
-                        AgentActive = true
-                        group(zone.getObjects())
-                        if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
-                        DebounceSkipping = Wait.time(SkipPack, 1, #self.getObjects())
-                        self.createButton({ click_function = "doAgent", function_owner = self, label = "Disable Agent", position = { x = 0, y = 1, z = 4 }, scale = { 2, 2, 2 }, width = 800 })
-                    end
-                    -- Stop the pick timer.
-                    if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
-                    PickTimerCount = 0
+            if not isOperative and obj.hasTag(TrackerTag) then TakenCount = TakenCount + 1 end
+            self.editButton({ index = 1, label = TakenCount .. " cards picked" })
+            if StopCounting then return end
+            -- If the player has taken all the cards they needed, pass
+            if TakenCount == (CountToTake + OperativePacksToPass) and NextBagGUID ~= nil then
+                if not AgentActive and obj.memo ~= AgentOfAcquisitions and not operativeInHand then
+                    PassCardsFromHand(zone)
+                else
+                    AgentActive = true
+                    group(zone.getObjects())
+                    if DebounceSkipping ~= nil then Wait.stop(DebounceSkipping) end
+                    DebounceSkipping = Wait.time(SkipPack, 1, #self.getObjects())
+                    self.createButton({ click_function = "doAgent", function_owner = self, label = "Disable Agent", position = { x = 0, y = 1, z = 4 }, scale = { 2, 2, 2 }, width = 800 })
                 end
+                -- Stop the pick timer.
+                if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+                PickTimerCount = 0
             end
+            DealCardsToHand()
         end
-        if not AgentActive then DealCardsToHand() end
-    end
-    if zone.type == 'Hand' and obj.type == 'Card' then
-        if ThisColor == zone.getValue() then obj.highlightOff('Red') end
+        obj.highlightOff('Red')
     end
 end
 
 function onObjectEnterZone(zone, obj)
+    if ThisColor ~= zone.getValue() then return end
     if zone.type == 'Hand' and obj.type == 'Card' then
-        if ThisColor == zone.getValue() then
-            if (obj.hasTag(TrackerTag)) then
-                TakenCount = TakenCount - 1
-                if TakenCount < 0 then TakenCount = 0 end
+        if (obj.hasTag(TrackerTag)) then
+            TakenCount = TakenCount - 1
+            if TakenCount < 0 then TakenCount = 0 end
+            self.editButton({ index = 1, label = TakenCount .. " cards picked" })
+        else
+            local isOperative = false
+            local isCogwork = false
+            if obj.memo == LeovoldsOperative and obj.getGMNotes() ~= 'operative_used' then
+                isOperative = true
+                OperativePacksToPass = OperativePacksToPass + 1
+                obj.setGMNotes('operative_used')
+                print(ThisColor .. ", you have used a Leovold's Operative. Please remove it from your hand. You will pass the next " .. OperativePacksToPass .. " packs.")
+            end
+            if obj.memo == CogworkLibrarian then
+                obj.addTag(TrackerTag)
+                isCogwork = true
+                print(ThisColor .. ", you have used a Cogwork Librarian. You may make an additional pick from this pack.")
+            end
+            if not isOperative and not isCogwork then
+                -- Kind of a reminder to the player that the draft is still going.
+                obj.highlightOn('Red', 15)
+                print(ThisColor .. ", return all cards from your pack to your current hand and remove all other objects.")
+            end
+            if isCogwork then
+                if not isOperative then TakenCount = TakenCount - 1 end
+                if TakenCount < 0 and not isCogwork then TakenCount = 0 end
                 self.editButton({ index = 1, label = TakenCount .. " cards picked" })
-            else
-                local isOperative = false
-                local isCogwork = false
-                if obj.memo == LeovoldsOperative and obj.getGMNotes() ~= 'operative_used' then
-                    isOperative = true
-                    OperativePacksToPass = OperativePacksToPass + 1
-                    obj.setGMNotes('operative_used')
-                    print(ThisColor .. ", you have used a Leovold's Operative. Please remove it from your hand. You will pass the next " .. OperativePacksToPass .. " packs.")
-                end
-                if obj.memo == CogworkLibrarian then
-                    obj.addTag(TrackerTag)
-                    isCogwork = true
-                    print(ThisColor .. ", you have used a Cogwork Librarian. You may make an additional pick from this pack.")
-                end
-                if not isOperative and not isCogwork then
-                    if #zone.getObjects() > 1 then
-                        obj.highlightOn('Red')
-                        print(ThisColor .. ", return all cards from your pack to your current hand and remove all other objects.")
-                    end
-                end
-                if isCogwork then
-                    if not isOperative then TakenCount = TakenCount - 1 end
-                    if TakenCount < 0 and not isCogwork then TakenCount = 0 end
-                    self.editButton({ index = 1, label = TakenCount .. " cards picked" })
-                end
             end
         end
     end
     if zone.type == 'Hand' and obj.type == 'Deck' then
-        if ThisColor == zone.getValue() then
-            -- if #zone.getObjects() > 1 then
-            --     obj.highlightOn('Red')
-            --     print(self.getGMNotes() .. ", take the deck of cards out of your hand before proceeding.")
-            --     return
-            -- end
-            obj.setLuaScript("function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
-            obj.addTag(TrackerTag)
-            Wait.frames(function() obj.spread() end, 5)
-            -- Start the pick timer.
-            if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
-            -- Count seconds
-            PickTimerCount = 0
-            DebouncePickTimer = Wait.time(function()
-                PickTimerCount = PickTimerCount + 1
-                local seconds = PickTimerCount % 60
-                local minutes = math.floor(PickTimerCount / 60)
-                local outString = string.format("%s:", minutes)
-                if seconds < 10 then outString = outString .. "0" end
-                outString = outString .. seconds
-                self.editButton({ index = 0, label = outString })
-                if PickTimerCount % 60 == 0 and PickTimerCount ~= 0 then printToColor("Pick time: " .. outString, ThisColor) end
-            end, 1, 5999)
+        if #zone.getObjects() > 1 then
+            obj.highlightOn('Red')
+            print(self.getGMNotes() .. ", take the deck of cards out of your hand before proceeding.")
+            return
         end
+        obj.setLuaScript("function onObjectLeaveContainer(container, leave_object) if container.type == 'Deck' then leave_object.setTags(container.getTags()) end end")
+        obj.addTag(TrackerTag)
+        Wait.frames(function() obj.spread() end, 5)
+        -- Start the pick timer.
+        if (DebouncePickTimer ~= nil) then Wait.stop(DebouncePickTimer) end
+        -- Count seconds
+        PickTimerCount = 0
+        DebouncePickTimer = Wait.time(function()
+            PickTimerCount = PickTimerCount + 1
+            local seconds = PickTimerCount % 60
+            local minutes = math.floor(PickTimerCount / 60)
+            local outString = string.format("%s:", minutes)
+            if seconds < 10 then outString = outString .. "0" end
+            outString = outString .. seconds
+            self.editButton({ index = 0, label = outString })
+            if PickTimerCount % 60 == 0 and PickTimerCount ~= 0 then printToColor("Pick time: " .. outString, ThisColor) end
+        end, 1, 5999)
     end
 end
 
