@@ -3,64 +3,57 @@ import requests
 import random
 import csv
 import copy
+import json
 
 
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
 
-    save = tts_output.Save(name=f"packs of of the cube with id {cc_id}")
+    save = tts_output.Save(name=f"packs of the cube with id {cc_id}")
     response = requests.get(
-        f"https://cubecobra.com/cube/download/csv/{cc_id}?primary=Color%20Category&secondary=Types-Multicolor&tertiary=Mana%20Value&quaternary=Alphabetical&showother=false",
+        f"https://cubecobra.com/cube/api/cubeJSON/{cc_id}",
         headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
-    reader = csv.DictReader(response.content.decode("utf-8").splitlines())
-    if "Name" not in reader.fieldnames:  # Catching 404 errors in CubeCobra is much harder than it should be.
-        return None
-    templist = []
-    # foil_indexes = []
-    for row in reader:
-        if not row["Maybeboard"]:
-            templist.append([row["Collector Number"], row["Set"]])
-        # if row["Finish"] == "Foil":
-        #     foil_indexes += [len(templist)]
-    cardinfo = tts_import.ijson_collection(templist)
+    js = response.json()
+    cube_cards = js["cards"]["mainboard"]
+    cardinfo = tts_import.mm_collection(
+        [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
+        out_dict=True,
+    )
     cubelist = []
-    reader = csv.DictReader(response.content.decode("utf-8").splitlines())
-    for row in reader:
-        if row["Maybeboard"]:
-            continue
-        for c in cardinfo:
-            if row["Collector Number"] == c["collector_number"] and row["Set"] == c["set"]:
-                x = {}
-                if "card_faces" in c.keys():
-                    x = {
-                        "card_faces": [
-                            {
-                                **c["card_faces"][0],
-                                "image_uris": {
-                                    "normal": row["Image URL"]
-                                    if row["Image URL"] != ""
-                                    else c["card_faces"][0]["image_uris"]["normal"]
-                                },
-                            },
-                            {
-                                **c["card_faces"][1],
-                                "image_uris": {
-                                    "normal": row["Image Back URL"]
-                                    if row["Image Back URL"] != ""
-                                    else c["card_faces"][1]["image_uris"]["normal"]
-                                },
-                            },
-                        ],
-                        "finish": row["Finish"] == "Foil",
-                    }
-                else:
-                    x = {
-                        "image_uris": {"normal": row["Image URL"] if row["Image URL"] != "" else c["image_uris"]["normal"]},
-                        "finish": row["Finish"] == "Foil",
-                    }
-                cubelist.append({**c, **x})
-                break
+    for row in cube_cards:
+        card = cardinfo[f'{row["details"]["collector_number"]}{row["details"]["set"]}']
+        x = {}
+        if "card_faces" in card.keys():
+            x = {
+                "card_faces": [
+                    {
+                        **card["card_faces"][0],
+                        "image_uris": {
+                            "normal": row['imgUrl']
+                            if 'imgUrl' in row
+                            else card["card_faces"][0]["image_uris"]["normal"]
+                        },
+                    },
+                    {
+                        **card["card_faces"][1],
+                        "image_uris": {
+                            "normal": row['imgBackUrl']
+                            if 'imgBackUrl' in row
+                            else card["card_faces"][1]["image_uris"]["normal"]
+                        },
+                    },
+                ],
+                "finish": row["finish"] == "Foil" if 'finish' in row else False,
+            }
+        else:
+            x = {
+                "image_uris": {
+                    "normal": row['imgUrl'] if 'imgUrl' in row else card["image_uris"]["normal"]
+                },
+                "finish": row["finish"] == "Foil" if 'finish' in row else False,
+            }
+        cubelist.append({**card, **x})
     random.shuffle(cubelist)
     for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
         the_cube = tts_output.Pack()

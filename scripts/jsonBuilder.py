@@ -3,15 +3,17 @@ import random
 import json
 
 response = requests.get(
-    f"https://www.planesculptors.net/set/blood-like-rivers?json",
+    f"https://www.planesculptors.net/set/splinters-of-novanda?json",
     headers={
         "User-Agent": "Python 3.9.13 CERA",
     },
 )
+
 data: dict = response.json()
 cards: dict[str, dict] = data["cards"]
-set = "c_vtm"
+set = "c_son"
 rarity = "M"
+
 w = []
 u = []
 r = []
