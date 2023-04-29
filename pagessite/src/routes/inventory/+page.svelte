@@ -5,6 +5,8 @@
 	import { flip } from 'svelte/animate';
 	import Inventorycard from '../../components/inventorycard/inventorycard.svelte';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
+	export const prerender = true;
+	export let data;
 	$: nth = 0;
 
 	function handleFileInput() {
