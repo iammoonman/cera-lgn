@@ -42,8 +42,8 @@ class Glintwing(commands.Cog):
                     value=f"G1 Winner: {match.players[match.gwinners[0]] if len(match.gwinners) > 0 else 'NONE'}{bslash}"
                     + f"G2 Winner: {(match.players[match.gwinners[1]] if match.gwinners[1] is not None else 'NONE') if len(match.gwinners) > 1 else 'NONE'}{bslash}"
                     + f"G3 Winner: {(match.players[match.gwinners[2]] if match.gwinners[2] is not None else 'NONE') if len(match.gwinners) > 2 else 'NONE'}{bslash}"
-                    + (f"{match.players[0]} has dropped.{bslash}" if match.drops[0] else "")
-                    + (f"{match.players[1]} has dropped.{bslash}" if match.drops[1] else ""),
+                    + (f"{match.players[0]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else "")
+                    + (f"{match.players[1]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else ""),
                 )
                 for match in w.matches
             ]
@@ -130,27 +130,27 @@ class StartingView(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
-    async def change_seat(self, select: discord.ui.Select, ctx: discord.Interaction):
-        if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
-            return
-        thisdraft = self.bot.drafts[self.id][-1]
-        try:
-            selection = int(select.values[0])
-            assert selection > 0 and selection < len(thisdraft.players)
-        except:
-            return await ctx.response.send_message(content="That is not a valid selection.", ephemeral=True)
-        this_player = thisdraft.get_player_by_id(str(ctx.user.id))
-        try:
-            thisdraft.get_player_by_seat(selection).seat = this_player.seat
-        except:
-            pass
-        this_player.seat = selection
-        await ctx.message.edit(
-            embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
-            view=self,
-        )
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # async def change_seat(self, select: discord.ui.Select, ctx: discord.Interaction):
+    #     if self.id not in self.bot.drafts.keys():
+    #         # await ctx.delete_original_message()
+    #         return
+    #     thisdraft = self.bot.drafts[self.id][-1]
+    #     try:
+    #         selection = int(select.values[0])
+    #         assert selection > 0 and selection < len(thisdraft.players)
+    #     except:
+    #         return await ctx.response.send_message(content="That is not a valid selection.", ephemeral=True)
+    #     this_player = thisdraft.get_player_by_id(str(ctx.user.id))
+    #     try:
+    #         thisdraft.get_player_by_seat(selection).seat = this_player.seat
+    #     except:
+    #         pass
+    #     this_player.seat = selection
+    #     await ctx.message.edit(
+    #         embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
+    #         view=self,
+    #     )
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -159,23 +159,25 @@ class StartingView(discord.ui.View):
             # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].add_player(
-            ctx.user.nick if ctx.user.nick is not None else ctx.user.name, str(ctx.user.id), seat=-1
+            ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
+            str(ctx.user.id),
+            seat=len(self.bot.drafts[self.id][-1].players),
         )
-        item = self.get_item("SEAT")
-        if item is not None:
-            self.remove_item("SEAT")
-        x = discord.ui.Select(
-            options=[
-                discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
-                for i in range(len(self.bot.drafts[self.id][-1].players))
-            ],
-            custom_id="SEAT",
-            max_values=1,
-            min_values=1,
-            select_type=discord.ComponentType.string_select,
-        )
-        x.callback = self.change_seat
-        self.add_item(x)
+        # item = self.get_item("SEAT")
+        # if item is not None:
+        #     self.remove_item("SEAT")
+        # x = discord.ui.Select(
+        #     options=[
+        #         discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
+        #         for i in range(len(self.bot.drafts[self.id][-1].players))
+        #     ],
+        #     custom_id="SEAT",
+        #     max_values=1,
+        #     min_values=1,
+        #     select_type=discord.ComponentType.string_select,
+        # )
+        # x.callback = self.change_seat
+        # self.add_item(x)
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
             view=self,
@@ -189,21 +191,21 @@ class StartingView(discord.ui.View):
             # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].drop_player(str(ctx.user.id))
-        item = self.get_item("SEAT")
-        if item is not None:
-            self.remove_item("SEAT")
-            x = discord.ui.Select(
-                options=[
-                    discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
-                    for i in range(len(self.bot.drafts[self.id][-1].players))
-                ],
-                custom_id="SEAT",
-                max_values=1,
-                min_values=1,
-                select_type=discord.ComponentType.string_select,
-            )
-            x.callback = self.change_seat
-            self.add_item(x)
+        # item = self.get_item("SEAT")
+        # if item is not None:
+        #     self.remove_item("SEAT")
+        #     x = discord.ui.Select(
+        #         options=[
+        #             discord.SelectOption(label=f"{i}", description=f"The seat {i} spot(s) to the left of the host.")
+        #             for i in range(len(self.bot.drafts[self.id][-1].players))
+        #         ],
+        #         custom_id="SEAT",
+        #         max_values=1,
+        #         min_values=1,
+        #         select_type=discord.ComponentType.string_select,
+        #     )
+        #     x.callback = self.change_seat
+        #     self.add_item(x)
         await ctx.message.edit(
             embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
             view=self,

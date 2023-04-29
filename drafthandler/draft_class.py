@@ -143,9 +143,7 @@ class Draft:
 
         "9" => player won game 1 and game 2 didn't happen
 
-        "-1" => player's opponent dropped late
-
-        """
+        "-1" => player's opponent dropped late"""
         # Get the current round
         # Get p_id's match
         # Parse code into gwinners
@@ -265,17 +263,14 @@ class Draft:
         # If there are no rounds, delete player
         if len(self.rounds) == 0:
             hold = None
-            seat = 0
             for q in self.players:
                 if q.player_id == p_id:
                     hold = q
-                    seat = q.seat
                     break
             self.players.remove(hold)  # type: ignore
             # Adjust other player's seating
-            for q in self.players:
-                if q.seat > seat:
-                    q.seat -= 1
+            for i, q in enumerate(self.players):
+                q.seat = i
         else:
             # If there are rounds, go into their latest match and toggle their index in drops
             player = [p for p in self.players if p.player_id == p_id][0]
@@ -291,6 +286,7 @@ class Draft:
         p = Player(n=p_name, id=p_id, s=seat)
         if p not in self.players:
             self.players.append(p)
+        print([(p.player_id, p.seat) for p in self.players])
         return
 
     def calculate(self):
