@@ -9,14 +9,14 @@ import json
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
 
-    save = tts_output.Save(name=f"packs of of the cube with id {cc_id}")
+    save = tts_output.Save(name=f"packs of the cube with id {cc_id}")
     response = requests.get(
         f"https://cubecobra.com/cube/api/cubeJSON/{cc_id}",
         headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
-    cardinfo = tts_import.ijson_collection(
+    cardinfo = tts_import.mm_collection(
         [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
         out_dict=True,
     )

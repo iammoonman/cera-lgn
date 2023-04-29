@@ -91,6 +91,10 @@ set_choices_v3 = [
     ["Magic 2013", "m13"],
     ["Masters 25", "a25"],
     ["Avacyn Restored", "avr"],
+    ["Dominaria Remastered", "dmr"],
+    ["Splinters of Novanda", "c_son"],
+    ["Conspiracy", "cns"],
+    ["Battlebond", "bbd"]
 ]
 
 

@@ -12,10 +12,10 @@ legal_sets = {
     "c_blr": "blood-like-rivers",
     "c_vtm": "villains-the-musical",
     "c_fmq": "the-fabled-masquerade",
+    "c_son": "splinters-of-novanda",
     "c_ksv": "karslav",
     "c_alr": "alara",
     "c_hnn": "high-noon1",
-    "c_vtm": "villains-the-musical",
     "c_rzp": "rat-zone-promos",
 }
 

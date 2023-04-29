@@ -1,7 +1,8 @@
+import mmap
 import time
+import orjson
 import requests
 import ijson
-import json
 import re
 
 
@@ -56,11 +57,12 @@ def scryfall_set(setcode):
 def ijson_collection(cardlist, out_dict=False):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
     blob_json = []
+    str_l = {f"{a[0]}{a[1]}": True for a in cardlist}
     out = {}
     f = open("default-cards.json", "rb")
     objects = ijson.items(f, "item")
     for o in objects:
-        if [o["collector_number"], o["set"]] in cardlist:
+        if f'{o["collector_number"]}{o["set"]}' in str_l:
             card_obj = tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}{o["set"]}'] = card_obj
@@ -232,6 +234,7 @@ def tts_parse(card):
         "set": card["set"],
         "name": card["name"],
         "collector_number": card["collector_number"],
+        "planar": "Battle " in card["type_line"] or "Plane " in card["type_line"] if "type_line" in card else False,
     }
     if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle"]:
         extra_obj = {
@@ -240,6 +243,7 @@ def tts_parse(card):
                 {
                     "name": face["name"],
                     "type_line": face["type_line"],
+                    "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"] if "type_line" in face else False,
                     "oracle_text": make_oracle_dfc(card, side == 0),
                     "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
                     "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
@@ -296,7 +300,7 @@ def tts_parse(card):
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
-    elif card["layout"] in ["vanguard"]:
+    elif card["layout"] == "Vanguard" or card["layout"] == "vanguard":
         extra_obj = {
             "oracle_text": make_oracle_vanguard(card),
             "image_uris": {"normal": card["image_uris"]["normal"]},
@@ -335,3 +339,35 @@ def tts_parse(card):
         }
     card_obj = {**card_obj, **extra_obj}
     return card_obj
+
+
+def mm_collection(cardlist, out_dict=False):
+    def file_parse_generator():
+        with open("default-cards.json", mode="r") as f:
+            with mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_READ) as m:
+                for line in iter(m.readline, b""):
+                    L = line.strip()
+                    if len(L) > 5:  # We assume that the lines are nicely formed.
+                        if L.endswith(b","):
+                            yield orjson.loads(L[:-1])
+                        else:
+                            yield orjson.loads(L)
+                    else:
+                        continue
+
+    generator = file_parse_generator()
+    string_list = {f"{a[0]}{a[1]}": True for a in cardlist}
+    blob_json = []
+    out = {}
+    while True:
+        try:
+            card = next(generator)
+        except:
+            break
+        if f'{card["collector_number"]}{card["set"]}' in string_list:
+            card_obj = tts_parse(card)
+            blob_json.append(card_obj)
+            out[f'{card["collector_number"]}{card["set"]}'] = card_obj
+    if out_dict:
+        return out
+    return blob_json
