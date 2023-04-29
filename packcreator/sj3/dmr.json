@@ -40,7 +40,7 @@
 			"flags": [], 
 			"options": [
 				{ "struct": {"a": 3}, "freq": 0.6825 }, 
-				{ "struct": {"a": 3}, "freq": 0.3125 }  
+				{ "struct": {"b": 3}, "freq": 0.3125 }  
 			], 
 			"sheets": {
 				"a": [
