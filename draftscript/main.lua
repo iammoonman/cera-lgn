@@ -69,24 +69,8 @@ function onClickGetBags()
                         GMNotes = player.color,
                         AltLookAngle = { x = 0, y = 0, z = 0 },
                         ColorDiffuse = { r = 0, g = 0, b = 0, a = 1 },
-                        LayoutGroupSortIndex = 0,
-                        Value = 0,
-                        Locked = false,
-                        Grid = true,
-                        Snap = true,
-                        IgnoreFoW = false,
-                        MeasureMovement = false,
-                        DragSelectable = true,
-                        Autoraise = true,
-                        Sticky = true,
                         Tooltip = true,
-                        GridProjection = false,
-                        HideWhenFaceDown = false,
                         Hands = false,
-                        MaterialIndex = -1,
-                        MeshIndex = -1,
-                        Number = 0,
-                        XmlUI = "",
                         Bag = { Order = 1 },
                         LuaScript = [[
                             function onLoad() WebRequest.get('https://raw.githubusercontent.com/iammoonman/cera/master/draftscript/bag.lua',self,'GetFreshScript') end
@@ -170,7 +154,7 @@ function UpdateVariables()
             o.setVar('CountToTake', CardsTaken)
         end
         return false
-    end, 1, 4)
+    end, 1, 2)
 end
 
 function GetFreshVersion(wr)
