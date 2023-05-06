@@ -119,14 +119,18 @@ class Pack:
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
             self.Description = ""
+            # self.SidewaysCard = False
+            # """Rotates the image clockwise."""
             """Contains oracle text, power/toughness, and loyalty if any.
             
             Formatted on import."""
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 self.Description = cardData["card_faces"][0]["oracle_text"]
+                # self.SidewaysCard = "Battle" in cardData["card_faces"][0]["type_line"]
             else:
                 # Oracle text formatting is applied on import
                 self.Description = cardData["oracle_text"]
+                # self.SidewaysCard = cardData["layout"] in ["planar", "battle"]
             self.Transform = transformAttrs
             self.ColorDiffuse = colorAttrs
             self.CardID = counter * 100
@@ -146,6 +150,7 @@ class Pack:
                 "BackIsHidden": True,
                 "UniqueBack": False,
             }
+            self.isPlanar = (cardData["planar"] if "planar" in cardData else False) or cardData["layout"] == "split"
             self.CustomDeck = self.frontImage
             self.AttachedDecals = decals if isFoil else []
             self.States = {}
@@ -166,11 +171,39 @@ class Pack:
                         "Nickname": backName,
                         "Description": backDescription,
                         "Transform": transformAttrs,
+                        "AltLookAngle": (
+                            {
+                                "x": 180.0,
+                                "y": 0.0,
+                                "z": 90.0,
+                            }
+                            if cardData["card_faces"][1]["planar"]
+                            else {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                            }
+                        )
+                        if "planar" in cardData["card_faces"][1]
+                        else (
+                            {
+                                "x": 180.0,
+                                "y": 0.0,
+                                "z": 180.0,
+                            }
+                            if cardData["layout"] == "flip"
+                            else {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                            }
+                        ),
                         "ColorDiffuse": colorAttrs,
                         "CardID": int((counter * 1000) - 100) * 100
                         + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
+                        # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
                     }
                 }
 
@@ -183,10 +216,12 @@ class Pack:
                 "Description": self.Description,
                 "ColorDiffuse": self.ColorDiffuse,
                 "Transform": self.Transform,
+                "AltLookAngle": {"x": 180.0 if self.isPlanar else 0.0, "y": 0.0, "z": 90.0 if self.isPlanar else 0.0},
                 "CardID": int(self.CardID),
                 "CustomDeck": {str(self.CardID // 100): self.CustomDeck},
                 "States": self.States,
                 "AttachedDecals": self.AttachedDecals,
+                # "SidewaysCard": self.SidewaysCard,
             }
 
     def import_cards(self, cardDataList, foilIndexes=[]):
