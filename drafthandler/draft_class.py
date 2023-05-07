@@ -366,6 +366,7 @@ class Match:
             raise ValueError
         self.players: list[Player] = p
         self.gwinners: list[Union[str, None]] = []
+        """A list of either the player's ID or None, representing the game won by that player or not played."""
         if p[1] == Player("Bye", "-1"):
             # Automatically set score for the bye.
             self.gwinners = [self.players[0].player_id, self.players[0].player_id, None]
