@@ -13,6 +13,19 @@ taglist = {
     "anti": "No Tag",
 }
 bslash = "\n"
+seat_order = [
+    "chair_white",
+    "chair_brown",
+    "chair_red",
+    "chair_orange",
+    "chair_yellow",
+    "chair_green",
+    "chair_teal",
+    "chair_blue",
+    "chair_purple",
+    "chair_pink",
+]
+"""Names of the seat emojis in order."""
 
 with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
@@ -73,7 +86,7 @@ def end_em(draft: Draft):
 
 
 class Glintwing(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.Bot):
         self.bot = bot
         self.drafts: dict[str, list[Draft]] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
@@ -85,9 +98,25 @@ class Glintwing(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: Union[discord.Member, discord.User]):
         # print(reaction.message) # Find the id of this message's views.
-        print(self.drafts.keys(), reaction.message.id)
-        if type(reaction.emoji) != 'str':
-            print(reaction.emoji.name)
+        if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
+            return
+        this_draft = self.drafts[reaction.message.id][-1]
+        if len(this_draft.rounds) == 0:
+            if type(reaction.emoji) != "str":
+                if reaction.emoji.name not in seat_order:
+                    return
+                this_player = this_draft.get_player_by_id(user.id)
+                this_player.seat_color = reaction.emoji.name
+                counter = 0
+                for color in seat_order:
+                    for player in self.drafts[reaction.message.id][-1].players:
+                        if player.seat_color == color:
+                            player.seat = counter
+                            counter += 1
+                await reaction.message.edit(
+                    embeds=[starting_em(self.drafts[reaction.message.id][-1])],
+                    view=self,
+                )
         return
 
     @commands.slash_command(guilds=[guild])
@@ -114,8 +143,9 @@ class Glintwing(commands.Cog):
         desc: str = "",
         rounds: int = 3,
     ):
-        msg = await ctx.respond(content="Setting up your draft...")
+        await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
+        msg = await ctx.interaction.original_response()
         self.drafts[msg.id] = [
             Draft(
                 draftID=msg.id,
@@ -134,7 +164,17 @@ class Glintwing(commands.Cog):
             seat=0,
         )
         self.timekeep[msg.id] = datetime.datetime.now()
-        await msg.edit_original_response(embeds=[starting_em(self.drafts[msg.id][-1])], content="", view=new_view)
+        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id][-1])], content="", view=new_view)
+        await msg.add_reaction("<:seat_white:1104759507311145012>")
+        await msg.add_reaction("<:seat_brown:1104759527808708698>")
+        await msg.add_reaction("<:seat_red:1104759572696141915>")
+        await msg.add_reaction("<:seat_orange:1104759633693909092>")
+        await msg.add_reaction("<:seat_yellow:1104759560905969804>")
+        await msg.add_reaction("<:seat_green:1104759586369572874>")
+        await msg.add_reaction("<:seat_teal:1104759619739471955>")
+        await msg.add_reaction("<:seat_blue:1104759698076479539>")
+        await msg.add_reaction("<:seat_purple:1104759602274381884>")
+        await msg.add_reaction("<:seat_pink:1104759547228336138>")
         return
 
 
@@ -146,6 +186,8 @@ class StartingView(discord.ui.View):
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
+            return
+        if len(self.bot.drafts[ctx.message.id][-1].players) == 10:
             return
         self.bot.drafts[ctx.message.id][-1].add_player(
             ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
@@ -192,6 +234,7 @@ class StartingView(discord.ui.View):
                 embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])],
                 view=new_view,
             )
+            await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     # @discord.ui.user_select(placeholder="ADD PLAYER", row=1)

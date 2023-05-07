@@ -312,7 +312,7 @@ class Round:
 
 
 class Player:
-    def __init__(self, n: str, id: str, s: int = 0):
+    def __init__(self, n: str, id: str, s: int = 0, s_c = "chair_white"):
         self.player_id: str = id
         """Discord user ID for the player."""
         self.seat: int = s
@@ -343,6 +343,8 @@ class Player:
         """Match-Win Percentage
             
             Not output to JSON."""
+        self.seat_color: str = s_c
+        """Seat color. Used for initial seating from TTS."""
 
     def __lt__(self, other):
         if self.score == other.score:
