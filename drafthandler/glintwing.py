@@ -39,9 +39,9 @@ class Glintwing(commands.Cog):
                 discord.EmbedField(
                     inline=True,
                     name=f"GAME: {match.players[0]} vs {match.players[1]}",
-                    value=f"G1 Winner: {match.players[match.gwinners[0]] if len(match.gwinners) > 0 else 'NONE'}{bslash}"
-                    + f"G2 Winner: {(match.players[match.gwinners[1]] if match.gwinners[1] is not None else 'NONE') if len(match.gwinners) > 1 else 'NONE'}{bslash}"
-                    + f"G3 Winner: {(match.players[match.gwinners[2]] if match.gwinners[2] is not None else 'NONE') if len(match.gwinners) > 2 else 'NONE'}{bslash}"
+                    value=f"G1 Winner: {draft.get_player_by_id(match.gwinners[0]) if match.gwinners[0] else 'NONE'}{bslash}"
+                    + f"G2 Winner: {(draft.get_player_by_id(match.gwinners[1]) if match.gwinners[1] is not None else 'NONE') if len(match.gwinners) > 1 else 'NONE'}{bslash}"
+                    + f"G3 Winner: {(draft.get_player_by_id(match.gwinners[2]) if match.gwinners[2] is not None else 'NONE') if len(match.gwinners) > 2 else 'NONE'}{bslash}"
                     + (f"{match.players[0]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else "")
                     + (f"{match.players[1]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else ""),
                 )
