@@ -80,7 +80,6 @@ class Draft:
         leng = len(self.players)
         players_sorted = [p for p in self.players if not p.dropped]
         players_sorted.sort(key=lambda p: (p.score, p.gpts), reverse=True)
-        print(players_sorted)
         for first_player in players_sorted:
             # Players have a hierarchy of who they want to play against.
             # It starts with the player with the highest distance from them.
@@ -286,14 +285,12 @@ class Draft:
         p = Player(n=p_name, id=p_id, s=seat)
         if p not in self.players:
             self.players.append(p)
-        print([(p.player_id, p.seat) for p in self.players])
         return
 
     def calculate(self):
         for player in self.players:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
-            # print(player.player_id, player.gpts, player.gcount, player.mpts, player.mcount)
         for player in self.players:
             player.ogp = sum(h := [p.gwp if p.gwp is not None else 0 for p in player.opponents]) / (
                 len(h) if len(h) > 0 else 1

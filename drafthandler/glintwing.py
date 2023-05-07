@@ -100,7 +100,6 @@ class Glintwing(commands.Cog):
     ):
         msg = await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
-        # print("DRAFT", new_view.id, "BY", ctx.user.id)
         self.drafts[new_view.id] = [
             Draft(
                 draftID=new_view.id,
@@ -154,9 +153,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("JOIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].add_player(
             ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
@@ -186,9 +183,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].drop_player(str(ctx.user.id))
         # item = self.get_item("SEAT")
@@ -214,15 +209,12 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("BEGIN", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
             if not all(x.seat > -1 for x in self.bot.drafts[self.id][-1].players):
                 return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
             new_view = IG_View(self.bot)
-            # print(self.id, new_view.id, "BEGIN")
             self.bot.drafts[new_view.id] = [self.bot.drafts[self.id][-1]]
             self.bot.timekeep[new_view.id] = self.bot.timekeep[self.id]
             self.bot.drafts[new_view.id][-1].finish_round()
@@ -241,7 +233,6 @@ class StartingView(discord.ui.View):
 
     # @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
     # async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
-    #     # print("ADD", self.id, "BY", ctx.user.id)
     #     if self.id not in self.bot.drafts.keys():
     #         # await ctx.delete_original_message()
     #         return
@@ -323,9 +314,7 @@ class IG_View(discord.ui.View):
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
-        # print("REPORT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].parse_match(str(ctx.user.id), select.values[0])
         await ctx.message.edit(
@@ -341,9 +330,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         self.bot.drafts[self.id][-1].drop_player(str(ctx.user.id))
         await ctx.message.edit(
@@ -359,9 +346,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("NEXT", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
             newRoundDraft = copy.deepcopy(self.bot.drafts[self.id][-1])
@@ -379,7 +364,6 @@ class IG_View(discord.ui.View):
                         view=self,
                     )
                 else:
-                    print(json.dumps(self.bot.drafts[self.id][-1].tojson()))
                     with open(f"pagessite/src/data/{self.id}.json", "w") as f:
                         json.dump(self.bot.drafts[self.id][-1].tojson(), f, ensure_ascii=False, indent=4)
                     await ctx.message.edit(embeds=[self.bot.end_em(self.bot.drafts[self.id][-1])], view=None)
@@ -400,7 +384,6 @@ class IG_View(discord.ui.View):
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
     async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
             if len(self.bot.drafts[self.id]) > 1:
@@ -409,9 +392,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
-        # print("TOGGLE_DROP", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         if str(ctx.user.id) == self.bot.drafts[self.id][-1].host or str(select.values[0]) == str(ctx.user.id):
             self.bot.drafts[self.id][-1].drop_player(str(select.values[0]))
@@ -428,9 +409,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        # print("TRIM", self.id, "BY", ctx.user.id)
         if self.id not in self.bot.drafts.keys():
-            # await ctx.delete_original_message()
             return
         if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
             self.bot.drafts[self.id][-1].max_rounds = len(self.bot.drafts[self.id][-1].rounds)
