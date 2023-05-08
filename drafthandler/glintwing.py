@@ -105,7 +105,11 @@ class Glintwing(commands.Cog):
             if type(reaction.emoji) != "str":
                 if reaction.emoji.name not in seat_order:
                     return
-                this_player = this_draft.get_player_by_id(user.id)
+                try:
+                    this_player = this_draft.get_player_by_id(str(user.id))
+                except StopIteration:
+                    await reaction.clear()
+                    return
                 this_player.seat_color = reaction.emoji.name
                 counter = 0
                 for color in seat_order:
@@ -113,10 +117,9 @@ class Glintwing(commands.Cog):
                         if player.seat_color == color:
                             player.seat = counter
                             counter += 1
-                await reaction.message.edit(
-                    embeds=[starting_em(self.drafts[reaction.message.id][-1])],
-                    view=self,
-                )
+                new_view = StartingView(self)
+                await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id][-1])], view=new_view)
+                await reaction.clear()
         return
 
     @commands.slash_command(guilds=[guild])
@@ -164,7 +167,9 @@ class Glintwing(commands.Cog):
             seat=0,
         )
         self.timekeep[msg.id] = datetime.datetime.now()
-        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id][-1])], content="", view=new_view)
+        await ctx.interaction.edit_original_response(
+            embeds=[starting_em(self.drafts[msg.id][-1])], content="", view=new_view
+        )
         await msg.add_reaction("<:seat_white:1104759507311145012>")
         await msg.add_reaction("<:seat_brown:1104759527808708698>")
         await msg.add_reaction("<:seat_red:1104759572696141915>")
