@@ -1,11 +1,13 @@
-const { refObject, UIElement, Vector, Text, Rotator, Canvas, Border, Button, RichText, refPackageId } = require("@tabletop-playground/api");
+const { refObject, Vector, Rotator, Border, RichText, Button, UIElement, VerticalBox } = require("@tabletop-playground/api");
 
 const debounce = (func, wait) => {
 	let d = null;
 	return (args) => {
 		if (d !== null) clearTimeout(d);
-		d = setTimeout(() => {if (refObject.isValid && refObject.getStackSize() === 1) func.apply(args)}, wait);
-	}
+		d = setTimeout(() => {
+			if (refObject.isValid && refObject.getStackSize() === 1) func.apply(args);
+		}, wait);
+	};
 };
 const debounceCardDetails = debounce(generateCardDetails, 1000);
 
@@ -26,6 +28,48 @@ refObject.onRemoved = (t) => {
 	debounceCardDetails();
 };
 
+function createTokens() {
+	const selfURL = refObject.getCardDetails().textureOverrideURL;
+	const [front_face] = selfURL.match(/(?<=&front_face=)(false|true)/g) ?? ["true"];
+	const [sf_id] = selfURL.match(/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/g) ?? [];
+	if (sf_id !== undefined) {
+		fetch(`https://api.scryfall.com/cards/${sf_id}`)
+			.then((r) => r.json())
+			.then(async (v) => {
+				const position = refObject.getPosition();
+				const { all_parts } = v;
+				let main_stack = undefined;
+				for (let index = 0; index < all_parts.length; index++) {
+					const element = all_parts[index];
+					if (element.id === sf_id) continue;
+					if (main_stack === undefined) {
+						const c = await fetch(`https://api.scryfall.com/cards/${element.id}`);
+						const j = await c.json();
+						console.log(j.name);
+						const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add([0, 8, 1]));
+						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host", "emblem"].includes(j.layout)) {
+							q.setTextureOverrideURL(j.image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
+						} else {
+							q.setTextureOverrideURL(j.card_faces[0].image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
+						}
+						main_stack = q;
+					} else {
+						const c = await fetch(`https://api.scryfall.com/cards/${element.id}`);
+						const j = await c.json();
+						console.log(j.name);
+						const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add([0, 8, 1]));
+						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host", "emblem"].includes(j.layout)) {
+							q.setTextureOverrideURL(j.image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
+						} else {
+							q.setTextureOverrideURL(j.card_faces[0].image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
+						}
+						main_stack.addCards(q);
+					}
+				}
+			});
+	}
+}
+
 function transformCard() {
 	const selfURL = refObject.getCardDetails().textureOverrideURL;
 	const [front_face] = selfURL.match(/(?<=&front_face=)(false|true)/g) ?? ["true"];
@@ -34,9 +78,9 @@ function transformCard() {
 		fetch(`https://api.scryfall.com/cards/${sf_id}`)
 			.then((r) => r.json())
 			.then((v) => {
-				const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces } = v;
+				const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces, all_parts } = v;
 				refObject.setName(name ?? "New Card");
-				makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity }, card_faces, front_face !== "true");
+				makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, all_parts }, card_faces, front_face !== "true");
 			});
 	}
 }
@@ -44,7 +88,7 @@ function transformCard() {
 // This should look a lot like the description from TTS, if possible.
 function makeDetailedDescription(layout, easy_face, card_faces, front_face = true) {
 	// Add ui elements
-	const RightSide = new UIElement();
+	const RightSide = new VerticalBox();
 	RightSide.height = 1060;
 	RightSide.width = 760;
 	RightSide.useWidgetSize = false;
@@ -55,10 +99,11 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 	RightSide.anchorX = 0;
 	RightSide.anchorY = 0;
 	RightSide.useTransparency = true;
+
 	const LeftSide = new UIElement();
-	LeftSide.height = 70;
-	LeftSide.width = 170;
-	LeftSide.useWidgetSize = false;
+	// LeftSide.height = 70;
+	// LeftSide.width = 170;
+	LeftSide.useWidgetSize = true;
 	LeftSide.zoomVisibility = 0;
 	LeftSide.position = new Vector(4.5, 5.0, -0.1);
 	LeftSide.rotation = new Rotator(180, 180, 0);
@@ -66,6 +111,9 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 	LeftSide.anchorX = 0;
 	LeftSide.anchorY = 0;
 	LeftSide.useTransparency = true;
+
+	const LeftBorder = new VerticalBox();
+
 	const RightBorder = new Border();
 	RightBorder.setColor([1, 1, 1, 0.75]);
 	// UI is different depending on layout.
@@ -103,11 +151,19 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 		}
 		const LeftButton = new Button();
 		LeftButton.setFontSize(24);
-		LeftButton.setText('Transform');
+		LeftButton.setText("Transform");
 		LeftButton.onClicked = transformCard;
-		LeftSide.widget = LeftButton;
+		LeftBorder.addChild(LeftButton);
+	}
+	if (!!easy_face["all_parts"] && layout !== "token") {
+		const TokenButton = new Button();
+		TokenButton.setFontSize(24);
+		TokenButton.setText("Tokens");
+		TokenButton.onClicked = createTokens;
+		LeftBorder.addChild(TokenButton);
 	}
 	RightSide.widget = RightBorder;
+	LeftSide.widget = LeftBorder;
 	refObject.addUI(RightSide);
 	refObject.addUI(LeftSide);
 }
@@ -121,10 +177,10 @@ function generateCardDetails() {
 			fetch(`https://api.scryfall.com/cards/${sf_id}`)
 				.then((r) => r.json())
 				.then((v) => {
-					const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces } = v;
+					const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces, all_parts } = v;
 					// Remove unused properties. Max length of savedData is 1023 chars
 					refObject.setName(name ?? "New Card");
-					makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity }, card_faces, front_face === "true");
+					makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, all_parts }, card_faces, front_face === "true");
 				});
 		}
 	});
