@@ -1,5 +1,10 @@
 const { refObject, Vector, Rotator, Border, RichText, Button, UIElement, VerticalBox } = require("@tabletop-playground/api");
 
+const globalState = {
+	loyalty: undefined,
+	stat_counters: undefined,
+};
+
 const debounce = (func, wait) => {
 	let d = null;
 	return (args) => {
@@ -45,7 +50,6 @@ function createTokens() {
 					if (main_stack === undefined) {
 						const c = await fetch(`https://api.scryfall.com/cards/${element.id}`);
 						const j = await c.json();
-						console.log(j.name);
 						const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add([0, 8, 1]));
 						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host", "emblem"].includes(j.layout)) {
 							q.setTextureOverrideURL(j.image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
@@ -56,7 +60,6 @@ function createTokens() {
 					} else {
 						const c = await fetch(`https://api.scryfall.com/cards/${element.id}`);
 						const j = await c.json();
-						console.log(j.name);
 						const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add([0, 8, 1]));
 						if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host", "emblem"].includes(j.layout)) {
 							q.setTextureOverrideURL(j.image_uris.normal.concat(`&scryfall_id=${element.id}&front_face=true`));
@@ -88,7 +91,7 @@ function transformCard() {
 // This should look a lot like the description from TTS, if possible.
 function makeDetailedDescription(layout, easy_face, card_faces, front_face = true) {
 	// Add ui elements
-	const RightSide = new VerticalBox();
+	const RightSide = new UIElement();
 	RightSide.height = 1060;
 	RightSide.width = 760;
 	RightSide.useWidgetSize = false;
@@ -116,6 +119,7 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 
 	const RightBorder = new Border();
 	RightBorder.setColor([1, 1, 1, 0.75]);
+
 	// UI is different depending on layout.
 	if (layout === "normal") {
 		const Name = easy_face.name ?? "";
@@ -146,8 +150,80 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 		RightBorder.setChild(new RichText().setText(Canvas_Text).setFontSize(24).setAutoWrap(true).setTextColor([0, 0, 0, 1]), 0, 0, 760, 1500);
 		if (!front_face) {
 			refObject.setTextureOverrideURL(card_faces[1].image_uris.normal.concat("&front_face=false"));
+			if (card_faces[1]["type_line"].includes("Planeswalker")) {
+				const LoyaltyText = new Button();
+				LoyaltyText.setFontSize(32);
+				LoyaltyText.setText(card_faces[1]["loyalty"]);
+				LoyaltyText.onClicked = () => null; // Actually, this should just be text.
+				LoyaltyText.my_id = "loyalty";
+				globalState.loyalty = parseInt(card_faces[1]["loyalty"]);
+				// Use the global state to track loyalty
+
+				const LoyaltyContainer = new UIElement();
+				LoyaltyContainer.width = 100;
+				LoyaltyContainer.height = 100;
+				LoyaltyContainer.useWidgetSize = false;
+				LoyaltyContainer.zoomVisibility = 0;
+				LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
+				LoyaltyContainer.rotation = new Rotator(180, 180, 0);
+				LoyaltyContainer.scale = 0.08;
+				LoyaltyContainer.anchorX = 0;
+				LoyaltyContainer.anchorY = 0;
+				LoyaltyContainer.useTransparency = true;
+				LoyaltyContainer.widget = LoyaltyText;
+				refObject.addUI(LoyaltyContainer);
+				refObject.addCustomAction("Add 1 Loyalty", undefined, "add_one_loyalty");
+				refObject.addCustomAction("Lose 1 Loyalty", undefined, "lose_one_loyalty");
+				refObject.addCustomAction("Add 5 Loyalty", undefined, "add_five_loyalty");
+				refObject.addCustomAction("Lose 5 Loyalty", undefined, "lose_five_loyalty");
+			} else {
+				const loyaltyElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(-3.5, -2.13, -0.1), 2));
+				if (!!loyaltyElement) {
+					refObject.removeUIElement(loyaltyElement);
+					refObject.removeCustomAction("add_one_loyalty");
+					refObject.removeCustomAction("lose_one_loyalty");
+					refObject.removeCustomAction("add_five_loyalty");
+					refObject.removeCustomAction("lose_five_loyalty");
+				}
+			}
 		} else {
 			refObject.setTextureOverrideURL(card_faces[0].image_uris.normal.concat("&front_face=true"));
+			if (card_faces[0]["type_line"].includes("Planeswalker")) {
+				const LoyaltyText = new Button();
+				LoyaltyText.setFontSize(32);
+				LoyaltyText.setText(card_faces[0]["loyalty"]);
+				LoyaltyText.onClicked = () => null; // Actually, this should just be text.
+				LoyaltyText.my_id = "loyalty";
+				globalState.loyalty = parseInt(card_faces[0]["loyalty"]);
+				// Use the global state to track loyalty
+
+				const LoyaltyContainer = new UIElement();
+				LoyaltyContainer.width = 100;
+				LoyaltyContainer.height = 100;
+				LoyaltyContainer.useWidgetSize = false;
+				LoyaltyContainer.zoomVisibility = 0;
+				LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
+				LoyaltyContainer.rotation = new Rotator(180, 180, 0);
+				LoyaltyContainer.scale = 0.08;
+				LoyaltyContainer.anchorX = 0;
+				LoyaltyContainer.anchorY = 0;
+				LoyaltyContainer.useTransparency = true;
+				LoyaltyContainer.widget = LoyaltyText;
+				refObject.addUI(LoyaltyContainer);
+				refObject.addCustomAction("Add 1 Loyalty", undefined, "add_one_loyalty");
+				refObject.addCustomAction("Lose 1 Loyalty", undefined, "lose_one_loyalty");
+				refObject.addCustomAction("Add 5 Loyalty", undefined, "add_five_loyalty");
+				refObject.addCustomAction("Lose 5 Loyalty", undefined, "lose_five_loyalty");
+			} else {
+				const loyaltyElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(-3.5, -2.13, -0.1), 2));
+				if (!!loyaltyElement) {
+					refObject.removeUIElement(loyaltyElement);
+					refObject.removeCustomAction("add_one_loyalty");
+					refObject.removeCustomAction("lose_one_loyalty");
+					refObject.removeCustomAction("add_five_loyalty");
+					refObject.removeCustomAction("lose_five_loyalty");
+				}
+			}
 		}
 		const LeftButton = new Button();
 		LeftButton.setFontSize(24);
@@ -162,6 +238,34 @@ function makeDetailedDescription(layout, easy_face, card_faces, front_face = tru
 		TokenButton.onClicked = createTokens;
 		LeftBorder.addChild(TokenButton);
 	}
+	if (layout === "normal" && easy_face["type_line"].includes("Planeswalker")) {
+		const LoyaltyText = new Button();
+		LoyaltyText.setFontSize(32);
+		LoyaltyText.setText(easy_face["loyalty"]);
+		LoyaltyText.onClicked = () => null; // Actually, this should just be text.
+		LoyaltyText.my_id = "loyalty";
+		globalState.loyalty = parseInt(easy_face["loyalty"]);
+		// Use the global state to track loyalty
+
+		const LoyaltyContainer = new UIElement();
+		LoyaltyContainer.width = 100;
+		LoyaltyContainer.height = 100;
+		LoyaltyContainer.useWidgetSize = false;
+		LoyaltyContainer.zoomVisibility = 0;
+		LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
+		LoyaltyContainer.rotation = new Rotator(180, 180, 0);
+		LoyaltyContainer.scale = 0.08;
+		LoyaltyContainer.anchorX = 0;
+		LoyaltyContainer.anchorY = 0;
+		LoyaltyContainer.useTransparency = true;
+		LoyaltyContainer.widget = LoyaltyText;
+		refObject.addUI(LoyaltyContainer);
+		refObject.addCustomAction("Add 1 Loyalty", undefined, "add_one_loyalty");
+		refObject.addCustomAction("Lose 1 Loyalty", undefined, "lose_one_loyalty");
+		refObject.addCustomAction("Add 5 Loyalty", undefined, "add_five_loyalty");
+		refObject.addCustomAction("Lose 5 Loyalty", undefined, "lose_five_loyalty");
+	}
+
 	RightSide.widget = RightBorder;
 	LeftSide.widget = LeftBorder;
 	refObject.addUI(RightSide);
@@ -177,11 +281,57 @@ function generateCardDetails() {
 			fetch(`https://api.scryfall.com/cards/${sf_id}`)
 				.then((r) => r.json())
 				.then((v) => {
-					const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces, all_parts } = v;
+					const { name, layout, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, card_faces, all_parts, loyalty } = v;
 					// Remove unused properties. Max length of savedData is 1023 chars
 					refObject.setName(name ?? "New Card");
-					makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, all_parts }, card_faces, front_face === "true");
+					makeDetailedDescription(layout, { name, mana_cost, cmc, type_line, oracle_text, power, toughness, rarity, all_parts, loyalty }, card_faces, front_face === "true");
+					refObject.onCustomAction = onCustomAction;
 				});
 		}
 	});
+}
+
+function onCustomAction(self, player, action_id) {
+	let UIToUpdate = undefined;
+	switch (action_id) {
+		case "add_one_loyalty":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			if (UIToUpdate === undefined) {
+				console.log("Did not find.");
+				break;
+			}
+			globalState.loyalty = (globalState.loyalty ?? 0) + 1;
+			UIToUpdate.widget.setText(`${globalState.loyalty}`);
+			break;
+		case "lose_one_loyalty":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			if (UIToUpdate === undefined) {
+				console.log("Did not find.");
+				break;
+			}
+			globalState.loyalty = (globalState.loyalty ?? 0) - 1;
+			UIToUpdate.widget.setText(`${globalState.loyalty}`);
+			break;
+		case "add_five_loyalty":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			if (UIToUpdate === undefined) {
+				console.log("Did not find.");
+				break;
+			}
+			globalState.loyalty = (globalState.loyalty ?? 0) + 5;
+			UIToUpdate.widget.setText(`${globalState.loyalty}`);
+			break;
+		case "lose_five_loyalty":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			if (UIToUpdate === undefined) {
+				console.log("Did not find.");
+				break;
+			}
+			globalState.loyalty = (globalState.loyalty ?? 0) - 5;
+			UIToUpdate.widget.setText(`${globalState.loyalty}`);
+			break;
+
+		default:
+			break;
+	}
 }
