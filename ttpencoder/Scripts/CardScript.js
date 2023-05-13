@@ -1,4 +1,4 @@
-const { refObject, Vector, Rotator, Border, RichText, Button, UIElement, VerticalBox } = require("@tabletop-playground/api");
+const { refObject, Vector, Rotator, Border, RichText, Button, UIElement, VerticalBox, UIZoomVisibility, ImageButton, refPackageId } = require("@tabletop-playground/api");
 
 const globalState = {
 	loyalty: undefined,
@@ -98,7 +98,7 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 	RightSide.height = 1060;
 	RightSide.width = 760;
 	RightSide.useWidgetSize = false;
-	RightSide.zoomVisibility = 1;
+	RightSide.zoomVisibility = UIZoomVisibility.ZoomedOnly;
 	RightSide.position = new Vector(4.5, -3.5, -0.1);
 	RightSide.rotation = new Rotator(180, 180, 0);
 	RightSide.scale = 0.08;
@@ -110,7 +110,7 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 	// LeftSide.height = 70;
 	// LeftSide.width = 170;
 	LeftSide.useWidgetSize = true;
-	LeftSide.zoomVisibility = 0;
+	LeftSide.zoomVisibility = UIZoomVisibility.Regular;
 	LeftSide.position = new Vector(4.5, 3.5, -0.1);
 	LeftSide.rotation = new Rotator(180, 180, 0);
 	LeftSide.scale = 0.08;
@@ -121,7 +121,7 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 	const LeftBorder = new VerticalBox();
 
 	const RightBorder = new Border();
-	RightBorder.setColor([1, 1, 1, 0.75]);
+	RightBorder.setColor([1, 1, 1, 0.9]);
 
 	// UI is different depending on layout.
 	if (layout === "normal") {
@@ -129,22 +129,19 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 		const Type_Line = easy_face.type_line ?? "";
 		const Mana_Cost = easy_face.mana_cost ?? "NO MANA COST";
 		const Oracle_Text = easy_face.oracle_text ?? "";
-		const Canvas_Text = `${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/, "[size=24][i](").replace(/\)/, ")[/i][/size]")}`;
-		console.log("HELLO")
+		const Canvas_Text = `${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/g, "[size=24][i](").replace(/\)/g, ")[/i][/size]")}${easy_face["type_line"].includes("Planeswalker") ? "\nStarting Loyalty: " + easy_face["loyalty"] : ""}${easy_face["type_line"].includes("Creature") || easy_face["type_line"].includes("Vehicle") ? "\n" + easy_face["power"] + "/" + easy_face["toughness"] : ""}`;
 		RightBorder.setChild(new RichText().setText(Canvas_Text).setFontSize(24).setAutoWrap(true).setTextColor([0, 0, 0, 1]), 0, 0, 760, 1500);
 		if (easy_face["type_line"].includes("Planeswalker")) {
 			const LoyaltyText = new Button();
-			LoyaltyText.setFontSize(32);
+			LoyaltyText.setFontSize(48);
 			LoyaltyText.setText(easy_face["loyalty"]);
-			LoyaltyText.onClicked = () => null; // Actually, this should just be text.
+			LoyaltyText.onClicked = () => null;
 			globalState.loyalty = parseInt(easy_face["loyalty"]);
-			// Use the global state to track loyalty
-
 			const LoyaltyContainer = new UIElement();
 			LoyaltyContainer.width = 100;
 			LoyaltyContainer.height = 100;
 			LoyaltyContainer.useWidgetSize = false;
-			LoyaltyContainer.zoomVisibility = 0;
+			LoyaltyContainer.zoomVisibility = UIZoomVisibility.Both;
 			LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
 			LoyaltyContainer.rotation = new Rotator(180, 180, 0);
 			LoyaltyContainer.scale = 0.08;
@@ -164,7 +161,7 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 		const Type_Line = easy_face.type_line ?? "";
 		const Mana_Cost = easy_face.mana_cost ?? "NO MANA COST";
 		const Oracle_Text = easy_face.oracle_text ?? "";
-		const Canvas_Text = `${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/, "[size=24][i](").replace(/\)/, ")[/i][/size]")}`;
+		const Canvas_Text = `${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/g, "[size=24][i](").replace(/\)/g, ")[/i][/size]")}`;
 		RightBorder.setChild(new RichText().setText(Canvas_Text).setFontSize(24).setAutoWrap(true).setTextColor([0, 0, 0, 1]), 0, 0, 760, 1500);
 	} else if (layout === "transform") {
 		// UI is different based on which side is face up.
@@ -176,88 +173,50 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 		const Type_Line_2 = back.type_line ?? "";
 		const Mana_Cost_2 = back.mana_cost ?? "NO MANA COST";
 		const Oracle_Text_2 = back.oracle_text ?? "";
-		const Canvas_Text = `[color=${front_face ? "#000000" : "#777777"}]${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/, "[size=24][i](").replace(/\)/, ")[/i][/size]")}[/color]\n-------------------------\n[color=${front_face ? "#444444" : "#000000"}]${Name_2} :: ${Mana_Cost_2}\n${Type_Line_2} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text_2.replace(/\(/, "[size=24][i](").replace(/\)/, ")[/i][/size]")}[/color]`;
+		let use_l_d = front_face ? (front["type_line"].includes("Planeswalker") ? "pw" : front["type_line"].includes("Battle") ? "bt" : false) : back["type_line"].includes("Planeswalker") ? "pw" : back["type_line"].includes("Battle") ? "bt" : false;
+		let use_l_d_f = front["type_line"].includes("Planeswalker") ? "pw" : front["type_line"].includes("Battle") ? "bt" : false;
+		let use_l_d_b = back["type_line"].includes("Planeswalker") ? "pw" : back["type_line"].includes("Battle") ? "bt" : false;
+		const Canvas_Text = `[color=${front_face ? "#000000" : "#777777"}]${Name} :: ${Mana_Cost}\n${Type_Line} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text.replace(/\(/g, "[size=24][i](").replace(/\)/g, ")[/i][/size]")}${use_l_d_f === "pw" ? "\nStarting Loyalty: " + front["loyalty"] : use_l_d_f === "bt" ? "\nStarting Defense: " + front["defense"] : ""}${front["type_line"].includes("Creature") || front["type_line"].includes("Vehicle") ? "\n" + front["power"] + "/" + front["toughness"] : ""}[/color]\n-------------------------\n[color=${front_face ? "#444444" : "#000000"}]${Name_2} :: ${Mana_Cost_2}\n${Type_Line_2} :: ${easy_face.rarity.toUpperCase()}\n${Oracle_Text_2.replace(/\(/g, "[size=24][i](").replace(/\)/g, ")[/i][/size]")}${use_l_d_b === "pw" ? "\nStarting Loyalty: " + back["loyalty"] : use_l_d_b === "bt" ? "\nStarting Defense: " + back["defense"] : ""}${
+			back["type_line"].includes("Creature") || back["type_line"].includes("Vehicle") ? "\n" + back["power"] + "/" + back["toughness"] : ""
+		}[/color]`;
 		RightBorder.setChild(new RichText().setText(Canvas_Text).setFontSize(24).setAutoWrap(true).setTextColor([0, 0, 0, 1]), 0, 0, 760, 1500);
-		if (!front_face) {
-			refObject.setTextureOverrideURL(back.image_uris.normal.concat("&front_face=false"));
-			const use_loyalty_defense_back = back["type_line"].includes("Planeswalker") ? "pw" : back["type_line"].includes("Battle") ? "bt" : false;
-			if (use_loyalty_defense_back) {
-				const LoyaltyText = new Button();
-				LoyaltyText.setFontSize(32);
-				LoyaltyText.setText(use_loyalty_defense_back === "pw" ? back["loyalty"] : back["defense"]);
-				LoyaltyText.onClicked = () => null; // Actually, this should just be text.
-				globalState.loyalty = parseInt(back["loyalty"]);
-				// Use the global state to track loyalty
-
-				const LoyaltyContainer = new UIElement();
-				LoyaltyContainer.width = 100;
-				LoyaltyContainer.height = 100;
-				LoyaltyContainer.useWidgetSize = false;
-				LoyaltyContainer.zoomVisibility = 0;
-				LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
-				LoyaltyContainer.rotation = new Rotator(180, 180, 0);
-				LoyaltyContainer.scale = 0.08;
-				LoyaltyContainer.anchorX = 0;
-				LoyaltyContainer.anchorY = 0;
-				LoyaltyContainer.useTransparency = true;
-				LoyaltyContainer.widget = LoyaltyText;
-				refObject.addUI(LoyaltyContainer);
-				refObject.addCustomAction("Add 1 " + (use_loyalty_defense_back === "pw" ? "Loyalty" : "Defense"), undefined, "add_one_loyalty");
-				refObject.addCustomAction("Lose 1 " + (use_loyalty_defense_back === "pw" ? "Loyalty" : "Defense"), undefined, "lose_one_loyalty");
-				refObject.addCustomAction("Add 5 " + (use_loyalty_defense_back === "pw" ? "Loyalty" : "Defense"), undefined, "add_five_loyalty");
-				refObject.addCustomAction("Lose 5 " + (use_loyalty_defense_back === "pw" ? "Loyalty" : "Defense"), undefined, "lose_five_loyalty");
-			} else {
-				const loyaltyElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(-3.5, -2.13, -0.1), 2));
-				if (!!loyaltyElement) {
-					refObject.removeUIElement(loyaltyElement);
-					refObject.removeCustomAction("add_one_loyalty");
-					refObject.removeCustomAction("lose_one_loyalty");
-					refObject.removeCustomAction("add_five_loyalty");
-					refObject.removeCustomAction("lose_five_loyalty");
-				}
-			}
+		refObject.setTextureOverrideURL(front_face ? front.image_uris.normal.concat("&front_face=true") : back.image_uris.normal.concat("&front_face=false"));
+		if (use_l_d) {
+			const LoyaltyText = new Button();
+			LoyaltyText.setFontSize(48);
+			LoyaltyText.setText(use_l_d === "pw" ? (front_face ? front["loyalty"] : back["loyalty"]) : front_face ? front["defense"] : back["defense"]);
+			LoyaltyText.onClicked = () => null;
+			globalState.loyalty = parseInt(use_l_d === "pw" ? (front_face ? front["loyalty"] : back["loyalty"]) : front_face ? front["defense"] : back["defense"]);
+			const LoyaltyContainer = new UIElement();
+			LoyaltyContainer.width = 100;
+			LoyaltyContainer.height = 100;
+			LoyaltyContainer.useWidgetSize = false;
+			LoyaltyContainer.zoomVisibility = UIZoomVisibility.Both;
+			LoyaltyContainer.position = use_l_d === "bt" ? new Vector(4.5, -2.4, -0.1) : new Vector(-3.5, -2.13, -0.1);
+			LoyaltyContainer.rotation = new Rotator(180, 180, 0);
+			LoyaltyContainer.scale = 0.08;
+			LoyaltyContainer.anchorX = 0;
+			LoyaltyContainer.anchorY = 0;
+			LoyaltyContainer.useTransparency = true;
+			LoyaltyContainer.widget = LoyaltyText;
+			refObject.addUI(LoyaltyContainer);
+			refObject.addCustomAction("Add 1 " + (use_l_d === "pw" ? "Loyalty" : "Defense"), undefined, "add_one_loyalty");
+			refObject.addCustomAction("Lose 1 " + (use_l_d === "pw" ? "Loyalty" : "Defense"), undefined, "lose_one_loyalty");
+			refObject.addCustomAction("Add 5 " + (use_l_d === "pw" ? "Loyalty" : "Defense"), undefined, "add_five_loyalty");
+			refObject.addCustomAction("Lose 5 " + (use_l_d === "pw" ? "Loyalty" : "Defense"), undefined, "lose_five_loyalty");
 		} else {
-			refObject.setTextureOverrideURL(front.image_uris.normal.concat("&front_face=true"));
-			const use_loyalty_defense_front = front["type_line"].includes("Planeswalker") ? "pw" : front["type_line"].includes("Battle") ? "bt" : false;
-			if (use_loyalty_defense_front) {
-				const LoyaltyText = new Button();
-				LoyaltyText.setFontSize(32);
-				LoyaltyText.setText(use_loyalty_defense_front === "pw" ? front["loyalty"] : front["defense"]);
-				LoyaltyText.onClicked = () => null; // Actually, this should just be text.
-				globalState.loyalty = parseInt(front["defense"]);
-				// Use the global state to track loyalty
-
-				const LoyaltyContainer = new UIElement();
-				LoyaltyContainer.width = 100;
-				LoyaltyContainer.height = 100;
-				LoyaltyContainer.useWidgetSize = false;
-				LoyaltyContainer.zoomVisibility = 0;
-				LoyaltyContainer.position = new Vector(-3.5, -2.13, -0.1);
-				LoyaltyContainer.rotation = new Rotator(180, 180, 0);
-				LoyaltyContainer.scale = 0.08;
-				LoyaltyContainer.anchorX = 0;
-				LoyaltyContainer.anchorY = 0;
-				LoyaltyContainer.useTransparency = true;
-				LoyaltyContainer.widget = LoyaltyText;
-				refObject.addUI(LoyaltyContainer);
-				refObject.addCustomAction("Add 1 " + (use_loyalty_defense_front === "pw" ? "Loyalty" : "Defense"), undefined, "add_one_loyalty");
-				refObject.addCustomAction("Lose 1 " + (use_loyalty_defense_front === "pw" ? "Loyalty" : "Defense"), undefined, "lose_one_loyalty");
-				refObject.addCustomAction("Add 5 " + (use_loyalty_defense_front === "pw" ? "Loyalty" : "Defense"), undefined, "add_five_loyalty");
-				refObject.addCustomAction("Lose 5 " + (use_loyalty_defense_front === "pw" ? "Loyalty" : "Defense"), undefined, "lose_five_loyalty");
-			} else {
-				const loyaltyElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(-3.5, -2.13, -0.1), 2));
-				if (!!loyaltyElement) {
-					refObject.removeUIElement(loyaltyElement);
-					refObject.removeCustomAction("add_one_loyalty");
-					refObject.removeCustomAction("lose_one_loyalty");
-					refObject.removeCustomAction("add_five_loyalty");
-					refObject.removeCustomAction("lose_five_loyalty");
-				}
-			}
+			const loyaltyElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			const defenseElement = refObject.getUIs().find((ui) => ui.position.equals(new Vector(4.5, -2.4, -0.1), 1));
+			if (!!loyaltyElement) refObject.removeUIElement(loyaltyElement);
+			if (!!defenseElement) refObject.removeUIElement(defenseElement);
+			refObject.removeCustomAction("add_one_loyalty");
+			refObject.removeCustomAction("lose_one_loyalty");
+			refObject.removeCustomAction("add_five_loyalty");
+			refObject.removeCustomAction("lose_five_loyalty");
 		}
-		const LeftButton = new Button();
-		LeftButton.setFontSize(24);
-		LeftButton.setText("Transform");
+		const LeftButton = new ImageButton();
+		LeftButton.setImage("back-forth.png", refPackageId); // Icon created by Lorc, sourced from game-icons.net
+		LeftButton.setImageSize(64, 0);
 		LeftButton.onClicked = transformCard;
 		LeftBorder.addChild(LeftButton);
 	}
@@ -306,37 +265,29 @@ function onCustomAction(self, player, action_id) {
 	switch (action_id) {
 		case "add_one_loyalty":
 			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
-			if (UIToUpdate === undefined) {
-				console.log("Did not find.");
-				break;
-			}
+			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
+			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) + 1;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "lose_one_loyalty":
 			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
-			if (UIToUpdate === undefined) {
-				console.log("Did not find.");
-				break;
-			}
+			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
+			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) - 1;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "add_five_loyalty":
 			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
-			if (UIToUpdate === undefined) {
-				console.log("Did not find.");
-				break;
-			}
+			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
+			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) + 5;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "lose_five_loyalty":
 			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
-			if (UIToUpdate === undefined) {
-				console.log("Did not find.");
-				break;
-			}
+			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
+			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) - 5;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
