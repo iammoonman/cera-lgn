@@ -54,7 +54,7 @@ def ig_em(draft: Draft, timekeepstamp: datetime.datetime):
                 + f"G2 Winner: {draft.get_player_by_id(match.gwinners[1]) if len(match.gwinners) > 1 and match.gwinners[1] is not None else 'NONE'}{bslash}"
                 + f"G3 Winner: {draft.get_player_by_id(match.gwinners[2]) if len(match.gwinners) > 2 and match.gwinners[2] is not None else 'NONE'}{bslash}"
                 + (f"{match.players[0]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else "")
-                + (f"{match.players[1]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else ""),
+                + (f"{match.players[1]} has dropped.{bslash}" if match.drops[match.players[1].player_id] else ""),
             )
             for match in w.matches
         ]
@@ -119,7 +119,7 @@ class Glintwing(commands.Cog):
                             counter += 1
                 new_view = StartingView(self)
                 await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id][-1])], view=new_view)
-                await reaction.clear()
+                # await reaction.clear()
         return
 
     @commands.slash_command(guilds=[guild])
