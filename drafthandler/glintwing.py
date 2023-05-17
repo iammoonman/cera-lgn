@@ -225,7 +225,10 @@ class StartingView(discord.ui.View):
                 return await ctx.response.send_message(
                     content="Interaction received. Players are not seated.", ephemeral=True
                 )
-            if len(self.bot.drafts[ctx.message.id][-1].players) < 4:
+            if (
+                len(self.bot.drafts[ctx.message.id][-1].players) < 4
+                or len(self.bot.drafts[ctx.message.id][-1].players) > 10
+            ):
                 return await ctx.response.send_message(
                     content="Interaction received. Not enough players.", ephemeral=True
                 )
