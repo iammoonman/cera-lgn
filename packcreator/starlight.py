@@ -94,7 +94,8 @@ set_choices_v3 = [
     ["Dominaria Remastered", "dmr"],
     ["Splinters of Novanda", "c_son"],
     ["Conspiracy", "cns"],
-    ["Battlebond", "bbd"]
+    ["Battlebond", "bbd"],
+    ["Commander Legends", "cmr"]
 ]
 
 
