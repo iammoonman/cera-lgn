@@ -19,6 +19,13 @@ globalEvents.onChatMessage = (sender, message) => {
 			makeMoxfieldDeck(mox_id, sender);
 		}
 	}
+	if (message.match(/^Frostwind\shttps:\/\/cubecobra\.com\/cube\/(list|overview)\/.+/)) {
+		const [cc_id] = message.match(/(?<=^Frostwind\shttps:\/\/cubecobra\.com\/cube\/overview\/).+/) ?? message.match(/(?<=^Frostwind\shttps:\/\/cubecobra\.com\/cube\/list\/).+/) ?? [null];
+		console.log(cc_id);
+		if (cc_id !== null) {
+			makeCubeCobraCube(cc_id, sender);
+		}
+	}
 };
 
 function makeMoxfieldDeck(deck_id, player) {
@@ -85,5 +92,63 @@ function makeMoxfieldDeck(deck_id, player) {
 			await create_stack(main_deck, [0, 0, 1]);
 			await create_stack(side_deck, [0, 8, 1]);
 			await create_stack(comm_deck, [0, 16, 1]);
+		});
+}
+
+function makeCubeCobraCube(cube_id, player) {
+	fetch(`https://cubecobra.com/cube/api/cubeJSON/${cube_id}`)
+		.then((r) => r.json())
+		.then(async (v) => {
+			const position = player.getCursorPosition();
+			const main_board = [];
+			const maybe_board = [];
+
+			const {
+				cards: { mainboard, maybeboard },
+			} = v;
+
+			Object.entries(mainboard).forEach(([k, v]) => main_board.push({ scryfall_id: v.details.scryfall_id }));
+			Object.entries(maybeboard).forEach(([k, v]) => maybe_board.push({ scryfall_id: v.details.scryfall_id }));
+
+			async function create_stack(deck, transform) {
+				let main_stack = undefined;
+				let main_ls = [];
+				for (let index = 0; index < deck.length; index++) {
+					const element = deck[index];
+					if (index % 75 === 0 || index === deck.length - 1) {
+						if (main_stack === undefined) {
+							const c = await fetch(`https://api.scryfall.com/cards/${element.scryfall_id}`);
+							const j = await c.json();
+							const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add(transform));
+							if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host"].includes(j.layout)) {
+								q.setTextureOverrideURL(j.image_uris.normal.concat(`&scryfall_id=${element.scryfall_id}&front_face=true`));
+							} else {
+								q.setTextureOverrideURL(j.card_faces[0].image_uris.normal.concat(`&scryfall_id=${element.scryfall_id}&front_face=true`));
+							}
+							main_stack = q;
+						} else {
+							const collection = main_ls.map((c) => ({ id: c }));
+							collection.push({ id: element.scryfall_id });
+							const response = await fetch(`https://api.scryfall.com/cards/collection`, { method: "POST", body: { identifiers: collection } });
+							const j = await response.json();
+							j.data.forEach((c) => {
+								const q = world.createObjectFromTemplate("31E5DB224CB620FF0B35E79BB7BB8D02", position.add(transform));
+								if (["normal", "adventure", "flip", "split", "meld", "leveler", "class", "saga", "planar", "vanguard", "token", "augment", "host"].includes(c.layout)) {
+									q.setTextureOverrideURL(c.image_uris.normal.concat(`&scryfall_id=${c.id}&front_face=true`));
+								} else {
+									q.setTextureOverrideURL(c.card_faces[0].image_uris.normal.concat(`&scryfall_id=${c.id}&front_face=true`));
+								}
+								main_stack.addCards(q);
+							});
+							main_ls = [];
+						}
+					} else {
+						main_ls.push(element.scryfall_id);
+					}
+				}
+			}
+
+			await create_stack(main_board, [0, 0, 1]);
+			await create_stack(maybe_board, [0, 8, 1]);
 		});
 }

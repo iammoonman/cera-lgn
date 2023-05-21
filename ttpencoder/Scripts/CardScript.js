@@ -2,7 +2,7 @@ const { refObject, Vector, Rotator, Border, RichText, Button, UIElement, Vertica
 
 const globalState = {
 	loyalty: undefined,
-	stat_counters: undefined,
+	stats: undefined,
 };
 
 const debounce = (func, wait) => {
@@ -234,6 +234,10 @@ function makeDetailedDescription(layout, easy_face, [front, back] = [], front_fa
 		EmblemButton.onClicked = createTokens;
 		LeftBorder.addChild(EmblemButton);
 	}
+	refObject.addCustomAction("Add 1 Stat Counter", undefined, "add_one_stat");
+	refObject.addCustomAction("Lose 1 Stat Counter", undefined, "lose_one_stat");
+	refObject.addCustomAction("Add 5 Stat Counters", undefined, "add_five_stat");
+	refObject.addCustomAction("Lose 5 Stat Counters", undefined, "lose_five_stat");
 
 	RightSide.widget = RightBorder;
 	LeftSide.widget = LeftBorder;
@@ -260,36 +264,85 @@ function generateCardDetails() {
 	});
 }
 
+function createStatCounterUI() {
+	const StatCounterText = new Button();
+	StatCounterText.setFontSize(24);
+	StatCounterText.setText("+0/+0");
+	StatCounterText.onClicked = () => null;
+	const StatCounterContainer = new UIElement();
+	StatCounterContainer.width = 140;
+	StatCounterContainer.height = 75;
+	StatCounterContainer.useWidgetSize = false;
+	StatCounterContainer.zoomVisibility = UIZoomVisibility.Both;
+	StatCounterContainer.position = new Vector(-3, -1.65, -0.1);
+	StatCounterContainer.rotation = new Rotator(180, 180, 0);
+	StatCounterContainer.scale = 0.08;
+	StatCounterContainer.anchorX = 0;
+	StatCounterContainer.anchorY = 0;
+	StatCounterContainer.useTransparency = true;
+	StatCounterContainer.widget = StatCounterText;
+	refObject.addUI(StatCounterContainer);
+	return StatCounterContainer;
+}
+
 function onCustomAction(self, player, action_id) {
 	let UIToUpdate = undefined;
 	switch (action_id) {
 		case "add_one_loyalty":
-			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 0.2));
 			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
 			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) + 1;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "lose_one_loyalty":
-			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 0.2));
 			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
 			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) - 1;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "add_five_loyalty":
-			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 0.2));
 			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
 			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) + 5;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
 			break;
 		case "lose_five_loyalty":
-			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 1));
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3.5, -2.13, -0.1), 0.2));
 			if (UIToUpdate === undefined) UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(4.5, -2.4, -0.1), 1));
 			if (UIToUpdate === undefined) break;
 			globalState.loyalty = (globalState.loyalty ?? 0) - 5;
 			UIToUpdate.widget.setText(`${globalState.loyalty}`);
+			break;
+		case "add_one_stat":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3, -1.65, -0.1), 0.2));
+			if (UIToUpdate === undefined) UIToUpdate = createStatCounterUI();
+			globalState.stats = (globalState.stats ?? 0) + 1;
+			if (globalState.stats === 0) refObject.removeUIElement(UIToUpdate);
+			else UIToUpdate.widget.setText(globalState.stats >= 0 ? `+${globalState.stats}/+${globalState.stats}` : `${globalState.stats}/${globalState.stats}`);
+			break;
+		case "lose_one_stat":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3, -1.65, -0.1), 0.2));
+			if (UIToUpdate === undefined) UIToUpdate = createStatCounterUI();
+			globalState.stats = (globalState.stats ?? 0) - 1;
+			if (globalState.stats === 0) refObject.removeUIElement(UIToUpdate);
+			else UIToUpdate.widget.setText(globalState.stats >= 0 ? `+${globalState.stats}/+${globalState.stats}` : `${globalState.stats}/${globalState.stats}`);
+			break;
+		case "add_five_stat":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3, -1.65, -0.1), 0.2));
+			if (UIToUpdate === undefined) UIToUpdate = createStatCounterUI();
+			globalState.stats = (globalState.stats ?? 0) + 5;
+			if (globalState.stats === 0) refObject.removeUIElement(UIToUpdate);
+			else UIToUpdate.widget.setText(globalState.stats >= 0 ? `+${globalState.stats}/+${globalState.stats}` : `${globalState.stats}/${globalState.stats}`);
+			break;
+		case "lose_five_stat":
+			UIToUpdate = refObject.getUIs().find((v) => v.position.equals(new Vector(-3, -1.65, -0.1), 0.2));
+			if (UIToUpdate === undefined) UIToUpdate = createStatCounterUI();
+			globalState.stats = (globalState.stats ?? 0) - 5;
+			if (globalState.stats === 0) refObject.removeUIElement(UIToUpdate);
+			else UIToUpdate.widget.setText(globalState.stats >= 0 ? `+${globalState.stats}/+${globalState.stats}` : `${globalState.stats}/${globalState.stats}`);
 			break;
 
 		default:
