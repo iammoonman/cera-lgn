@@ -1,40 +1,39 @@
 <script lang="ts">
+	import Tooltip, { Wrapper } from '@smui/tooltip';
+	import type { PD } from 'src/types/discord';
 	import type { CardDisplayType } from 'src/types/displaycard';
 	export let C: CardDisplayType;
-	$: horizontal = C.description == '';
+	export let pn: Record<string, PD>;
 	let scry_link = `https://scryfall.com/card/${C.set === '' ? 'lea' : C.set}/${
 		C.cn === '' ? '1' : C.cn
 	}`;
 	let image_link = C.uri === '' ? 'https://picsum.photos/336/468' : C.uri;
-	import { Motion } from 'svelte-motion';
 	import Fancycardhover from './fancycardhover.svelte';
 </script>
 
-<div
-	class={horizontal ? 'card-h tiny-shadow grid grid-cols-2' : 'card-v tiny-shadow grid grid-cols-1'}
->
-	<section class={`textbox-h ${horizontal ? 'flex-col' : 'flex-row'}`}>
-		<div class="text-lg truncate force-height-title">
-			{C.title === '' ? 'Animate Wall' : C.title}
-		</div>
-		<hr />
-		<p class={`text-hack text-sm force-height-desc ${horizontal ? '' : 'invisible'}`}>
-			{C.description === ''
-				? `I'll be honest I don't play EDH with strangers very often, I have a wide range of friends that I play with and most of the myriad of problems I see brought up on this subreddit never really seem to be a problem for me so maybe it's a perspective issue.
-
-			Anyway politics has always been a large part of the fun of multiplayer at least with me and my friends, would others really get salty if I say "Listen, you can kill me, but since I have a gun you'll die after, so what if you don't kill me?" which in my eyes is just like any other deal, 2 players agreeing on a line of actions because they both believe it will let them win the whole thing in the long run.
-			
-			Are yall mostly concerned about brandishing firearms for no reason?`
-				: C.description}
-		</p>
-		<footer class="text-xs flex space-x-4">
-			<span>{C.set === '' ? 'LEA' : C.set} / {C.cn === '' ? '1' : C.cn}</span>
-			<a href={scry_link}>Scryfall</a>
-		</footer>
-	</section>
-	<div class={`cardbox ${horizontal ? 'ml-1 mr-2' : 'ml-9 mr-9 mb-3'}`}>
+<div class={'card-v tiny-shadow grid grid-cols-1 relative'}>
+	<div class="black-border">
+		<div />
+		<div />
+	</div>
+	<Wrapper>
+		<section class="textbox-h flex-row relative">
+			<div class="text-lg truncate force-height-title relative">
+				{C.title === '' ? 'Animate Wall' : C.title}
+			</div>
+			<Tooltip xPos="center" yPos="detected" class="bg-slate-400">
+				{C.description ?? ""}
+			</Tooltip>
+			<div class="text-xs flex space-x-4">
+				<span>{pn[C.p_id].username}</span>
+				<span>{C.set === '' ? 'lea' : C.set} / {C.cn === '' ? '1' : C.cn}</span>
+				<a href={scry_link}>Scryfall</a>
+			</div>
+		</section>
+	</Wrapper>
+	<div class="cardbox ml-9 mr-9 mb-3">
 		<Fancycardhover height={234} width={168}>
-			<img class="card tiny-shadow" alt="card" src={image_link} />
+			<img class="card tiny-shadow" alt="card_image" src={image_link} />
 		</Fancycardhover>
 	</div>
 </div>
@@ -43,27 +42,21 @@
 	.tiny-shadow {
 		box-shadow: 0 1px 3px 0 black, 0 1px 2px -1px black;
 	}
-	.card-h {
-		background-color: var(--gamma);
-		aspect-ratio: 468 / 336;
-		width: 468px;
-		height: 336px;
-		border-radius: 3.5% / 4.75%;
-	}
 	.card-v {
-		background-color: var(--gamma);
 		aspect-ratio: 336 / 468;
 		height: 468px;
 		width: 336px;
 		border-radius: 4.75% / 3.5%;
+		background-color: #18578c;
+		color: white;
 	}
 	.card {
-		background-color: var(--yotta);
 		aspect-ratio: 336 / 468;
 		height: auto;
 		border-radius: 4.75% / 3.5%;
 	}
 	.textbox-h {
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		justify-items: space-between;
@@ -74,37 +67,54 @@
 	.textbox-h > * {
 		margin-top: 0;
 		margin-bottom: 0;
-		color: var(--alpha);
-	}
-	.textbox-h > footer {
-		margin-top: auto;
-		color: var(--beta);
 	}
 	.cardbox {
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		border-radius: 0 15px 15px 0;
+		transition-duration: 400ms;
 	}
-	.text-hack {
-		text-overflow: ellipsis;
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-line-clamp: 12;
-		-webkit-box-orient: vertical;
-	}
-	hr {
-		border-color: var(--yotta);
-		margin-left: 5px;
-		margin-right: 16px;
+	.cardbox:hover {
+		transition-property: scale;
+		scale: 1.05;
 	}
 	.force-height-title {
-		height: 1.75rem;
+		box-shadow: 0 1px 3px -3px white;
 	}
-	.force-height-desc {
-		min-height: 1.25rem;
+	.black-border {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		border-radius: 4.75% / 3.5%;
+		box-shadow: inset 0 0 0 8px black;
+		z-index: 0;
 	}
-	.invisible {
-		display: none;
+	.black-border:after {
+		position: absolute;
+		height: 15px;
+		width: 320px;
+		border-radius: 0 0 50% 50%;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		content: '';
+		background-color: black;
+	}
+	.black-border > div:first-child {
+		background: radial-gradient(ellipse at 100% 0px, transparent 43%, black 44%);
+		position: absolute;
+		height: 45px;
+		width: 20px;
+		bottom: 12px;
+	}
+	.black-border > div:last-child {
+		background: radial-gradient(ellipse at 0px 0px, transparent 43%, black 44%);
+		position: absolute;
+		height: 45px;
+		width: 20px;
+		bottom: 12px;
+		right: 0px;
 	}
 </style>

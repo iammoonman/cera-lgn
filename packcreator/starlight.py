@@ -70,7 +70,31 @@ set_choices_v3 = [
     ["Urza's Saga", "usg"],
     ["Dominaria", "dom"],
     ["Exodus", "exo"],
-    ["Urza's Legacy", "ulg"]
+    ["Urza's Legacy", "ulg"],
+    ["Nemesis", "nem"],
+    ["Prophecy", "pcy"],
+    ["Mercadian Masques", "mmq"],
+    ["Zendikar", "zen"],
+    ["Scars of Mirrodin", "som"],
+    ["Mirrodin Besieged", "mbs"],
+    ["Blood Like Rivers", "c_blr"],
+    ["Apocalypse", "apc"],
+    ["Invasion", "inv"],
+    ["Odyssey", "ody"],
+    ["Planeshift", "pls"],
+    ["Torment", "tor"],
+    ["Judgment", "jud"],
+    ["Worldwake", "wwk"],
+    ["Rise of the Eldrazi", "roe"],
+    ["Innistrad", "isd"],
+    ["FUN 2022", "c_fun2"],
+    ["Magic 2013", "m13"],
+    ["Masters 25", "a25"],
+    ["Avacyn Restored", "avr"],
+    ["Dominaria Remastered", "dmr"],
+    ["Splinters of Novanda", "c_son"],
+    ["Conspiracy", "cns"],
+    ["Battlebond", "bbd"]
 ]
 
 
@@ -98,7 +122,6 @@ class Starlight(commands.Cog):
         return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(guild_ids=[guild], description="Create packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -136,7 +159,6 @@ class Starlight(commands.Cog):
         return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(guild_ids=[guild], description="Create packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -171,7 +193,6 @@ class Starlight(commands.Cog):
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
     @commands.slash_command(guild_ids=[guild], description="Load a pack image for a Pack 1, Pick 1.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(
         name="set",
         description="Choose the set.",
@@ -193,7 +214,6 @@ class Starlight(commands.Cog):
         return
 
     @commands.slash_command(guild_ids=[guild], description="Load a V3 set file and make packs.")
-    @discord.default_permissions(manage_roles=True)
     @discord.option(name="v3", description="A V3 JSON file.", type=discord.Attachment)
     @discord.option(
         name="num",

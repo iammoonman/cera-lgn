@@ -1,3 +1,4 @@
+import json
 import time
 import discord
 from discord.ext import commands
@@ -24,6 +25,7 @@ class Smokespew(commands.Cog):
     async def sc_search(self, ctx: discord.ApplicationContext, query: str):
         await ctx.defer()
         full_json = []
+        full_set_json = []
         time.sleep(0.25)
         response = requests.get(
             f"https://api.scryfall.com/cards/search?q={quote(query)}",
@@ -40,6 +42,48 @@ class Smokespew(commands.Cog):
         paginator = Paginator(pages=[Page(content=f'{c["scryfall_uri"][:-3]}discord') for c in full_json])
         await paginator.respond(ctx.interaction)
         return
+
+    @commands.slash_command(guild_ids=[guild], description="Add a card to CERA's website.")
+    @discord.option(name="title", description="The title of this entry. ex. 'My Favorite Card'", type=str)
+    @discord.option(
+        name="set",
+        description="The set code of the printing for the card. ex. '2x2' for Double Masters 2022.",
+        type=str,
+    )
+    @discord.option(name="cn", description="The collector's number for the printing of the card.", type=str)
+    @discord.option(name="description", description="A description to show in the tooltip.", type=str)
+    async def sw_card(self, ctx: discord.ApplicationContext, title: str, set: str, cn: str, description: str):
+        newCard = {
+            "id": f'{ctx.interaction.id}',
+            "title": title,
+            "set": set,
+            "cn": cn,
+            "uri": "",
+            "description": description,
+            "p_id": f'{ctx.author.id}',
+        }
+        await ctx.defer()
+        time.sleep(0.25)
+        response = requests.get(
+            f"https://api.scryfall.com/cards/search?q={quote(f'set:{set} cn:{cn}')}",
+            headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
+        )
+        resjson = response.json()
+        if resjson["object"] == "error":
+            return await ctx.respond("That card was not found.")
+        cc = resjson["data"][0]
+        try:
+            if cc["layout"] == "transform" or cc["layout"] == "reversible-card":
+                newCard["uri"] = cc["card_faces"][0]["image_uris"]["normal"]
+            else:
+                newCard["uri"] = cc["image_uris"]["normal"]
+        except:
+            return await ctx.respond("Please don't put weird cards up, the image won't work.")
+        with open(f"pagessite/src/carddata/{newCard['id']}.json", "w") as f:
+            json.dump(newCard, f, ensure_ascii=False, indent=4)
+        return await ctx.respond(
+            f"A display for {cc['name']} will be added to the site under your name the next time Moon builds the site."
+        )
 
 
 def setup(bot):

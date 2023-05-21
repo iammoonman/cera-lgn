@@ -1,6 +1,6 @@
 export type LimitedEvent = {
     id: number;
-    tag: 'ptm' | 'omn' | 'dps' | '';
+    tag: string; // 'ptm' | 'omn' | 'dps' | '';
     date: Date;
     title: string;
     description?: string;
@@ -155,7 +155,7 @@ export function json_to_new(a: {
 }): Draft {
     return {
         ...a,
-        date: new Date(),
+        date: new Date(a.date),
         rounds: new Map(a.rounds.map((r, i) => {
             return [i, {
                 ...r, matches: r.matches.map(m => {

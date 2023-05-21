@@ -1,21 +1,43 @@
 <script lang="ts">
 	import type { Match } from 'src/types/events';
-	import { PlayerList } from '../../types/playerstore';
 	export let m: Match;
+	export let pn: Record<
+		string,
+		{
+			id: string;
+			bot: boolean;
+			system: boolean;
+			flags: number;
+			username: string;
+			discriminator: string;
+			avatar: string;
+			banner: null;
+			accentColor: null;
+			createdTimestamp: number;
+			defaultAvatarURL: string;
+			hexAccentColor: null;
+			tag: string;
+			avatarURL: string;
+			displayAvatarURL: string;
+			bannerURL: null;
+		}
+	>;
 </script>
 
 <div class="pill">
 	<div class="innerpill">
-		{#if m.p_ids.length == 1}
+		{#if m.p_ids.includes('-1')}
 			<span class="overflow-x-hidden text-ellipsis whitespace-nowrap text-center">BYE</span>
 		{/if}
 		{#each m.p_ids as p}
-			<div class="topguy">
-				<span class="overflow-x-hidden text-ellipsis whitespace-nowrap"
-					>{PlayerList.get(p) ?? 'Unknown'}</span
-				>
-				<span>{[...m.games].filter(([k, x]) => x === p).length}</span>
-			</div>
+			{#if p !== '-1'}
+				<div class="topguy">
+					<span class="overflow-x-hidden text-ellipsis whitespace-nowrap">
+						{pn[p]?.username ?? 'BYE'}
+					</span>
+					<span>{[...m.games].filter(([k, x]) => x === p).length}</span>
+				</div>
+			{/if}
 		{/each}
 	</div>
 </div>
@@ -25,12 +47,15 @@
 		border: none;
 		border-radius: 15px;
 		box-shadow: inset 0 0 0 2px black, inset 0 -2px 0 3px black;
-		background-color: white;
+		/* background-color: white */
+		background-image: linear-gradient(150deg, #ffed9e99 0%, #c69800 100%);
+		background-color: #7e1515;
 		padding: 5px 6px 7px 5px;
 		margin-bottom: 1px;
 		width: 203px;
 		transition: transform 0.1s ease-in-out;
 		cursor: default;
+		color: black;
 	}
 	.pill:hover {
 		position: relative;

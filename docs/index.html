@@ -5,71 +5,1017 @@
 		<link rel="icon" href="/cera/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="stylesheet" href="https://unpkg.com/svelte-material-ui/bare.css" />
+		<style>
+			body {
+				background-color: #424242;
+			}
+		</style>
 		<meta http-equiv="content-security-policy" content="">
-	<link rel="stylesheet" href="/cera/_app/immutable/assets/__layout-837203fe.css">
-	<link rel="stylesheet" href="/cera/_app/immutable/assets/index-6614c58d.css">
-	<link rel="modulepreload" href="/cera/_app/immutable/start-5861f0dd.js">
-	<link rel="modulepreload" href="/cera/_app/immutable/chunks/index-161b7df8.js">
-	<link rel="modulepreload" href="/cera/_app/immutable/chunks/index-e49f58e5.js">
-	<link rel="modulepreload" href="/cera/_app/immutable/pages/__layout.svelte-39e1e824.js">
-	<link rel="modulepreload" href="/cera/_app/immutable/pages/index.svelte-4e38086c.js">
+		<link href="/cera/_app/immutable/assets/_layout-545ee574.css" rel="stylesheet">
+		<link href="/cera/_app/immutable/assets/_page-aa9b33a4.css" rel="stylesheet">
+		<link rel="modulepreload" href="/cera/_app/immutable/start-0fafb620.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/chunks/index-db041984.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/chunks/singletons-cdc3555d.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/chunks/index-b21b6e3f.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/components/pages/_layout.svelte-9073594a.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/components/pages/_page.svelte-0c811d6a.js">
+		<link rel="modulepreload" href="/cera/_app/immutable/chunks/index-611c23b5.js">
 	</head>
 	<body>
 		<div>
 
 
-<div class="m-10 rounded-md bg-blue-200 p-5 grid gap-1 w-1/2"><span>slot: , sheet: </span>
-<div class="grid p-2 gap-2 svelte-mdalzz" id="draggercomponent"><section class="rounded-lg cardarea svelte-mdalzz"></section>
-	<section class=""><div id="textarea" class="border-black border svelte-mdalzz">[]</div></section>
-	<section class="rounded-lg cardarea bg-red-100 svelte-mdalzz" style="height: 100px; width: 100px; overflow: hidden;"></section>
-	<section class="grid h-min self-center gap-2 grid-cols-2"><input type="text" value="">
-		<button class="px-4 py-2 rounded-md drop-shadow-md font-semibold text-sm text-black tracking-wide bg-green-200">Search
-</button>
-		<span>0 cards returned in search.</span>
-		<button class="px-4 py-2 rounded-md drop-shadow-md font-semibold text-sm text-black tracking-wide bg-green-200">Add
-</button></section>
+<div class="topnav w-full h-min p-2 z-10 flex flex-row justify-between sticky top-0 text-xl svelte-khtypk"><span>The Rat Zone</span>
+	<span> </span></div>
+<div class="grid grid-catch gap-4"><div class="h-full mt-2 flex booty place-items-center pb-10 pr-10 flex-wrap gap-3 justify-around"><div class="h-min rounded-lg filterblock svelte-khtypk"><div class="flex flex-col sidefilters p-3 gap-2"><div class="text-xl text-center">Filter Controls</div>
+				<div class="flex flex-row w-full justify-between"><label for="ps">Player Search</label>
+					<input type="text" name="ps" class="svelte-khtypk" value=""></div>
+				<div class="flex flex-row w-full justify-between"><label for="tag">Tag</label>
+					<select name="tag" style="width: 201px;" class="svelte-khtypk"><option value="" class="svelte-khtypk"></option><option value="ptm" class="svelte-khtypk">Prime Time with Moon</option><option value="dps" class="svelte-khtypk">Draft Progression Series</option><option value="anti" class="svelte-khtypk">No Tag</option></select></div>
+				<div class="flex flex-row w-full justify-between"><label for="dt1">Earliest Date</label>
+					<input type="date" name="dt1" style="width: 201px;" class="svelte-khtypk" value="2018-01-01"></div>
+				<div class="flex flex-row w-full justify-between"><label for="dt2">Latest Date</label>
+					<input type="date" name="dt2" style="width: 201px;" class="svelte-khtypk" value=""></div>
+				<div class="flex flex-row w-full justify-between"><label for="dts">Draft Title</label>
+					<input type="text" name="dts" class="svelte-khtypk" value=""></div>
+				<div class="flex flex-row w-full justify-between"><label for="dds">Draft Description</label>
+					<input type="text" name="dds" class="svelte-khtypk" value=""></div>
+				<div class="flex flex-row w-full justify-between"><label for="dts">Card Title</label>
+					<input type="text" name="dts" class="svelte-khtypk" value=""></div></div></div>
+		
+		
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">FUN 2022</span>
+			<span class="text-date svelte-1d754jy">11/11/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-0"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">FUN 2022
+			<hr>
+			testing testing 123</div>
 </div>
-	<section id="headers" class="rounded-xl grid grid-cols-1 p-1 gap-1">HEADERS
-	<button class="px-4 py-2 rounded-md drop-shadow-md font-semibold text-sm text-black tracking-wide bg-green-200">Print object
-</button>
-	<textarea disabled style="resize: none; overflow-y: scroll;"></textarea>
-	<div class="rounded-xl flex flex-row justify-between"><label for="full_name" class="p-2">Set Full Name</label>
-		<input id="full_name" value="" class="rounded-sm m-1"></div>
-	<div class="rounded-xl flex flex-row justify-between"><label for="custom_set" class="p-2">Custom Set Code</label>
-		<input id="custom_set" value="" class="rounded-sm m-1"></div>
-	<div class="rounded-xl flex flex-row justify-between"><label for="default_set" class="p-2">Default Set Code</label>
-		<input id="default_set" value="" class="rounded-sm m-1"></div></section>
-<section id="distros" class="rounded-xl p-1 grid gap-1">DISTROS
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
 	
-	<button class="px-4 py-2 rounded-md drop-shadow-md font-semibold text-sm text-black tracking-wide bg-green-200">ADD NEW DISTRO
-</button></section>
-
-<section id="slots" class="rounded-xl p-1 grid gap-1">SLOTS
 	
-	<button class="px-4 py-2 rounded-md drop-shadow-md font-semibold text-sm text-black tracking-wide bg-green-200">ADD NEW SLOT
-</button></section></div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/338058257555914752/d6df424511db5fe7b2fbea15f8e09845.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">The color red</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://better-default-discord.netlify.app/Icons/Solid-Black.png" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Komic420</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">The color red</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.39</td>
+                    <td class="text-right svelte-1d754jy">0.86</td>
+                    <td class="text-right svelte-1d754jy">0.39</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Komic420</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.55</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.38</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Kazoooo</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.35</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">flaviuscrispus</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">yetimafia1</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.64</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Pauper Masters in Prime Time</span>
+			<span class="text-date svelte-1d754jy">10/28/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-1"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Pauper Masters in Prime Time
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/432910635622334466/b87a41e54337827b754162140444d97e.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Seefel</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/862860781716635649/1ee691cf9f69cf8003bac5dd56189fa2.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Weaver</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Seefel</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.37</td>
+                    <td class="text-right svelte-1d754jy">0.86</td>
+                    <td class="text-right svelte-1d754jy">0.39</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.34</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.28</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Weaver</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.64</td>
+                    <td class="text-right svelte-1d754jy">0.40</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Wander</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.40</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Orreo</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.60</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">yetimafia1</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.48</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.61</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">SchwertHamster</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">The color red</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.74</td>
+                    <td class="text-right svelte-1d754jy">0.20</td>
+                    <td class="text-right svelte-1d754jy">0.83</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Urza's Blocky Ass</span>
+			<span class="text-date svelte-1d754jy">9/30/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-2"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Urza's Blocky Ass
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/224588946250661888/865c3029d7e0d12da3f89384289b32ed.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">MiX</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/247076572295593984/4cf345bea87d14d11056d023a44263f2.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">SchwertHamster</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.48</td>
+                    <td class="text-right svelte-1d754jy">0.75</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">MiX</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">SchwertHamster</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.37</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">azdrez</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.47</td>
+                    <td class="text-right svelte-1d754jy">0.71</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Conrad</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.24</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.22</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Cosmic👌🏿</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.29</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">flaviuscrispus</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">adamf9898</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.60</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Pre-Pre-Pre-Release Bro</span>
+			<span class="text-date svelte-1d754jy">11/4/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-3"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Pre-Pre-Pre-Release Bro
+			<hr>
+			why</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/270716704487768064/c7d542a44ee99cf555b83476459be759.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">brianna</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/224664793154322432/a4702504be9836b72333d0cd7cd5a2d6.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Zarfax</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/211543853398753281/b5bb80370e0c7fd58f03d568daa5ebb7.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">azdrez</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">brianna</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.80</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Zarfax</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.46</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">azdrez</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.60</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BetaCrasher</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.47</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">yetimafia1</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.58</td>
+                    <td class="text-right svelte-1d754jy">0.38</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.28</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">MiX</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Wander</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.60</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">flaviuscrispus</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">The color red</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Ravnica Cube Playtest 1</span>
+			<span class="text-date svelte-1d754jy">11/25/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-4"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Ravnica Cube Playtest 1
+			<hr>
+			first test of the new draft script as well yike</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/432910635622334466/b87a41e54337827b754162140444d97e.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Seefel</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/250385022106730496/8f4e1ca6a1a2bbd6d6bffc6d1da08ad0.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">BetaCrasher</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Seefel</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.41</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.22</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">7</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.71</td>
+                    <td class="text-right svelte-1d754jy">0.54</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BetaCrasher</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.26</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">NeroCaesar1</td>
+                    <td class="text-right svelte-1d754jy">4</td>
+                    <td class="text-right svelte-1d754jy">0.46</td>
+                    <td class="text-right svelte-1d754jy">0.57</td>
+                    <td class="text-right svelte-1d754jy">0.59</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">bandre</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">King Of Eurobeat</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.48</td>
+                    <td class="text-right svelte-1d754jy">0.40</td>
+                    <td class="text-right svelte-1d754jy">0.39</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Loni</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.57</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">flaviuscrispus</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Penthoplayer</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                    <td class="text-right svelte-1d754jy">0.25</td>
+                    <td class="text-right svelte-1d754jy">0.72</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Pauper Masters</span>
+			<span class="text-date svelte-1d754jy">9/9/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-5"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Pauper Masters
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/411627939478765568/7fc504085283708c1d4313f2169d4b08.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Martelaar</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/326182836568719380/08068aca35d4f2a18b25c2124187b9e5.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">শয়তান</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Martelaar</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.46</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">শয়তান</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.47</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.70</td>
+                    <td class="text-right svelte-1d754jy">0.20</td>
+                    <td class="text-right svelte-1d754jy">0.75</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Alex_Tolstoi</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.40</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Komic420</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">SchwertHamster</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Wander</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">aWhiteCrow</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.58</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.58</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">FIFTH EDITION</span>
+			<span class="text-date svelte-1d754jy">11/18/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-6"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">FIFTH EDITION
+			<hr>
+			at long last, the one piece is real</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/298561362034950154/ab1ac444950fb28793143d0b09568ddf.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">flaviuscrispus</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/211543853398753281/b5bb80370e0c7fd58f03d568daa5ebb7.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">azdrez</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.20</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.25</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">flaviuscrispus</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.17</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.22</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">azdrez</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.30</td>
+                    <td class="text-right svelte-1d754jy">0.71</td>
+                    <td class="text-right svelte-1d754jy">0.39</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">zachdressing</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.69</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">The color red</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.86</td>
+                    <td class="text-right svelte-1d754jy">0.40</td>
+                    <td class="text-right svelte-1d754jy">0.83</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BetaCrasher</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Kazoooo</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.79</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.78</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Modern Horizons 2</span>
+			<span class="text-date svelte-1d754jy">9/16/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-7"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Modern Horizons 2
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/139112253784850433/be3f01e9f9db6911ea7e1d28c13cdef8.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Alex_Tolstoi</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/250385022106730496/8f4e1ca6a1a2bbd6d6bffc6d1da08ad0.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">BetaCrasher</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/862860781716635649/1ee691cf9f69cf8003bac5dd56189fa2.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Weaver</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Alex_Tolstoi</td>
+                    <td class="text-right svelte-1d754jy">9</td>
+                    <td class="text-right svelte-1d754jy">0.52</td>
+                    <td class="text-right svelte-1d754jy">0.86</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BetaCrasher</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Weaver</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.42</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Komic420</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.64</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">ricochet</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Dunwich ruler</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.49</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.38</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.61</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Cosmic👌🏿</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.53</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.50</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">SchwertHamster</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.62</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Kamigawa</span>
+			<span class="text-date svelte-1d754jy">9/23/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-8"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Kamigawa
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/862860781716635649/1ee691cf9f69cf8003bac5dd56189fa2.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Weaver</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/270716704487768064/c7d542a44ee99cf555b83476459be759.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">brianna</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Weaver</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.51</td>
+                    <td class="text-right svelte-1d754jy">0.71</td>
+                    <td class="text-right svelte-1d754jy">0.56</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">brianna</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                    <td class="text-right svelte-1d754jy">0.57</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BetaCrasher</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.65</td>
+                    <td class="text-right svelte-1d754jy">0.29</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">SchwertHamster</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                    <td class="text-right svelte-1d754jy">0.00</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">mp3guy3</td>
+                    <td class="text-right svelte-1d754jy">0</td>
+                    <td class="text-right svelte-1d754jy">0.57</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div>
+			<div class="fakecontainer svelte-1s58oo1"><div class="svelte-1s58oo1"><div class="outercard grid grid-cols-1 p-2 relative justify-between svelte-1d754jy"><div class="black-border svelte-1d754jy"><div></div><div></div></div>
+	<div class="titlecard relative svelte-1d754jy"><span class="text-title text-ellipsis overflow-x-hidden whitespace-nowrap svelte-1d754jy">Design Game Draft</span>
+			<span class="text-date svelte-1d754jy">10/21/2022</span></div>
+		<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-9"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Design Game Draft
+			<hr>
+			No description provided.</div>
+</div>
+	<div class="tagsymbolcontainer svelte-1d754jy"><div style="--size: 230px" class="svelte-i1tjtx">
+	<svg viewBox="0 0 86.142449 86.142449" version="1.1" id="svg14128" xmlns="http://www.w3.org/2000/svg"><defs id="defs14125"></defs><g id="layer1" transform="translate(-69.77504,-64.582646)"><path id="path3174-7-1-8" style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M 65.984375,0 44.568359,13.179688 23.158203,26.359375 c 7.807937,10.11275 15.599624,4.431157 24.277344,20.681641 8.677417,16.250645 25.498188,36.854519 14.314453,55.802734 5.976491,3.82291 9.678957,3.28009 16.146484,-3.248047 21.048945,33.649807 31.855156,60.968887 32.111326,84.312497 17.49812,25.4705 8.84599,38.55246 2.57617,38.25977 -5.14801,-0.24038 -6.92932,-6.7437 -7.02929,-12.82031 C 93.84265,239.64726 59.020384,263.30216 0,287.74414 c 88.196296,52.13072 164.85396,45.30102 219.86914,10.27148 56.05894,-33.33369 96.70753,-98.70094 89.90234,-200.925776 -48.41128,41.679336 -85.21794,62.108896 -117.54492,58.914066 5.38065,2.82648 10.38607,7.34843 8.28125,12.05273 -2.56346,5.72924 -18.14216,7.55976 -32.99804,-19.53711 -20.72478,-10.7458 -40.24667,-32.7043 -60.80469,-66.656249 8.74257,-2.833092 10.89635,-5.892934 10.17578,-12.951172 C 94.926045,70.359846 84.107939,46.060752 73.509766,30.992188 62.911441,15.923827 71.494813,11.52666 65.984375,0 Z m -12.625,27.462891 c 7.422879,2.251302 14.046209,6.490448 18.523437,12.601562 l -4.90039,3.017578 c 15.37886,15.790466 25.659345,36.452714 37.765628,55.371094 11.43574,19.330965 25.25336,37.822485 32.42187,58.666015 l 4.90235,-3.01758 c 3.43853,6.75035 4.24072,14.57562 2.90625,22.2168 -7.42285,-2.25124 -14.0464,-6.49439 -18.52344,-12.60547 l 4.90039,-3.01367 C 115.97661,144.90877 105.69425,124.24055 93.587891,105.32227 82.152325,85.991112 68.336447,67.505815 61.167969,46.662109 l -4.900391,3.013672 C 52.829077,42.925466 52.024937,35.104139 53.359375,27.462891 Z m 138.462895,154.576169 0.008,0.0156 c 2.01237,0.49493 4.34984,0.54954 7.05859,0.12695 0.51825,4.10615 3.44522,10.24832 9.98633,14.35156 14.58573,9.14729 23.27678,14.47815 33.82812,22.25782 3.21491,2.37188 6.81251,6.99968 9.36524,8.80078 4.82619,3.42255 11.06326,1.12184 19.33203,2.57031 0.0673,2.28136 0.37621,4.49475 0.91211,6.66016 -18.14128,4.60361 -30.80831,12.02422 -34.82617,23.83789 -2.73801,-0.39583 -5.41446,-0.93517 -8.05469,-1.59961 0.68515,-3.12571 2.00182,-6.25382 3.20117,-9.76953 1.71198,-5.02734 -0.13556,-9.7785 -7.11133,-13.99414 -7.98175,-4.81754 -15.70613,-10.61934 -24.36132,-15.69532 -2.35915,-1.38073 -3.80094,0.42115 -4.49414,3.42383 -2.95132,0.23962 -6.25813,-0.0884 -9.38282,-1.90625 -1.4242,-0.83297 -2.56831,-2.28631 -2.07422,-3.875 0.94009,-3.04857 1.26442,-6.53906 1.27735,-10.66211 0.004,-2.11941 -0.86159,-3.45745 -3.10742,-3.80664 -3.3645,-0.51621 -7.46255,-0.4883 -12.12891,0.25195 0.33222,-2.54063 0.57376,-5.22289 0.47852,-8.43164 l 0.002,-0.002 c 7.70706,-0.78954 19.00817,-7.93981 20.0918,-12.55469 z m -45.39844,32.82813 c 7.03215,5.59793 20.28588,11.52978 34.30664,16.03906 0.44149,-1.07327 0.54676,-2.19712 0.80078,-3.27148 0.42917,-1.83421 1.9174,-2.49394 3.50586,-2.26758 2.25131,0.32579 4.70102,1.05183 7.30273,2.30078 1.36366,0.65412 2.04283,1.79118 1.90821,3.05664 -0.52063,4.61752 0.56053,9.62299 7.87304,15.92187 5.88019,4.05359 11.26392,8.56179 16.30079,13.40821 -4.88225,7.81519 -7.29616,15.47854 -6.77735,22.9414 -2.92218,0.94787 -5.88012,1.31193 -8.88476,1.07227 -0.0386,-3.2442 -2.37602,-7.09191 -6.45704,-11.03906 -14.74987,-14.26235 -30.30795,-24.19557 -43.73828,-29.8711 -2.10277,-0.89208 -3.91344,-0.29435 -3.69336,2.0586 0.11566,1.25661 0.34977,3.76724 0.53516,5.00976 0.25058,1.69266 -0.40626,3.13219 -2.67969,3.5586 -1.69111,0.31823 -5.14903,0.64962 -6.87109,0.60351 -2.56895,-0.0782 -3.82059,-1.73563 -4.06641,-3.76758 -0.42984,-3.57082 -0.93999,-7.16733 -1.66797,-10.91601 -1.32593,-6.87976 -6.18295,-4.85196 -12.62304,-1.86133 -0.9774,-2.66673 -1.00251,-5.61159 -0.4336,-8.41797 z m 2.0625,43.9707 c 1.88685,-0.0851 2.99585,1.10076 3.31836,3.19727 1.00735,6.4487 1.3454,13.01547 2.87304,19.33593 1.51707,6.2877 5.06562,12.51899 12.20118,10.29493 l 3.02539,4.83984 c -7.42324,3.60503 -19.20215,15.78603 -19.20508,15.78906 L 144.31055,306.75 c 0,0 0.6892,-12.58446 -0.5625,-18.68359 -1.77884,-8.25052 -4.19142,-15.78246 -5.00391,-23.88868 -0.19918,-2.05205 0.91212,-4.44739 3.55469,-4.74023 1.87079,-0.20409 3.77568,-0.30656 5.79883,-0.56641 0.13269,-0.0171 0.26288,-0.0275 0.38867,-0.0332 z" transform="matrix(0.26458333,0,0,0.26458333,71.767632,64.582646)"></path></g></svg>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</div></div>
+	<div class="top-three svelte-1d754jy"><div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/767019012353687562/a6d5a274da08da41b53e6300240451fe.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">BL4Z3210</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/237059875073556481/b9b0610218d94a531d5bdd75eb38e385.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">I am Moonslice</span></div>
+		<div class="player-avatar svelte-1d754jy"><img src="https://cdn.discordapp.com/avatars/97905054249398272/051bd385ebcbd0188ff121969ec8178c.webp" alt="player_pfp" class="svelte-1d754jy">
+			<span class="svelte-1d754jy">Amuzet</span></div></div>
+    <table class="svelte-1d754jy"><thead class="svelte-1d754jy"><tr style="background-color: inherit;" class="svelte-1d754jy"><th class="svelte-1d754jy">Player</th>
+                <th class="text-right svelte-1d754jy">PTS</th>
+                <th class="text-right svelte-1d754jy">OMP</th>
+                <th class="text-right svelte-1d754jy">GWP</th>
+                <th class="text-right svelte-1d754jy">OGP</th></tr></thead>
+        <tbody class="svelte-1d754jy"><tr class="svelte-1d754jy"><td class="svelte-1d754jy">BL4Z3210</td>
+                    <td class="text-right svelte-1d754jy">6</td>
+                    <td class="text-right svelte-1d754jy">0.37</td>
+                    <td class="text-right svelte-1d754jy">0.57</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">I am Moonslice</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.63</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Amuzet</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.44</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">Seefel</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.43</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">The color red</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.63</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">0.67</td>
+                </tr><tr class="svelte-1d754jy"><td class="svelte-1d754jy">azdrez</td>
+                    <td class="text-right svelte-1d754jy">3</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                    <td class="text-right svelte-1d754jy">1.00</td>
+                    <td class="text-right svelte-1d754jy">0.33</td>
+                </tr></tbody></table>
+	<button class="absolute tap-icon svelte-1d754jy"><span>Show Games</span>
+		<div style="--size: 20px" class="svelte-i1tjtx">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="#000" fill-opacity="0"></path><g class="" style="" transform="translate(0,0)"><path d="M19.828 18.256l-.002.015c249.642 36.995 371.904 169.983 397.32 278.01-2.094 5.977-4.496 11.044-7.068 14.968-17.29 26.383-62.522 40.075-101.654 28.596 5.984-19.75 10.132-39.834 12.07-59.12-95.46 8.177-212.544 8.42-301.207-22.642 41.727 95.317 99.325 164.465 164.983 230.08 18.296-2.164 35.807-11.35 51.837-25.37 85.218 34.667 188.066-2.555 226.748-60.68 46.922-70.5 74.07-317.52-167.462-383.856H232.81c160.326 54.874 195.73 167.74 191.573 239.03-37.15-93.627-137.68-191.855-312.38-239.03H19.83z" fill="white" fill-opacity="1"></path></g></svg>
+</div></button>
+</div></div>
+</div><div class="card-v tiny-shadow grid grid-cols-1 relative svelte-1qor0gk"><div class="black-border svelte-1qor0gk"><div class="svelte-1qor0gk"></div>
+		<div class="svelte-1qor0gk"></div></div>
+	<section class="textbox-h flex-row relative svelte-1qor0gk"><div class="text-lg truncate force-height-title relative svelte-1qor0gk">My Favorite Card</div>
+			<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-10"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">lul good meme</div>
+</div>
+			<div class="text-xs flex space-x-4 svelte-1qor0gk"><span>I am Moonslice</span>
+				<span>xln / 180</span>
+				<a href="https://scryfall.com/card/xln/180">Scryfall</a></div></section>
+	<div class="cardbox ml-9 mr-9 mb-3 svelte-1qor0gk"><div class="superparent svelte-clz1vn"><div class="card_s svelte-clz1vn" style="--posX: 0deg;
+		--posY: 0deg;
+		--rX: 50%;
+		--rY: 50%;"><div class="card__glare svelte-clz1vn"></div>
+		<img class="card tiny-shadow svelte-1qor0gk" alt="card_image" src="https://cards.scryfall.io/normal/front/7/6/76ac5b70-47db-4cdb-91e7-e5c18c42e516.jpg?1562558297"></div>
+</div></div>
+</div>
+			<div class="card-v tiny-shadow grid grid-cols-1 relative svelte-1qor0gk"><div class="black-border svelte-1qor0gk"><div class="svelte-1qor0gk"></div>
+		<div class="svelte-1qor0gk"></div></div>
+	<section class="textbox-h flex-row relative svelte-1qor0gk"><div class="text-lg truncate force-height-title relative svelte-1qor0gk">PRISON SENTENCE</div>
+			<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-11"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">Better pacifism</div>
+</div>
+			<div class="text-xs flex space-x-4 svelte-1qor0gk"><span>flaviuscrispus</span>
+				<span>BRO / 021</span>
+				<a href="https://scryfall.com/card/BRO/021">Scryfall</a></div></section>
+	<div class="cardbox ml-9 mr-9 mb-3 svelte-1qor0gk"><div class="superparent svelte-clz1vn"><div class="card_s svelte-clz1vn" style="--posX: 0deg;
+		--posY: 0deg;
+		--rX: 50%;
+		--rY: 50%;"><div class="card__glare svelte-clz1vn"></div>
+		<img class="card tiny-shadow svelte-1qor0gk" alt="card_image" src="https://cards.scryfall.io/normal/front/7/6/76832ca8-95b2-4bc8-a191-9e2f50b77626.jpg?1667561922"></div>
+</div></div>
+</div>
+			<div class="card-v tiny-shadow grid grid-cols-1 relative svelte-1qor0gk"><div class="black-border svelte-1qor0gk"><div class="svelte-1qor0gk"></div>
+		<div class="svelte-1qor0gk"></div></div>
+	<section class="textbox-h flex-row relative svelte-1qor0gk"><div class="text-lg truncate force-height-title relative svelte-1qor0gk">My Fav Card</div>
+			<div class="bg-slate-400 mdc-tooltip" style="" role="tooltip" aria-hidden="true" id="SMUI-tooltip-12"><div class="mdc-tooltip__surface mdc-tooltip__surface-animation" style="">My fav card</div>
+</div>
+			<div class="text-xs flex space-x-4 svelte-1qor0gk"><span>Seefel</span>
+				<span>ALA / 43</span>
+				<a href="https://scryfall.com/card/ALA/43">Scryfall</a></div></section>
+	<div class="cardbox ml-9 mr-9 mb-3 svelte-1qor0gk"><div class="superparent svelte-clz1vn"><div class="card_s svelte-clz1vn" style="--posX: 0deg;
+		--posY: 0deg;
+		--rX: 50%;
+		--rY: 50%;"><div class="card__glare svelte-clz1vn"></div>
+		<img class="card tiny-shadow svelte-1qor0gk" alt="card_image" src="https://cards.scryfall.io/normal/front/7/e/7e4becff-8280-4e29-a370-bf82fb6734d5.jpg?1562705856"></div>
+</div></div>
+</div>
+			</div>
+</div>
 
 
-		<script type="module" data-sveltekit-hydrate="3snl7a">
-		import { set_public_env, start } from "/cera/_app/immutable/start-5861f0dd.js";
+		<script type="module" data-sveltekit-hydrate="141dlbq">
+			import { start } from "/cera/_app/immutable/start-0fafb620.js";
 
-		set_public_env({});
-
-		start({
-			target: document.querySelector('[data-sveltekit-hydrate="3snl7a"]').parentNode,
-			paths: {"base":"/cera","assets":"/cera"},
-			session: {},
-			route: true,
-			spa: false,
-			trailing_slash: "never",
-			hydrate: {
-				status: 200,
-				error: null,
-				nodes: [0, 2],
-				params: {},
-				routeId: ""
-			}
-		});
-	</script></div>
+			start({
+				env: {},
+				hydrate: {
+					status: 200,
+					error: null,
+					node_ids: [0, 2],
+					params: {},
+					route: {"id":"/"},
+					data: [null,{type:"data",data:{cds:[{id:"5ff47736ce751cd18c696bd6ec4ba61e",tag:"ptm",date:new Date(1668211200000),description:"testing testing 123",title:"FUN 2022",rounds:new Map([[0,{title:1,matches:[{p_ids:["298561362034950154","237059875073556481"],games:new Map([[0,"298561362034950154"],[1,"237059875073556481"],[2,"298561362034950154"]]),drops:[],bye:false},{p_ids:["225877870008860672","320756550992134145"],games:new Map([[0,"320756550992134145"],[1,"320756550992134145"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["338058257555914752","408421929410887687"],games:new Map([[0,"338058257555914752"],[1,"338058257555914752"],[2,"TIE"]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["225877870008860672","408421929410887687"],games:new Map([[0,"225877870008860672"],[1,"225877870008860672"],[2,"TIE"]]),drops:["408421929410887687"],bye:false},{p_ids:["237059875073556481","320756550992134145"],games:new Map([[0,"320756550992134145"],[1,"320756550992134145"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["298561362034950154","338058257555914752"],games:new Map([[0,"338058257555914752"],[1,"298561362034950154"],[2,"338058257555914752"]]),drops:["298561362034950154"],bye:false}]}],[2,{title:3,matches:[{p_ids:["237059875073556481","225877870008860672"],games:new Map([[0,"237059875073556481"],[1,"225877870008860672"],[2,"237059875073556481"]]),drops:[],bye:false},{p_ids:["320756550992134145","338058257555914752"],games:new Map([[0,"338058257555914752"],[1,"338058257555914752"],[2,"TIE"]]),drops:[],bye:false}]}]]),scores:[{id:"338058257555914752",points:9,gwp:"0.86",ogp:"0.39",omp:"0.39"},{id:"320756550992134145",points:6,gwp:"0.67",ogp:"0.55",omp:"0.56"},{id:"237059875073556481",points:3,gwp:"0.38",ogp:"0.53",omp:"0.50"},{id:"225877870008860672",points:3,gwp:"0.43",ogp:"0.35",omp:"0.33"},{id:"298561362034950154",points:3,gwp:"0.50",ogp:"0.62",omp:"0.67"},{id:"408421929410887687",points:0,gwp:"0.00",ogp:"0.64",omp:"0.67"}]},{id:"44f3d018202b23d9239c1f6e09b271dc",tag:"ptm",date:new Date(1667001600000),title:"Pauper Masters in Prime Time",rounds:new Map([[0,{title:1,matches:[{p_ids:["237059875073556481","94151949280088064"],games:new Map([[0,"94151949280088064"],[1,"237059875073556481"],[2,"94151949280088064"]]),drops:[],bye:false},{p_ids:["259350406507790336","247076572295593984"],games:new Map([[0,"259350406507790336"],[1,"247076572295593984"],[2,"259350406507790336"]]),drops:["247076572295593984"],bye:false},{p_ids:["432910635622334466","338058257555914752"],games:new Map([[0,"432910635622334466"],[1,"432910635622334466"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["862860781716635649","408421929410887687"],games:new Map([[0,"408421929410887687"],[1,"862860781716635649"],[2,"862860781716635649"]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["338058257555914752","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"338058257555914752"],[2,"237059875073556481"]]),drops:["338058257555914752"],bye:false},{p_ids:["408421929410887687","94151949280088064"],games:new Map([[0,"408421929410887687"],[1,"408421929410887687"],[2,"TIE"]]),drops:["94151949280088064"],bye:false},{p_ids:["259350406507790336","432910635622334466"],games:new Map([[0,"259350406507790336"],[1,"432910635622334466"],[2,"432910635622334466"]]),drops:["259350406507790336"],bye:false},{p_ids:["862860781716635649","-1"],games:new Map([[0,"862860781716635649"],[1,"862860781716635649"],[2,"TIE"]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["237059875073556481","408421929410887687"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["862860781716635649","432910635622334466"],games:new Map([[0,"432910635622334466"],[1,"432910635622334466"],[2,"TIE"]]),drops:[],bye:false}]}]]),scores:[{id:"432910635622334466",points:9,gwp:"0.86",ogp:"0.37",omp:"0.39"},{id:"237059875073556481",points:6,gwp:"0.62",ogp:"0.34",omp:"0.28"},{id:"862860781716635649",points:6,gwp:"0.40",ogp:"0.64",omp:"0.67"},{id:"94151949280088064",points:3,gwp:"0.40",ogp:"0.53",omp:"0.50"},{id:"259350406507790336",points:3,gwp:"0.50",ogp:"0.60",omp:"0.50"},{id:"408421929410887687",points:3,gwp:"0.43",ogp:"0.48",omp:"0.61"},{id:"247076572295593984",points:0,gwp:"0.33",ogp:"0.50",omp:"0.50"},{id:"338058257555914752",points:0,gwp:"0.20",ogp:"0.74",omp:"0.83"}]},{id:"34c515549e8d750c986216823a61b58d",tag:"ptm",date:new Date(1664582400000),title:"Urza's Blocky Ass",rounds:new Map([[0,{title:1,matches:[{p_ids:["217759307519754240","295629879058235405"],games:new Map([[0,"217759307519754240"],[1,"295629879058235405"],[2,"295629879058235405"]]),drops:[],bye:false},{p_ids:["298561362034950154","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"298561362034950154"],[2,"237059875073556481"]]),drops:[],bye:false},{p_ids:["224588946250661888","247076572295593984"],games:new Map([[0,"224588946250661888"],[1,"224588946250661888"],[2,""]]),drops:[],bye:false},{p_ids:["389699205700124674","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"211543853398753281"],[2,""]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["247076572295593984","389699205700124674"],games:new Map([[0,"247076572295593984"],[1,"247076572295593984"],[2,""]]),drops:[],bye:false},{p_ids:["217759307519754240","298561362034950154"],games:new Map([[0,"298561362034950154"],[1,"298561362034950154"],[2,""]]),drops:[],bye:false},{p_ids:["295629879058235405","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,""]]),drops:[],bye:false},{p_ids:["224588946250661888","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"211543853398753281"],[2,""]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["389699205700124674","217759307519754240"],games:new Map([[0,"217759307519754240"],[1,"217759307519754240"],[2,""]]),drops:[],bye:false},{p_ids:["295629879058235405","224588946250661888"],games:new Map([[0,"224588946250661888"],[1,"224588946250661888"],[2,""]]),drops:[],bye:false},{p_ids:["247076572295593984","298561362034950154"],games:new Map([[0,"247076572295593984"],[1,"247076572295593984"],[2,""]]),drops:[],bye:false},{p_ids:["237059875073556481","211543853398753281"],games:new Map([[0,"237059875073556481"],[1,"211543853398753281"],[2,"237059875073556481"]]),drops:[],bye:false}]}]]),scores:[{id:"237059875073556481",points:9,gwp:"0.75",ogp:"0.48",omp:"0.44"},{id:"224588946250661888",points:6,gwp:"0.67",ogp:"0.56",omp:"0.56"},{id:"247076572295593984",points:6,gwp:"0.67",ogp:"0.37",omp:"0.33"},{id:"211543853398753281",points:6,gwp:"0.71",ogp:"0.47",omp:"0.56"},{id:"217759307519754240",points:3,gwp:"0.43",ogp:"0.24",omp:"0.22"},{id:"295629879058235405",points:3,gwp:"0.29",ogp:"0.62",omp:"0.67"},{id:"298561362034950154",points:3,gwp:"0.43",ogp:"0.62",omp:"0.67"},{id:"389699205700124674",points:0,gwp:"0.00",ogp:"0.60",omp:"0.56"}]},{id:"479318e1467604818b8f7a9f057b4b1b",tag:"ptm",date:new Date(1667606400000),description:"why",title:"Pre-Pre-Pre-Release Bro",rounds:new Map([[0,{title:1,matches:[{p_ids:["250385022106730496","298561362034950154"],games:new Map([[0,"250385022106730496"],[1,"250385022106730496"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["237059875073556481","94151949280088064"],games:new Map([[0,"94151949280088064"],[1,"94151949280088064"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["224588946250661888","338058257555914752"],games:new Map([[0,"224588946250661888"],[1,"224588946250661888"],[2,"TIE"]]),drops:["338058257555914752"],bye:false},{p_ids:["224664793154322432","211543853398753281"],games:new Map([[0,"224664793154322432"],[1,"224664793154322432"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["270716704487768064","408421929410887687"],games:new Map([[0,"270716704487768064"],[1,"270716704487768064"],[2,"TIE"]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["298561362034950154","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:["298561362034950154"],bye:false},{p_ids:["211543853398753281","408421929410887687"],games:new Map([[0,"211543853398753281"],[1,"408421929410887687"],[2,"211543853398753281"]]),drops:[],bye:false},{p_ids:["250385022106730496","94151949280088064"],games:new Map([[0,"250385022106730496"],[1,"94151949280088064"],[2,"250385022106730496"]]),drops:["94151949280088064"],bye:false},{p_ids:["224588946250661888","224664793154322432"],games:new Map([[0,"224664793154322432"],[1,"224664793154322432"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["270716704487768064","-1"],games:new Map([[0,"270716704487768064"],[1,"270716704487768064"],[2,"TIE"]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["408421929410887687","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"408421929410887687"],[2,"408421929410887687"]]),drops:[],bye:false},{p_ids:["224588946250661888","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"224588946250661888"],[2,"211543853398753281"]]),drops:[],bye:false},{p_ids:["270716704487768064","250385022106730496"],games:new Map([[0,"270716704487768064"],[1,"250385022106730496"],[2,"270716704487768064"]]),drops:[],bye:false},{p_ids:["224664793154322432","-1"],games:new Map([[0,"224664793154322432"],[1,"224664793154322432"],[2,"TIE"]]),drops:["224664793154322432"],bye:false}]}]]),scores:[{id:"270716704487768064",points:9,gwp:"0.80",ogp:"0.50",omp:"0.50"},{id:"224664793154322432",points:9,gwp:"1.00",ogp:"0.46",omp:"0.50"},{id:"211543853398753281",points:6,gwp:"0.50",ogp:"0.60",omp:"0.56"},{id:"250385022106730496",points:6,gwp:"0.62",ogp:"0.47",omp:"0.50"},{id:"408421929410887687",points:3,gwp:"0.38",ogp:"0.58",omp:"0.67"},{id:"237059875073556481",points:3,gwp:"0.43",ogp:"0.33",omp:"0.28"},{id:"224588946250661888",points:3,gwp:"0.43",ogp:"0.50",omp:"0.56"},{id:"94151949280088064",points:3,gwp:"0.60",ogp:"0.53",omp:"0.50"},{id:"298561362034950154",points:0,gwp:"0.00",ogp:"0.53",omp:"0.50"},{id:"338058257555914752",points:0,gwp:"0.00",ogp:"0.43",omp:"0.33"}]},{id:"f3062e959d29bf308d5d417fdabe7f5a",tag:"ptm",date:new Date(1669420800000),description:"first test of the new draft script as well yike",title:"Ravnica Cube Playtest 1",rounds:new Map([[0,{title:1,matches:[{p_ids:["250385022106730496","298561362034950154"],games:new Map([[0,"250385022106730496"],[1,"298561362034950154"],[2,"250385022106730496"]]),drops:["298561362034950154"],bye:false},{p_ids:["237059875073556481","991405068106604627"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["216644984487673856","456230209650294787"],games:new Map([[0,"456230209650294787"],[1,"456230209650294787"],[2,"TIE"]]),drops:["216644984487673856"],bye:false},{p_ids:["312254915659694080","432910635622334466"],games:new Map([[0,"432910635622334466"],[1,"312254915659694080"],[2,"432910635622334466"]]),drops:[],bye:false},{p_ids:["499795373389512718","-1"],games:new Map([[0,"499795373389512718"],[1,"499795373389512718"],[2,"TIE"]]),drops:["499795373389512718"],bye:false}]}],[1,{title:2,matches:[{p_ids:["991405068106604627","312254915659694080"],games:new Map([[0,"312254915659694080"],[1,"991405068106604627"],[2,"991405068106604627"]]),drops:["991405068106604627"],bye:false},{p_ids:["250385022106730496","237059875073556481"],games:new Map([[0,"250385022106730496"],[1,"237059875073556481"],[2,"237059875073556481"]]),drops:[],bye:false},{p_ids:["456230209650294787","432910635622334466"],games:new Map([[0,"432910635622334466"],[1,"456230209650294787"],[2,"432910635622334466"]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["312254915659694080","250385022106730496"],games:new Map([[0,"250385022106730496"],[1,"250385022106730496"],[2,"TIE"]]),drops:["312254915659694080"],bye:false},{p_ids:["456230209650294787","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"456230209650294787"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["432910635622334466","-1"],games:new Map([[0,"432910635622334466"],[1,"432910635622334466"],[2,"TIE"]]),drops:[],bye:false}]}]]),scores:[{id:"432910635622334466",points:9,gwp:"0.67",ogp:"0.41",omp:"0.22"},{id:"237059875073556481",points:7,gwp:"0.71",ogp:"0.53",omp:"0.54"},{id:"250385022106730496",points:6,gwp:"0.62",ogp:"0.43",omp:"0.26"},{id:"456230209650294787",points:4,gwp:"0.57",ogp:"0.46",omp:"0.59"},{id:"499795373389512718",points:3,gwp:"0.00",ogp:"0.00",omp:"0.00"},{id:"991405068106604627",points:3,gwp:"0.40",ogp:"0.48",omp:"0.39"},{id:"216644984487673856",points:0,gwp:"0.00",ogp:"0.57",omp:"0.44"},{id:"298561362034950154",points:0,gwp:"0.33",ogp:"0.62",omp:"0.67"},{id:"312254915659694080",points:0,gwp:"0.25",ogp:"0.56",omp:"0.72"}]},{id:"c526a6da351fe93e4d38c313819897e6",tag:"ptm",date:new Date(1662768000000),title:"Pauper Masters",rounds:new Map([[0,{title:1,matches:[{p_ids:["139112253784850433","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"139112253784850433"],[2,"139112253784850433"]]),drops:[],bye:false},{p_ids:["320756550992134145","411627939478765568"],games:new Map([[0,"411627939478765568"],[1,"411627939478765568"],[2,""]]),drops:[],bye:false},{p_ids:["94151949280088064","247076572295593984"],games:new Map([[0,"247076572295593984"],[1,"247076572295593984"],[2,""]]),drops:["94151949280088064","247076572295593984"],bye:false},{p_ids:["369637929032744965","326182836568719380"],games:new Map([[0,"326182836568719380"],[1,"326182836568719380"],[2,""]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["320756550992134145","369637929032744965"],games:new Map([[0,"320756550992134145"],[1,"320756550992134145"],[2,""]]),drops:["320756550992134145","369637929032744965"],bye:false},{p_ids:["237059875073556481","411627939478765568"],games:new Map([[0,"411627939478765568"],[1,"411627939478765568"],[2,""]]),drops:[],bye:false},{p_ids:["139112253784850433","326182836568719380"],games:new Map([[0,"326182836568719380"],[1,"326182836568719380"],[2,""]]),drops:["139112253784850433"],bye:false}]}],[2,{title:3,matches:[{p_ids:["237059875073556481","-1"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,""]]),drops:[],bye:true},{p_ids:["411627939478765568","326182836568719380"],games:new Map([[0,"411627939478765568"],[1,"411627939478765568"],[2,""]]),drops:[],bye:false}]}]]),scores:[{id:"411627939478765568",points:9,gwp:"1.00",ogp:"0.46",omp:"0.50"},{id:"326182836568719380",points:6,gwp:"0.67",ogp:"0.47",omp:"0.50"},{id:"237059875073556481",points:3,gwp:"0.20",ogp:"0.70",omp:"0.75"},{id:"139112253784850433",points:3,gwp:"0.40",ogp:"0.43",omp:"0.50"},{id:"320756550992134145",points:3,gwp:"0.50",ogp:"0.50",omp:"0.50"},{id:"247076572295593984",points:3,gwp:"1.00",ogp:"0.00",omp:"0.00"},{id:"94151949280088064",points:0,gwp:"0.00",ogp:"1.00",omp:"1.00"},{id:"369637929032744965",points:0,gwp:"0.00",ogp:"0.58",omp:"0.58"}]},{id:"be782866482706ef6fe9b51f3a780ee2",tag:"ptm",date:new Date(1668816000000),description:"at long last, the one piece is real",title:"FIFTH EDITION",rounds:new Map([[0,{title:1,matches:[{p_ids:["250385022106730496","298561362034950154"],games:new Map([[0,"298561362034950154"],[1,"298561362034950154"],[2,"TIE"]]),drops:["250385022106730496"],bye:false},{p_ids:["237059875073556481","225877870008860672"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["338058257555914752","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"338058257555914752"],[2,"338058257555914752"]]),drops:[],bye:false},{p_ids:["213511591532953601","-1"],games:new Map([[0,"213511591532953601"],[1,"213511591532953601"],[2,"TIE"]]),drops:[],bye:false}]}],[1,{title:2,matches:[{p_ids:["225877870008860672","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"211543853398753281"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["213511591532953601","298561362034950154"],games:new Map([[0,"213511591532953601"],[1,"213511591532953601"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["237059875073556481","338058257555914752"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:["338058257555914752"],bye:false}]}],[2,{title:3,matches:[{p_ids:["225877870008860672","298561362034950154"],games:new Map([[0,"298561362034950154"],[1,"298561362034950154"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["211543853398753281","213511591532953601"],games:new Map([[0,"211543853398753281"],[1,"211543853398753281"],[2,"TIE"]]),drops:["213511591532953601"],bye:false},{p_ids:["237059875073556481","-1"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:[],bye:false}]}]]),scores:[{id:"237059875073556481",points:9,gwp:"1.00",ogp:"0.20",omp:"0.25"},{id:"298561362034950154",points:6,gwp:"0.67",ogp:"0.17",omp:"0.22"},{id:"211543853398753281",points:6,gwp:"0.71",ogp:"0.30",omp:"0.39"},{id:"213511591532953601",points:6,gwp:"0.50",ogp:"0.69",omp:"0.67"},{id:"338058257555914752",points:3,gwp:"0.40",ogp:"0.86",omp:"0.83"},{id:"250385022106730496",points:0,gwp:"0.00",ogp:"0.67",omp:"0.67"},{id:"225877870008860672",points:0,gwp:"0.00",ogp:"0.79",omp:"0.78"}]},{id:"372325e4fdeddec3fed3bbf61e3362b2",tag:"ptm",date:new Date(1663372800000),title:"Modern Horizons 2",rounds:new Map([[0,{title:1,matches:[{p_ids:["139112253784850433","250385022106730496"],games:new Map([[0,"250385022106730496"],[1,"139112253784850433"],[2,"139112253784850433"]]),drops:[],bye:false},{p_ids:["295629879058235405","481445928407138304"],games:new Map([[0,"481445928407138304"],[1,"481445928407138304"],[2,""]]),drops:[],bye:false},{p_ids:["237059875073556481","320756550992134145"],games:new Map([[0,"237059875073556481"],[1,"320756550992134145"],[2,"320756550992134145"]]),drops:[],bye:false},{p_ids:["247076572295593984","862860781716635649"],games:new Map([[0,"862860781716635649"],[1,"247076572295593984"],[2,"862860781716635649"]]),drops:["247076572295593984"],bye:false},{p_ids:["700197033700753468","-1"],games:new Map([[0,"700197033700753468"],[1,"700197033700753468"],[2,""]]),drops:[],bye:true}]}],[1,{title:2,matches:[{p_ids:["295629879058235405","250385022106730496"],games:new Map([[0,"250385022106730496"],[1,"250385022106730496"],[2,""]]),drops:["295629879058235405"],bye:false},{p_ids:["237059875073556481","700197033700753468"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,""]]),drops:["700197033700753468"],bye:false},{p_ids:["139112253784850433","481445928407138304"],games:new Map([[0,"139112253784850433"],[1,"139112253784850433"],[2,""]]),drops:[],bye:false},{p_ids:["320756550992134145","862860781716635649"],games:new Map([[0,"862860781716635649"],[1,"320756550992134145"],[2,"320756550992134145"]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["481445928407138304","250385022106730496"],games:new Map([[0,"481445928407138304"],[1,"250385022106730496"],[2,"250385022106730496"]]),drops:[],bye:false},{p_ids:["237059875073556481","862860781716635649"],games:new Map([[0,"862860781716635649"],[1,"862860781716635649"],[2,""]]),drops:[],bye:false},{p_ids:["139112253784850433","320756550992134145"],games:new Map([[0,"139112253784850433"],[1,"139112253784850433"],[2,""]]),drops:[],bye:false}]}]]),scores:[{id:"139112253784850433",points:9,gwp:"0.86",ogp:"0.52",omp:"0.56"},{id:"250385022106730496",points:6,gwp:"0.62",ogp:"0.43",omp:"0.44"},{id:"862860781716635649",points:6,gwp:"0.62",ogp:"0.42",omp:"0.33"},{id:"320756550992134145",points:6,gwp:"0.50",ogp:"0.64",omp:"0.67"},{id:"700197033700753468",points:3,gwp:"0.00",ogp:"0.43",omp:"0.33"},{id:"481445928407138304",points:3,gwp:"0.43",ogp:"0.49",omp:"0.56"},{id:"237059875073556481",points:3,gwp:"0.43",ogp:"0.38",omp:"0.61"},{id:"295629879058235405",points:0,gwp:"0.00",ogp:"0.53",omp:"0.50"},{id:"247076572295593984",points:0,gwp:"0.33",ogp:"0.62",omp:"0.67"}]},{id:"556a2d4f396ad01cc7b5a0b72389403e",tag:"ptm",date:new Date(1663977600000),title:"Kamigawa",rounds:new Map([[0,{title:1,matches:[{p_ids:["250385022106730496","237059875073556481"],games:new Map([[0,"237059875073556481"],[1,"250385022106730496"],[2,"250385022106730496"]]),drops:[],bye:false},{p_ids:["247076572295593984","862860781716635649"],games:new Map([[0,"862860781716635649"],[1,"862860781716635649"],[2,""]]),drops:["247076572295593984"],bye:false},{p_ids:["270716704487768064","245008700723560448"],games:new Map([[0,"270716704487768064"],[1,"245008700723560448"],[2,"270716704487768064"]]),drops:["245008700723560448"],bye:false}]}],[1,{title:2,matches:[{p_ids:["237059875073556481","862860781716635649"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,""]]),drops:[],bye:false},{p_ids:["250385022106730496","270716704487768064"],games:new Map([[0,"270716704487768064"],[1,"270716704487768064"],[2,""]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["250385022106730496","862860781716635649"],games:new Map([[0,"862860781716635649"],[1,"862860781716635649"],[2,""]]),drops:[],bye:false},{p_ids:["237059875073556481","270716704487768064"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,""]]),drops:[],bye:false}]}]]),scores:[{id:"862860781716635649",points:6,gwp:"0.67",ogp:"0.33",omp:"0.33"},{id:"237059875073556481",points:6,gwp:"0.71",ogp:"0.51",omp:"0.56"},{id:"270716704487768064",points:6,gwp:"0.57",ogp:"0.44",omp:"0.33"},{id:"250385022106730496",points:3,gwp:"0.29",ogp:"0.65",omp:"0.67"},{id:"247076572295593984",points:0,gwp:"0.00",ogp:"0.67",omp:"0.67"},{id:"245008700723560448",points:0,gwp:"0.33",ogp:"0.57",omp:"0.67"}]},{id:"c93bd7838859eee420135a758354ebdc",tag:"ptm",date:new Date(1666396800000),title:"Design Game Draft",rounds:new Map([[0,{title:1,matches:[{p_ids:["97905054249398272","767019012353687562"],games:new Map([[0,"97905054249398272"],[1,"97905054249398272"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["237059875073556481","432910635622334466"],games:new Map([[0,"432910635622334466"],[1,"432910635622334466"],[2,"TIE"]]),drops:["432910635622334466"],bye:false},{p_ids:["338058257555914752","211543853398753281"],games:new Map([[0,"211543853398753281"],[1,"211543853398753281"],[2,"TIE"]]),drops:["211543853398753281"],bye:false}]}],[1,{title:2,matches:[{p_ids:["767019012353687562","237059875073556481"],games:new Map([[0,"767019012353687562"],[1,"237059875073556481"],[2,"767019012353687562"]]),drops:[],bye:false},{p_ids:["338058257555914752","97905054249398272"],games:new Map([[0,"338058257555914752"],[1,"338058257555914752"],[2,"TIE"]]),drops:[],bye:false}]}],[2,{title:3,matches:[{p_ids:["237059875073556481","97905054249398272"],games:new Map([[0,"237059875073556481"],[1,"237059875073556481"],[2,"TIE"]]),drops:[],bye:false},{p_ids:["767019012353687562","338058257555914752"],games:new Map([[0,"767019012353687562"],[1,"767019012353687562"],[2,"TIE"]]),drops:["767019012353687562"],bye:false}]}]]),scores:[{id:"767019012353687562",points:6,gwp:"0.57",ogp:"0.37",omp:"0.33"},{id:"237059875073556481",points:3,gwp:"0.43",ogp:"0.63",omp:"0.67"},{id:"97905054249398272",points:3,gwp:"0.33",ogp:"0.44",omp:"0.44"},{id:"432910635622334466",points:3,gwp:"1.00",ogp:"0.43",omp:"0.33"},{id:"338058257555914752",points:3,gwp:"0.33",ogp:"0.63",omp:"0.67"},{id:"211543853398753281",points:3,gwp:"1.00",ogp:"0.33",omp:"0.33"}]}],users:{"408421929410887687":{id:"408421929410887687",bot:false,system:false,flags:0,username:"yetimafia1",discriminator:"9699",avatar:"cd2df72498c5d4842f3281c3ce094578",banner:null,accentColor:1578263,createdTimestamp:1517445776084,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F4.png",hexAccentColor:"#181517",tag:"yetimafia1#9699",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F408421929410887687\u002Fcd2df72498c5d4842f3281c3ce094578.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F408421929410887687\u002Fcd2df72498c5d4842f3281c3ce094578.webp",bannerURL:null},"237059875073556481":{id:"237059875073556481",bot:false,system:false,flags:0,username:"I am Moonslice",discriminator:"4132",avatar:"b9b0610218d94a531d5bdd75eb38e385",banner:null,accentColor:null,createdTimestamp:1476589878577,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:null,tag:"I am Moonslice#4132",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F237059875073556481\u002Fb9b0610218d94a531d5bdd75eb38e385.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F237059875073556481\u002Fb9b0610218d94a531d5bdd75eb38e385.webp",bannerURL:null},"225877870008860672":{id:"225877870008860672",bot:false,system:false,flags:0,username:"Kazoooo",discriminator:"6312",avatar:"3bd426b4d57cc23430a2d3cfbe3ad431",banner:null,accentColor:null,createdTimestamp:1473923880818,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:null,tag:"Kazoooo#6312",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F225877870008860672\u002F3bd426b4d57cc23430a2d3cfbe3ad431.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F225877870008860672\u002F3bd426b4d57cc23430a2d3cfbe3ad431.webp",bannerURL:null},"298561362034950154":{id:"298561362034950154",bot:false,system:false,flags:0,username:"flaviuscrispus",discriminator:"3701",avatar:"ab1ac444950fb28793143d0b09568ddf",banner:null,accentColor:null,createdTimestamp:1491252975711,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F1.png",hexAccentColor:null,tag:"flaviuscrispus#3701",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F298561362034950154\u002Fab1ac444950fb28793143d0b09568ddf.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F298561362034950154\u002Fab1ac444950fb28793143d0b09568ddf.webp",bannerURL:null},"320756550992134145":{id:"320756550992134145",bot:false,system:false,flags:0,username:"Komic420",discriminator:"9518",avatar:null,banner:null,accentColor:null,createdTimestamp:1496544721125,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"Komic420#9518",avatarURL:"https:\u002F\u002Fbetter-default-discord.netlify.app\u002FIcons\u002FSolid-Black.png",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",bannerURL:null},"338058257555914752":{id:"338058257555914752",bot:false,system:false,flags:0,username:"The color red",discriminator:"4785",avatar:"d6df424511db5fe7b2fbea15f8e09845",banner:"a_93f028538f009b6d63d80f9f0f140815",accentColor:14945035,createdTimestamp:1500669769420,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:"#e40b0b",tag:"The color red#4785",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F338058257555914752\u002Fd6df424511db5fe7b2fbea15f8e09845.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F338058257555914752\u002Fd6df424511db5fe7b2fbea15f8e09845.webp",bannerURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fbanners\u002F338058257555914752\u002Fa_93f028538f009b6d63d80f9f0f140815.gif"},"247076572295593984":{id:"247076572295593984",bot:false,system:false,flags:0,username:"SchwertHamster",discriminator:"8472",avatar:"4cf345bea87d14d11056d023a44263f2",banner:null,accentColor:null,createdTimestamp:1478978045296,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:null,tag:"SchwertHamster#8472",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F247076572295593984\u002F4cf345bea87d14d11056d023a44263f2.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F247076572295593984\u002F4cf345bea87d14d11056d023a44263f2.webp",bannerURL:null},"94151949280088064":{id:"94151949280088064",bot:false,system:false,flags:256,username:"Wander",discriminator:"4535",avatar:"4864cac5e79efbed013124ba37e8534a",banner:null,accentColor:9505319,createdTimestamp:1442517973967,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:"#910a27",tag:"Wander#4535",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F94151949280088064\u002F4864cac5e79efbed013124ba37e8534a.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F94151949280088064\u002F4864cac5e79efbed013124ba37e8534a.webp",bannerURL:null},"259350406507790336":{id:"259350406507790336",bot:false,system:false,flags:0,username:"Orreo",discriminator:"7565",avatar:"cb56f221360b77638d785c7945cf0962",banner:null,accentColor:null,createdTimestamp:1481904355409,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:null,tag:"Orreo#7565",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F259350406507790336\u002Fcb56f221360b77638d785c7945cf0962.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F259350406507790336\u002Fcb56f221360b77638d785c7945cf0962.webp",bannerURL:null},"862860781716635649":{id:"862860781716635649",bot:false,system:false,flags:0,username:"Weaver",discriminator:"6712",avatar:"1ee691cf9f69cf8003bac5dd56189fa2",banner:null,accentColor:15653967,createdTimestamp:1625792441539,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:"#eedc4f",tag:"Weaver#6712",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F862860781716635649\u002F1ee691cf9f69cf8003bac5dd56189fa2.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F862860781716635649\u002F1ee691cf9f69cf8003bac5dd56189fa2.webp",bannerURL:null},"432910635622334466":{id:"432910635622334466",bot:false,system:false,flags:0,username:"Seefel",discriminator:"1146",avatar:"b87a41e54337827b754162140444d97e",banner:null,accentColor:null,createdTimestamp:1523284338623,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F1.png",hexAccentColor:null,tag:"Seefel#1146",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F432910635622334466\u002Fb87a41e54337827b754162140444d97e.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F432910635622334466\u002Fb87a41e54337827b754162140444d97e.webp",bannerURL:null},"389699205700124674":{id:"389699205700124674",bot:false,system:false,flags:0,username:"adamf9898",discriminator:"8483",avatar:"47470acf12f77c113c4c2eb5e2e750de",banner:null,accentColor:0,createdTimestamp:1512981930900,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:"#000000",tag:"adamf9898#8483",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F389699205700124674\u002F47470acf12f77c113c4c2eb5e2e750de.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F389699205700124674\u002F47470acf12f77c113c4c2eb5e2e750de.webp",bannerURL:null},"217759307519754240":{id:"217759307519754240",bot:false,system:false,flags:0,username:"Conrad",discriminator:"3821",avatar:"e0850a03436dbc5d43f747a262ddc054",banner:null,accentColor:null,createdTimestamp:1471988264685,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F1.png",hexAccentColor:null,tag:"Conrad#3821",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F217759307519754240\u002Fe0850a03436dbc5d43f747a262ddc054.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F217759307519754240\u002Fe0850a03436dbc5d43f747a262ddc054.webp",bannerURL:null},"295629879058235405":{id:"295629879058235405",bot:false,system:false,flags:0,username:"Cosmic👌🏿",discriminator:"6922",avatar:"2da45e668a2e5d402fde1975859bde8b",banner:null,accentColor:0,createdTimestamp:1490554055705,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:"#000000",tag:"Cosmic👌🏿#6922",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F295629879058235405\u002F2da45e668a2e5d402fde1975859bde8b.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F295629879058235405\u002F2da45e668a2e5d402fde1975859bde8b.webp",bannerURL:null},"224588946250661888":{id:"224588946250661888",bot:false,system:false,flags:0,username:"MiX",discriminator:"9955",avatar:"865c3029d7e0d12da3f89384289b32ed",banner:null,accentColor:null,createdTimestamp:1473616577447,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:null,tag:"MiX#9955",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F224588946250661888\u002F865c3029d7e0d12da3f89384289b32ed.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F224588946250661888\u002F865c3029d7e0d12da3f89384289b32ed.webp",bannerURL:null},"211543853398753281":{id:"211543853398753281",bot:false,system:false,flags:0,username:"azdrez",discriminator:"1318",avatar:"b5bb80370e0c7fd58f03d568daa5ebb7",banner:null,accentColor:null,createdTimestamp:1470506384945,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"azdrez#1318",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F211543853398753281\u002Fb5bb80370e0c7fd58f03d568daa5ebb7.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F211543853398753281\u002Fb5bb80370e0c7fd58f03d568daa5ebb7.webp",bannerURL:null},"270716704487768064":{id:"270716704487768064",bot:false,system:false,flags:0,username:"brianna",discriminator:"1943",avatar:"c7d542a44ee99cf555b83476459be759",banner:null,accentColor:null,createdTimestamp:1484614292023,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"brianna#1943",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F270716704487768064\u002Fc7d542a44ee99cf555b83476459be759.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F270716704487768064\u002Fc7d542a44ee99cf555b83476459be759.webp",bannerURL:null},"250385022106730496":{id:"250385022106730496",bot:false,system:false,flags:128,username:"BetaCrasher",discriminator:"6993",avatar:"8f4e1ca6a1a2bbd6d6bffc6d1da08ad0",banner:"a_f25250571a33947fdc87a57eea72902c",accentColor:null,createdTimestamp:1479766841199,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"BetaCrasher#6993",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F250385022106730496\u002F8f4e1ca6a1a2bbd6d6bffc6d1da08ad0.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F250385022106730496\u002F8f4e1ca6a1a2bbd6d6bffc6d1da08ad0.webp",bannerURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fbanners\u002F250385022106730496\u002Fa_f25250571a33947fdc87a57eea72902c.gif"},"224664793154322432":{id:"224664793154322432",bot:false,system:false,flags:64,username:"Zarfax",discriminator:"4618",avatar:"a4702504be9836b72333d0cd7cd5a2d6",banner:null,accentColor:null,createdTimestamp:1473634660758,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"Zarfax#4618",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F224664793154322432\u002Fa4702504be9836b72333d0cd7cd5a2d6.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F224664793154322432\u002Fa4702504be9836b72333d0cd7cd5a2d6.webp",bannerURL:null},"216644984487673856":{id:"216644984487673856",bot:false,system:false,flags:256,username:"Loni",discriminator:"0889",avatar:"57dc312780a0f5ae066d260e357c7e62",banner:null,accentColor:null,createdTimestamp:1471722589371,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F4.png",hexAccentColor:null,tag:"Loni#0889",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F216644984487673856\u002F57dc312780a0f5ae066d260e357c7e62.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F216644984487673856\u002F57dc312780a0f5ae066d260e357c7e62.webp",bannerURL:null},"312254915659694080":{id:"312254915659694080",bot:false,system:false,flags:512,username:"Penthoplayer",discriminator:"9347",avatar:"8ec6b219f4907da45bc586747b11993d",banner:null,accentColor:10945276,createdTimestamp:1494517773309,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:"#a702fc",tag:"Penthoplayer#9347",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F312254915659694080\u002F8ec6b219f4907da45bc586747b11993d.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F312254915659694080\u002F8ec6b219f4907da45bc586747b11993d.webp",bannerURL:null},"499795373389512718":{id:"499795373389512718",bot:false,system:false,flags:0,username:"bandre",discriminator:"9968",avatar:"2d9251124d501666fb6f0f2685c5021b",banner:null,accentColor:null,createdTimestamp:1539230902765,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"bandre#9968",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F499795373389512718\u002F2d9251124d501666fb6f0f2685c5021b.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F499795373389512718\u002F2d9251124d501666fb6f0f2685c5021b.webp",bannerURL:null},"991405068106604627":{id:"991405068106604627",bot:false,system:false,flags:0,username:"King Of Eurobeat",discriminator:"5768",avatar:"ce013bb8676280e9dc372b6827621f0d",banner:null,accentColor:null,createdTimestamp:1656439787652,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"King Of Eurobeat#5768",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F991405068106604627\u002Fce013bb8676280e9dc372b6827621f0d.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F991405068106604627\u002Fce013bb8676280e9dc372b6827621f0d.webp",bannerURL:null},"456230209650294787":{id:"456230209650294787",bot:false,system:false,flags:0,username:"NeroCaesar1",discriminator:"2347",avatar:"877e8d1b5f8b457774a80bdb040bdf90",banner:null,accentColor:3234215,createdTimestamp:1528844158328,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:"#3159a7",tag:"NeroCaesar1#2347",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F456230209650294787\u002F877e8d1b5f8b457774a80bdb040bdf90.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F456230209650294787\u002F877e8d1b5f8b457774a80bdb040bdf90.webp",bannerURL:null},"369637929032744965":{id:"369637929032744965",bot:false,system:false,flags:64,username:"aWhiteCrow",discriminator:"0359",avatar:"5b090dcc575784e2908d2eaa6b2b606d",banner:null,accentColor:15527148,createdTimestamp:1508198949822,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F4.png",hexAccentColor:"#ececec",tag:"aWhiteCrow#0359",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F369637929032744965\u002F5b090dcc575784e2908d2eaa6b2b606d.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F369637929032744965\u002F5b090dcc575784e2908d2eaa6b2b606d.webp",bannerURL:null},"139112253784850433":{id:"139112253784850433",bot:false,system:false,flags:0,username:"Alex_Tolstoi",discriminator:"7930",avatar:"be3f01e9f9db6911ea7e1d28c13cdef8",banner:null,accentColor:1005289,createdTimestamp:1453237345883,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:"#0f56e9",tag:"Alex_Tolstoi#7930",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F139112253784850433\u002Fbe3f01e9f9db6911ea7e1d28c13cdef8.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F139112253784850433\u002Fbe3f01e9f9db6911ea7e1d28c13cdef8.webp",bannerURL:null},"411627939478765568":{id:"411627939478765568",bot:false,system:false,flags:0,username:"Martelaar",discriminator:"6085",avatar:"7fc504085283708c1d4313f2169d4b08",banner:null,accentColor:15728401,createdTimestamp:1518210148449,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:"#efff11",tag:"Martelaar#6085",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F411627939478765568\u002F7fc504085283708c1d4313f2169d4b08.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F411627939478765568\u002F7fc504085283708c1d4313f2169d4b08.webp",bannerURL:null},"326182836568719380":{id:"326182836568719380",bot:false,system:false,flags:0,username:"শয়তান",discriminator:"4735",avatar:"08068aca35d4f2a18b25c2124187b9e5",banner:null,accentColor:null,createdTimestamp:1497838448422,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:null,tag:"শয়তান#4735",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F326182836568719380\u002F08068aca35d4f2a18b25c2124187b9e5.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F326182836568719380\u002F08068aca35d4f2a18b25c2124187b9e5.webp",bannerURL:null},"213511591532953601":{id:"213511591532953601",bot:false,system:false,flags:0,username:"zachdressing",discriminator:"3817",avatar:"b4e657ea094e7d4543e5bf26554dcfdf",banner:null,accentColor:null,createdTimestamp:1470975530275,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F2.png",hexAccentColor:null,tag:"zachdressing#3817",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F213511591532953601\u002Fb4e657ea094e7d4543e5bf26554dcfdf.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F213511591532953601\u002Fb4e657ea094e7d4543e5bf26554dcfdf.webp",bannerURL:null},"700197033700753468":{id:"700197033700753468",bot:false,system:false,flags:0,username:"ricochet",discriminator:"8680",avatar:"ec6eac2f17ac05674b090afea49d54d7",banner:null,accentColor:null,createdTimestamp:1587010381866,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:null,tag:"ricochet#8680",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F700197033700753468\u002Fec6eac2f17ac05674b090afea49d54d7.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F700197033700753468\u002Fec6eac2f17ac05674b090afea49d54d7.webp",bannerURL:null},"481445928407138304":{id:"481445928407138304",bot:false,system:false,flags:0,username:"Dunwich ruler",discriminator:"2266",avatar:"676f598fb8cc32eecb8058198f17ff51",banner:null,accentColor:11010303,createdTimestamp:1534856054165,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F1.png",hexAccentColor:"#a800ff",tag:"Dunwich ruler#2266",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F481445928407138304\u002F676f598fb8cc32eecb8058198f17ff51.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F481445928407138304\u002F676f598fb8cc32eecb8058198f17ff51.webp",bannerURL:null},"245008700723560448":{id:"245008700723560448",bot:false,system:false,flags:0,username:"mp3guy3",discriminator:"3135",avatar:"a_5b4d654df8ad6588a99339eb4a89e050",banner:"a_2c6dcfb10ac7e546d5f3646ed422a53d",accentColor:null,createdTimestamp:1478485026294,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F0.png",hexAccentColor:null,tag:"mp3guy3#3135",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F245008700723560448\u002Fa_5b4d654df8ad6588a99339eb4a89e050.gif",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F245008700723560448\u002Fa_5b4d654df8ad6588a99339eb4a89e050.gif",bannerURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fbanners\u002F245008700723560448\u002Fa_2c6dcfb10ac7e546d5f3646ed422a53d.gif"},"97905054249398272":{id:"97905054249398272",bot:false,system:false,flags:0,username:"Amuzet",discriminator:"3078",avatar:"051bd385ebcbd0188ff121969ec8178c",banner:null,accentColor:null,createdTimestamp:1443412783921,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F3.png",hexAccentColor:null,tag:"Amuzet#3078",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F97905054249398272\u002F051bd385ebcbd0188ff121969ec8178c.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F97905054249398272\u002F051bd385ebcbd0188ff121969ec8178c.webp",bannerURL:null},"767019012353687562":{id:"767019012353687562",bot:false,system:false,flags:0,username:"BL4Z3210",discriminator:"2396",avatar:"a6d5a274da08da41b53e6300240451fe",banner:null,accentColor:660524,createdTimestamp:1602941983069,defaultAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Fembed\u002Favatars\u002F1.png",hexAccentColor:"#0a142c",tag:"BL4Z3210#2396",avatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F767019012353687562\u002Fa6d5a274da08da41b53e6300240451fe.webp",displayAvatarURL:"https:\u002F\u002Fcdn.discordapp.com\u002Favatars\u002F767019012353687562\u002Fa6d5a274da08da41b53e6300240451fe.webp",bannerURL:null}},cards:[{id:"1037542042840084490",title:"My Favorite Card",set:"xln",cn:"180",uri:"https:\u002F\u002Fcards.scryfall.io\u002Fnormal\u002Ffront\u002F7\u002F6\u002F76ac5b70-47db-4cdb-91e7-e5c18c42e516.jpg?1562558297",description:"lul good meme",p_id:"237059875073556481"},{id:"1038679335713914880",title:"PRISON SENTENCE",set:"BRO",cn:"021",uri:"https:\u002F\u002Fcards.scryfall.io\u002Fnormal\u002Ffront\u002F7\u002F6\u002F76832ca8-95b2-4bc8-a191-9e2f50b77626.jpg?1667561922",description:"Better pacifism",p_id:"298561362034950154"},{id:"1046269900974473307",title:"My Fav Card",set:"ALA",cn:"43",uri:"https:\u002F\u002Fcards.scryfall.io\u002Fnormal\u002Ffront\u002F7\u002Fe\u002F7e4becff-8280-4e29-a370-bf82fb6734d5.jpg?1562705856",description:"My fav card",p_id:"432910635622334466"}]},uses:{}}],
+					form: null
+				},
+				paths: {"base":"/cera","assets":"/cera"},
+				target: document.querySelector('[data-sveltekit-hydrate="141dlbq"]').parentNode,
+				trailing_slash: "never"
+			});
+		</script>
+	</div>
 	</body>
 </html>

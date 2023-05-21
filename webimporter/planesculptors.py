@@ -10,9 +10,13 @@ legal_sets = {
     "c_ank": "ankheret",
     "c_gsc": "ghariv-the-sacred-city",
     "c_blr": "blood-like-rivers",
+    "c_vtm": "villains-the-musical",
+    "c_fmq": "the-fabled-masquerade",
+    "c_son": "splinters-of-novanda",
     "c_ksv": "karslav",
     "c_alr": "alara",
     "c_hnn": "high-noon1",
+    "c_rzp": "rat-zone-promos",
 }
 
 
@@ -49,6 +53,7 @@ def get_ps_set(setcode):
             "oracle_text": decode_rtext(v["rulesText"]) if v["rulesText"] is not None else "",
             "mana_cost": v["manaCost"].replace("[", "{").replace("]", "}") if v["manaCost"] is not None else "",
             "loyalty": "",
+            "image_uris": {"normal": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
         }
         face_2 = {
             "name": v["name2"],
@@ -59,6 +64,7 @@ def get_ps_set(setcode):
             "oracle_text": decode_rtext(v["rulesText2"]) if v["rulesText2"] is not None else "",
             "mana_cost": v["manaCost2"].replace("[", "{").replace("]", "}") if v["manaCost2"] is not None else "",
             "loyalty": "",
+            "image_uris": {"normal": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
         }
         sc_obj = {
             "oracle_id": "",
@@ -66,7 +72,7 @@ def get_ps_set(setcode):
             "set": setcode,
             "collector_number": v["cardNumber"],
             "rarity": v["rarity"].lower(),
-            "image_uris": {"png": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
+            "image_uris": {"normal": f"https://www.planesculptors.net{v['artUrl']}", "small": ""},
         }
         if v["shape"] == "normal":
             sc_obj = {**sc_obj, **face_1}
@@ -77,9 +83,11 @@ def get_ps_set(setcode):
             sc_obj["card_faces"] = [face_1, face_2]
         if v["shape"] == "double":
             sc_obj["name"] = face_1["name"] + "//" + face_2["name"]
+            sc_obj["cmc"] = int(v["cmc"])
             sc_obj["type_line"] = face_1["type_line"] + "//" + face_2["type_line"]
             sc_obj["mana_cost"] = face_1["mana_cost"] + "//" + face_2["mana_cost"]
             sc_obj["card_faces"] = [face_1, face_2]
+            sc_obj["stitched"] = True
         out.append(tts_parse(sc_obj))
     return out
 
