@@ -1,10 +1,6 @@
 # cera
 
-Check out the GitHub Pages site [here](https://iammoonman.github.io/cera/). It features score cards for many recent draft events.
-
-This repository is a monorepo of various connected projects surrounding the operation and management of the Discord server, MTG Limited on TTS.  
-
-Check out the wiki for more detailed descriptions of each project.  
+This monorepo contains various connected projects surrounding the operation and management of the Discord server, MTG Limited on TTS.  
 
 Contributions, feature requests, and bug reports are welcome either via DM to an admin of MTG Limited on TTS on Discord or through the issues page on this repo.
 

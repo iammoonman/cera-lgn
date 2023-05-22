@@ -1,0 +1,262 @@
+import json
+import discord
+import pickle
+
+from starlight import p_caller
+import io
+from discord.ext import commands
+from starlight import p1p1
+
+set_choices = [
+    ["Fifth Edition", "5ed"],
+    ["Aether Revolt", "aer"],
+    ["Adventures in the Forgotten Realms", "afr"],
+    ["Amonkhet", "akh"],
+    ["Battle for Zendikar", "bfz"],
+    ["Born of the Gods", "bng"],
+    ["Dragon's Maze", "dgm"],
+    ["Dark Ascension", "dka"],
+    ["Dominaria", "dom"],
+    ["Dragons of Tarkir", "dtk"],
+    ["Throne of Eldraine", "eld"],
+    ["Eternal Masters", "ema"],
+    ["Eldrich Moon", "emn"],
+    ["Fate Reforged", "frf"],
+    ["FUN", "fun"],
+    ["Guilds of Ravnica", "grn"],
+    ["Gatecrash", "gtc"],
+    ["Hour of Devastation", "hou"],
+    ["Ikoria: Lair of Behemoths", "iko"],
+    ["Journey into Nyx", "jou"],
+    ["Kaldheim", "khm"],
+    ["Kaladesh", "kld"],
+    ["Khans of Tarkir", "ktk"],
+    ["Magic 2014", "m14"],
+    ["Magic 2015", "m15"],
+    ["Core Set 2019", "m19"],
+    ["Core Set 2020", "m20"],
+    ["Core Set 2021", "m21"],
+    ["Modern Horizons 1", "mh1"],
+    ["Modern Horizons 2", "mh2"],
+    ["Modern Masters", "mma"],
+    ["Midnight Hunt", "mid"],
+    ["Mirage", "mir"],
+    ["Kamigawa: Neon Dynasty", "neo"],
+    ["Oath of the Gatewatch", "ogw"],
+    ["Magic Origins", "ori"],
+    ["Rivals of Ixalan", "rix"],
+    ["Ravnica Allegaince", "rna"],
+    ["Rise of the Eldrazi", "roe"],
+    ["Return to Ravnica", "rtr"],
+    ["Shadows over Innistrad", "soi"],
+    ["Streets of New Capenna", "snc"],
+    ["Strixhaven: School of Mages", "stx"],
+    ["Stronghold", "sth"],
+    ["Tempest", "tmp"],
+    ["Theros Beyond Death", "thb"],
+    ["Theros", "ths"],
+    ["Urza's Destiny", "uds"],
+    ["Visions", "vis"],
+    ["Crimson Vow", "vow"],
+    ["War of the Spark", "war"],
+    ["Weatherlight", "wth"],
+    ["Ixalan", "xln"],
+    ["Zendikar Rising", "znr"],
+]
+
+set_choices_v3 = [
+    ["Adventures in the Forgotten Realms", "afr"],
+    ["Pauper Masters", "ppm"],
+    ["Urza's Saga", "usg"],
+    ["Dominaria", "dom"],
+    ["Exodus", "exo"],
+    ["Urza's Legacy", "ulg"],
+    ["Nemesis", "nem"],
+    ["Prophecy", "pcy"],
+    ["Mercadian Masques", "mmq"],
+    ["Zendikar", "zen"],
+    ["Scars of Mirrodin", "som"],
+    ["Mirrodin Besieged", "mbs"],
+    ["Blood Like Rivers", "c_blr"],
+    ["Apocalypse", "apc"],
+    ["Invasion", "inv"],
+    ["Odyssey", "ody"],
+    ["Planeshift", "pls"],
+    ["Torment", "tor"],
+    ["Judgment", "jud"],
+    ["Worldwake", "wwk"],
+    ["Rise of the Eldrazi", "roe"],
+    ["Innistrad", "isd"],
+    ["FUN 2022", "c_fun2"],
+    ["Magic 2013", "m13"],
+    ["Masters 25", "a25"],
+    ["Avacyn Restored", "avr"],
+    ["Dominaria Remastered", "dmr"],
+    ["Splinters of Novanda", "c_son"],
+    ["Conspiracy", "cns"],
+    ["Battlebond", "bbd"],
+    ["Commander Legends", "cmr"]
+]
+
+
+with open("guild.pickle", "rb") as f:
+    guild = pickle.load(f)
+
+
+class Starlight(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    def getSeqID(self):
+        try:
+            with open("counter.pickle", "rb") as f:
+                e = pickle.load(f)
+        except:
+            with open("counter.pickle", "wb") as f:
+                pickle.dump(0, f)
+            e = 0
+        with open("counter.pickle", "wb") as f:
+            pickle.dump(e + 1, f)
+        return str(e + 1)
+
+    async def get_sets(ctx: discord.AutocompleteContext):
+        return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
+
+    @commands.slash_command(guild_ids=[guild], description="Create packs.")
+    @discord.option(
+        name="set",
+        description="Choose the set.",
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices][:10],
+        autocomplete=get_sets,
+        type=str,
+    )
+    @discord.option(
+        name="num",
+        description="Number of packs.",
+        min_value=1,
+        max_value=72,
+        default=36,
+        type=int,
+    )
+    @discord.option(
+        name="lands",
+        description="Include a basic land pack from this set?",
+        type=bool,
+        default=False,
+    )
+    async def v2_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
+        await ctx.defer(ephemeral=True)
+        try:
+            raw = p_caller.get_packs(set, num, lands)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
+        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
+        await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
+
+    async def get_sets_v3(ctx: discord.AutocompleteContext):
+        return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
+
+    @commands.slash_command(guild_ids=[guild], description="Create packs.")
+    @discord.option(
+        name="set",
+        description="Choose the set.",
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10],
+        autocomplete=get_sets_v3,
+        type=str,
+    )
+    @discord.option(
+        name="num",
+        description="Number of packs.",
+        min_value=1,
+        max_value=72,
+        default=36,
+        type=int,
+    )
+    @discord.option(
+        name="lands",
+        description="Include a basic land pack from this set?",
+        type=bool,
+        default=False,
+    )
+    async def v3_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
+        await ctx.defer(ephemeral=True)
+        try:
+            raw = p_caller.get_packs_v3(set, num, lands)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+                ephemeral=True,
+            )
+        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
+        await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
+
+    @commands.slash_command(guild_ids=[guild], description="Load a pack image for a Pack 1, Pick 1.")
+    @discord.option(
+        name="set",
+        description="Choose the set.",
+        options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10],
+        autocomplete=get_sets_v3,
+        type=str,
+    )
+    async def v3_p1p1(self, ctx: discord.ApplicationContext, set: str):
+        await ctx.defer()
+        real_name = [s[0] for s in set_choices_v3 if s[1] == set][0]
+        try:
+            raw = p1p1.make_p1p1(set)
+            f_o = discord.File(raw, f"p1p1_{set}.png")
+            await ctx.respond(content=f"Pack 1, Pick 1 for {real_name}", file=f_o)
+        except:
+            return await ctx.respond(
+                "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
+            )
+        return
+
+    @commands.slash_command(guild_ids=[guild], description="Load a V3 set file and make packs.")
+    @discord.option(name="v3", description="A V3 JSON file.", type=discord.Attachment)
+    @discord.option(
+        name="num",
+        description="Number of packs.",
+        min_value=1,
+        max_value=72,
+        default=36,
+        type=int,
+    )
+    @discord.option(
+        name="lands",
+        description="Include a basic land pack from this set?",
+        type=bool,
+        default=False,
+    )
+    async def v3_upload(self, ctx: discord.ApplicationContext, v3: discord.Attachment, num: int, lands: bool):
+        await ctx.defer(ephemeral=True)
+        f = io.BytesIO(await v3.read())
+        # Verify that v3 is actually in v3 format
+        # Pass into function
+        try:
+            raw = p_caller.get_packs_setfile(f, num, lands)
+        except json.JSONDecodeError as err:
+            return await ctx.respond(
+                f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True
+            )
+        except KeyError as err:
+            return await ctx.respond(
+                f"The file you submitted wasn't properly formed. It is missing the {err} key. If you don't understand what that means, contact Moon.",
+                ephemeral=True,
+            )
+        except:
+            return await ctx.respond(
+                "Something went wrong with your file as it was processing.\nCheck to ensure that all required fields have good values and that the document is valid JSON.\nIf that all checks out, contact Moon.",
+                ephemeral=True,
+            )
+        # Return errors
+        # Return packs
+        packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{'your custom set'}_{self.getSeqID()}.json")
+        await ctx.respond(content=f"Here are your {num} packs of {'your custom set'}", file=packs, ephemeral=True)
+        return
+
+
+def setup(bot):
+    bot.add_cog(Starlight(bot))
