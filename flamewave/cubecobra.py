@@ -1,24 +1,23 @@
-from flamewave import tts_import
+from flamewave import collection_import
 import requests
 import random
 import csv
 import copy
 import json
-
-from flamewave import tts_output
+from flamewave import tts_classes
 
 
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
 
-    save = tts_output.Save(name=f"packs of the cube with id {cc_id}")
+    save = tts_classes.Save(name=f"packs of the cube with id {cc_id}")
     response = requests.get(
         f"https://cubecobra.com/cube/api/cubeJSON/{cc_id}",
         headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
-    cardinfo = tts_import.mm_collection(
+    cardinfo = collection_import.mm_collection(
         [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
         out_dict=True,
     )
@@ -32,33 +31,31 @@ def get_cube(cc_id, p_len):
                     {
                         **card["card_faces"][0],
                         "image_uris": {
-                            "normal": row['imgUrl']
-                            if 'imgUrl' in row
+                            "normal": row["imgUrl"]
+                            if "imgUrl" in row
                             else card["card_faces"][0]["image_uris"]["normal"]
                         },
                     },
                     {
                         **card["card_faces"][1],
                         "image_uris": {
-                            "normal": row['imgBackUrl']
-                            if 'imgBackUrl' in row
+                            "normal": row["imgBackUrl"]
+                            if "imgBackUrl" in row
                             else card["card_faces"][1]["image_uris"]["normal"]
                         },
                     },
                 ],
-                "finish": row["finish"] == "Foil" if 'finish' in row else False,
+                "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         else:
             x = {
-                "image_uris": {
-                    "normal": row['imgUrl'] if 'imgUrl' in row else card["image_uris"]["normal"]
-                },
-                "finish": row["finish"] == "Foil" if 'finish' in row else False,
+                "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else card["image_uris"]["normal"]},
+                "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         cubelist.append({**card, **x})
     random.shuffle(cubelist)
     for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
-        the_cube = tts_output.Pack()
+        the_cube = tts_classes.Deck()
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
         save.addObject(the_cube)
     return save.getOut()

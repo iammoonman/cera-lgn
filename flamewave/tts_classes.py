@@ -56,7 +56,7 @@ class Save:
         }
 
 
-class Pack:
+class Deck:
     """Represents one stack of cards output to the bag."""
 
     """Required for TTS."""
@@ -103,7 +103,7 @@ class Pack:
             "CustomDeck": {},
             "ContainedObjects": [],
         }
-        self.Decals = [random.choice([Pack.StarFoil, Pack.SetSpiralFoil, Pack.VoronoiFoil])]
+        self.Decals = [random.choice([Deck.StarFoil, Deck.SetSpiralFoil, Deck.VoronoiFoil])]
         self.Counter = 0
         """Uniquely identifies each card in the pack."""
 

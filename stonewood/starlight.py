@@ -2,7 +2,7 @@ import json
 import discord
 import pickle
 
-from starlight import p_caller
+from starlight import p_getter
 import io
 from discord.ext import commands
 from starlight import p1p1
@@ -147,7 +147,7 @@ class Starlight(commands.Cog):
     async def v2_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
         try:
-            raw = p_caller.get_packs(set, num, lands)
+            raw = p_getter.get_packs(set, num, lands)
         except:
             return await ctx.respond(
                 "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
@@ -184,7 +184,7 @@ class Starlight(commands.Cog):
     async def v3_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
         try:
-            raw = p_caller.get_packs_v3(set, num, lands)
+            raw = p_getter.get_packs_v3(set, num, lands)
         except:
             return await ctx.respond(
                 "Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.",
@@ -236,7 +236,7 @@ class Starlight(commands.Cog):
         # Verify that v3 is actually in v3 format
         # Pass into function
         try:
-            raw = p_caller.get_packs_setfile(f, num, lands)
+            raw = p_getter.get_packs_setfile(f, num, lands)
         except json.JSONDecodeError as err:
             return await ctx.respond(
                 f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True

@@ -1,8 +1,7 @@
 import requests
 import re
 import html
-
-from flamewave.tts_import import tts_parse
+from flamewave.tts_parse import tts_parse
 
 legal_sets = {
     "c_dms": "dreamscape",

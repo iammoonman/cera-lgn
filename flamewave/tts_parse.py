@@ -1,77 +1,4 @@
-import mmap
-import time
-import orjson
-import requests
-import ijson
 import re
-
-
-def scryfall_collection(cardlist, out_dict=False):
-    """Returns a list of JSON data from Scryfall, parsed into the tts format.
-
-    Input uses [ set , name ].
-
-    Don't input more than 75 card objects."""
-    if len(cardlist) > 74:
-        return None
-    time.sleep(0.25)
-    response = requests.post(
-        f"https://api.scryfall.com/cards/collection",
-        json={"identifiers": [{"set": i[0], "name": i[1]} for i in cardlist]},
-        headers={
-            "User-Agent": "Python 3.9.13 CERA",
-            "Content-Type": "application/json",
-        },
-    )
-    f_n = response.json()["data"]
-    out = []
-    out_2 = {}
-    for item in f_n:
-        c_obj = tts_parse(item)
-        out.append(c_obj)
-        out_2[c_obj["name"] + c_obj["set"]] = c_obj
-    if out_dict:
-        return out_2
-    return out
-
-
-def scryfall_set(setcode):
-    """Returns list of JSON data containing all cards from the set. Deprecated."""
-    full_set_json = []
-    time.sleep(0.25)
-    response = requests.get(
-        f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints",
-        headers={"User-Agent": "Python 3.9.13 CERA"},
-    )
-    full_set_json += (resjson := response.json())["data"]
-    while resjson["has_more"]:
-        time.sleep(0.25)
-        response = requests.get(
-            resjson["next_page"],
-            headers={"User-Agent": "Python 3.9.13 CERA"},
-        )
-        full_set_json += (resjson := response.json())["data"]
-    return full_set_json
-
-
-def ijson_collection(cardlist, out_dict=False):
-    """Returns list of JSON data containing all cards from the list by collector_number and set."""
-    blob_json = []
-    str_l = {f"{a[0]}{a[1]}": True for a in cardlist}
-    out = {}
-    f = open("default-cards.json", "rb")
-    objects = ijson.items(f, "item")
-    for o in objects:
-        if f'{o["collector_number"]}{o["set"]}' in str_l:
-            card_obj = tts_parse(o)
-            blob_json.append(card_obj)
-            out[f'{o["collector_number"]}{o["set"]}'] = card_obj
-        if len(blob_json) == len(cardlist):
-            break
-    f.close()
-    if out_dict:
-        return out
-    return blob_json
 
 
 def italicize_reminder(text: str):
@@ -83,7 +10,7 @@ def italicize_reminder(text: str):
 def make_oracle_dfc(card_dota, is_reverse=False):
     face_1 = card_dota["card_faces"][0]
     face_2 = card_dota["card_faces"][1]
-    descriptionHold = (
+    return (
         ("" if is_reverse else "[6E6E6E]")
         + f'[b]{face_1["name"]} {face_1["mana_cost"]}[/b]'
         + "\n"
@@ -130,11 +57,10 @@ def make_oracle_dfc(card_dota, is_reverse=False):
         )
         + ("[-]" if is_reverse else "")
     )
-    return descriptionHold
 
 
 def make_oracle_normal(card_data):
-    descriptionHold = (
+    return (
         f'[b]{card_data["name"]} {card_data["mana_cost"]}[/b]'
         + "\n"
         + f'{card_data["type_line"]} {rarity_icon(card_data["rarity"])}'
@@ -153,11 +79,10 @@ def make_oracle_normal(card_data):
             else ""
         )
     )
-    return descriptionHold
 
 
 def make_oracle_splitadventure(card_data):
-    descriptionHold = (
+    return (
         "[b]"
         + f'[b]{card_data["card_faces"][0]["name"]} {card_data["card_faces"][0]["mana_cost"]}[/b]'
         + "\n"
@@ -182,7 +107,6 @@ def make_oracle_splitadventure(card_data):
             else ""
         )
     )
-    return descriptionHold
 
 
 def make_oracle_reversible(card_data):
@@ -190,7 +114,7 @@ def make_oracle_reversible(card_data):
 
 
 def make_oracle_vanguard(card_data):
-    descriptionHold = (
+    return (
         "[b]"
         + card_data["name"]
         + card_data["mana_cost"]
@@ -205,7 +129,6 @@ def make_oracle_vanguard(card_data):
         + "\n"
         + f'Hand: {card_data["hand_modifier"]} + 7 = [b]{(7 + int(card_data["hand_modifier"]))}[/b]'
     )
-    return descriptionHold
 
 
 def rarity_icon(rarity):
@@ -243,7 +166,9 @@ def tts_parse(card):
                 {
                     "name": face["name"],
                     "type_line": face["type_line"],
-                    "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"] if "type_line" in face else False,
+                    "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"]
+                    if "type_line" in face
+                    else False,
                     "oracle_text": make_oracle_dfc(card, side == 0),
                     "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
                     "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
@@ -339,35 +264,3 @@ def tts_parse(card):
         }
     card_obj = {**card_obj, **extra_obj}
     return card_obj
-
-
-def mm_collection(cardlist, out_dict=False):
-    def file_parse_generator():
-        with open("default-cards.json", mode="r") as f:
-            with mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_READ) as m:
-                for line in iter(m.readline, b""):
-                    L = line.strip()
-                    if len(L) > 5:  # We assume that the lines are nicely formed.
-                        if L.endswith(b","):
-                            yield orjson.loads(L[:-1])
-                        else:
-                            yield orjson.loads(L)
-                    else:
-                        continue
-
-    generator = file_parse_generator()
-    string_list = {f"{a[0]}{a[1]}": True for a in cardlist}
-    blob_json = []
-    out = {}
-    while True:
-        try:
-            card = next(generator)
-        except:
-            break
-        if f'{card["collector_number"]}{card["set"]}' in string_list:
-            card_obj = tts_parse(card)
-            blob_json.append(card_obj)
-            out[f'{card["collector_number"]}{card["set"]}'] = card_obj
-    if out_dict:
-        return out
-    return blob_json
