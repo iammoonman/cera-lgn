@@ -1,23 +1,22 @@
-from flamewave import collection_import
+import flamewave
 import requests
 import random
 import csv
 import copy
 import json
-from flamewave import tts_classes
 
 
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
 
-    save = tts_classes.Save(name=f"packs of the cube with id {cc_id}")
+    save = flamewave.tts_classes.Save(name=f"packs of the cube with id {cc_id}")
     response = requests.get(
         f"https://cubecobra.com/cube/api/cubeJSON/{cc_id}",
         headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
-    cardinfo = collection_import.mm_collection(
+    cardinfo = flamewave.collection_import.mm_collection(
         [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
         out_dict=True,
     )
@@ -47,7 +46,7 @@ def get_cube(cc_id, p_len):
         cubelist.append({**card, **x})
     random.shuffle(cubelist)
     for i in [cubelist[u : u + p_len] for u in range(0, len(cubelist), p_len)]:
-        the_cube = tts_classes.Deck()
+        the_cube = flamewave.tts_classes.Deck()
         the_cube.import_cards(i, [i.index(q) for q in [r for r in i if r["finish"]]])
         save.addObject(the_cube)
     return save.getOut()

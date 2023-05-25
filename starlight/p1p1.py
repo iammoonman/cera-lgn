@@ -1,6 +1,6 @@
 import time
 from PIL import Image
-from starlight import p_getter
+import starlight
 import io
 import requests
 import re
@@ -14,7 +14,7 @@ def make_p1p1(setcode):
 
     Returns a BytesIO object."""
     # Grab from get_p1p1_v3
-    pack, foils = p_getter.get_p1p1_v3(setcode)
+    pack, foils = starlight.p_getter.get_p1p1_v3(setcode)
     width = min(len(pack), 5) * im_width
     height = (len(pack) // 5) if len(pack) % 5 == 0 else (len(pack) // 5 + 1)
     height = height * im_height

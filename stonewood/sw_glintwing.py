@@ -3,7 +3,7 @@ import json
 from typing import Union
 import discord
 from discord.ext import commands
-from glintwing import Draft
+import glintwing
 import pickle
 import datetime
 
@@ -31,7 +31,7 @@ with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
 
 
-def starting_em(draft: Draft):
+def starting_em(draft: glintwing.Draft):
     return discord.Embed(
         title=f"{draft.title} | ENTRY",
         fields=[
@@ -44,7 +44,7 @@ def starting_em(draft: Draft):
     )
 
 
-def ig_em(draft: Draft, timekeepstamp: datetime.datetime):
+def ig_em(draft: glintwing.Draft, timekeepstamp: datetime.datetime):
     return discord.Embed(
         title=f"{draft.title} | Round: {(w:=[r for r in draft.rounds if not r.completed][0]).title}",
         fields=[
@@ -60,7 +60,7 @@ def ig_em(draft: Draft, timekeepstamp: datetime.datetime):
     )
 
 
-def end_em(draft: Draft):
+def end_em(draft: glintwing.Draft):
     return discord.Embed(
         title=f"{draft.title} | FINAL",
         fields=[
@@ -78,7 +78,7 @@ def end_em(draft: Draft):
 class Glintwing(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
-        self.drafts: dict[str, list[Draft]] = {}
+        self.drafts: dict[str, list[glintwing.Draft]] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
 
@@ -122,7 +122,7 @@ class Glintwing(commands.Cog):
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
         self.drafts[msg.id] = [
-            Draft(
+            glintwing.Draft(
                 draftID=msg.id,
                 date=datetime.datetime.today().strftime("%Y-%m-%d"),
                 host=str(ctx.author.id),

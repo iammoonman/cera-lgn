@@ -1,7 +1,7 @@
 import requests
 import re
 import html
-from flamewave.tts_parse import tts_parse
+import flamewave
 
 legal_sets = {
     "c_dms": "dreamscape",
@@ -87,7 +87,7 @@ def get_ps_set(setcode):
             sc_obj["mana_cost"] = face_1["mana_cost"] + "//" + face_2["mana_cost"]
             sc_obj["card_faces"] = [face_1, face_2]
             sc_obj["stitched"] = True
-        out.append(tts_parse(sc_obj))
+        out.append(flamewave.tts_parse(sc_obj))
     return out
 
 

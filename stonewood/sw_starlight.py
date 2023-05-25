@@ -2,10 +2,9 @@ import json
 import discord
 import pickle
 
-from starlight import p_getter
+import starlight
 import io
 from discord.ext import commands
-from starlight import p1p1
 
 set_choices = [
     ["Fifth Edition", "5ed"],
@@ -97,7 +96,7 @@ class Starlight(commands.Cog):
     async def v2_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
         try:
-            raw = p_getter.get_packs(set, num, lands)
+            raw = starlight.p_getter.get_packs(set, num, lands)
         except:
             return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
@@ -113,7 +112,7 @@ class Starlight(commands.Cog):
     async def v3_pack(self, ctx: discord.ApplicationContext, set: str, num: int, lands: bool):
         await ctx.defer(ephemeral=True)
         try:
-            raw = p_getter.get_packs_v3(set, num, lands)
+            raw = starlight.p_getter.get_packs_v3(set, num, lands)
         except:
             return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{self.getSeqID()}.json")
@@ -125,7 +124,7 @@ class Starlight(commands.Cog):
         await ctx.defer()
         real_name = [s[0] for s in set_choices_v3 if s[1] == set][0]
         try:
-            raw = p1p1.make_p1p1(set)
+            raw = starlight.p1p1.make_p1p1(set)
             f_o = discord.File(raw, f"p1p1_{set}.png")
             await ctx.respond(content=f"Pack 1, Pick 1 for {real_name}", file=f_o)
         except:
@@ -142,7 +141,7 @@ class Starlight(commands.Cog):
         # Verify that v3 is actually in v3 format
         # Pass into function
         try:
-            raw = p_getter.get_packs_setfile(f, num, lands)
+            raw = starlight.p_getter.get_packs_setfile(f, num, lands)
         except json.JSONDecodeError as err:
             return await ctx.respond(f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True)
         except KeyError as err:

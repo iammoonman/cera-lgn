@@ -1,7 +1,7 @@
 import json
-from glintwing import Draft
+import glintwing
 
-test_draft = Draft("test", "", "1", "anti", "", "", 3)
+test_draft = glintwing.Draft("test", "", "1", "anti", "", "", 3)
 test_draft.add_player("1", is_host=True, p_id="1", seat=0)
 test_draft.add_player("2", p_id="2", seat=1)
 test_draft.add_player("3", p_id="3", seat=2)
@@ -31,7 +31,7 @@ print(json.dumps(test_draft.tojson()))
 print("---------------")
 print("---------------")
 print("---------------")
-test_draft_2 = Draft("test", "", "1", "anti", "", "", 3)
+test_draft_2 = glintwing.Draft("test", "", "1", "anti", "", "", 3)
 test_draft_2.add_player("1", is_host=True, p_id="1", seat=0)
 test_draft_2.add_player("2", p_id="2", seat=1)
 test_draft_2.add_player("3", p_id="3", seat=2)
@@ -66,7 +66,7 @@ print(json.dumps(test_draft_2.tojson()))
 print("---------------")
 print("---------------")
 print("---------------")
-test_draft_3 = Draft("test", "", "1", "anti", "", "", 3)
+test_draft_3 = glintwing.Draft("test", "", "1", "anti", "", "", 3)
 test_draft_3.add_player("1", is_host=True, p_id="1", seat=0)
 test_draft_3.add_player("2", p_id="2", seat=1)
 test_draft_3.add_player("3", p_id="3", seat=2)

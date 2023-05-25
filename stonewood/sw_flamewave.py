@@ -3,8 +3,7 @@ import json
 import discord
 from discord.ext import commands
 import pickle
-from flamewave import cubecobra
-from flamewave import draftmancer
+import flamewave
 from io import BytesIO
 
 with open("guild.pickle", "rb") as f:
@@ -33,7 +32,7 @@ class Flamewave(commands.Cog):
     async def cc_cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
         await ctx.defer(ephemeral=True)
         try:
-            raw = cubecobra.get_cube(cc_id, len_p)
+            raw = flamewave.cubecobra.get_cube(cc_id, len_p)
         except:
             return await ctx.respond(
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
@@ -48,7 +47,7 @@ class Flamewave(commands.Cog):
     async def cc_p1p1(self, ctx: discord.ApplicationContext, cc_id: str, seed: str):
         await ctx.defer()
         try:
-            uri, new_seed = cubecobra.get_cube_p1p1(cc_id, seed)
+            uri, new_seed = flamewave.cubecobra.get_cube_p1p1(cc_id, seed)
         except:
             return await ctx.respond(
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
@@ -60,7 +59,7 @@ class Flamewave(commands.Cog):
     async def tk_log(self, ctx: discord.ApplicationContext, file: discord.Attachment):
         await ctx.defer(ephemeral=True)
         f = BytesIO(await file.read())
-        f2, n = draftmancer.full_draftmancer_log(f)
+        f2, n = flamewave.draftmancer.full_draftmancer_log(f)
         new_file = discord.File(io.StringIO(json.dumps(f2)), filename=f"draft_{n}.json")
         await ctx.respond(file=new_file, ephemeral=True)
         return
