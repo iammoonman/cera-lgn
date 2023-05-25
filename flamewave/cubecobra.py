@@ -30,19 +30,11 @@ def get_cube(cc_id, p_len):
                 "card_faces": [
                     {
                         **card["card_faces"][0],
-                        "image_uris": {
-                            "normal": row["imgUrl"]
-                            if "imgUrl" in row
-                            else card["card_faces"][0]["image_uris"]["normal"]
-                        },
+                        "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else card["card_faces"][0]["image_uris"]["normal"]},
                     },
                     {
                         **card["card_faces"][1],
-                        "image_uris": {
-                            "normal": row["imgBackUrl"]
-                            if "imgBackUrl" in row
-                            else card["card_faces"][1]["image_uris"]["normal"]
-                        },
+                        "image_uris": {"normal": row["imgBackUrl"] if "imgBackUrl" in row else card["card_faces"][1]["image_uris"]["normal"]},
                     },
                 ],
                 "finish": row["finish"] == "Foil" if "finish" in row else False,

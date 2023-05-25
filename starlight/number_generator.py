@@ -34,9 +34,7 @@ def get_section(number_to_take):
     try:
         section_chosen = random.choice([s for s in sections if len(s) >= number_to_take])
     except:
-        sections = respawn_sections(number_to_take, min_len=number_to_take - 2) + respawn_sections(
-            number_to_take, min_len=number_to_take - 2
-        )
+        sections = respawn_sections(number_to_take, min_len=number_to_take - 2) + respawn_sections(number_to_take, min_len=number_to_take - 2)
         section_chosen = random.choice([s for s in sections if len(s) >= number_to_take])
     sections.remove(section_chosen)
     while len(section_chosen) > number_to_take:

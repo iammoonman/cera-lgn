@@ -51,9 +51,7 @@ class Draft:
                     "matches": [
                         {
                             "p_ids": [u.player_id if u.player_id != "-1" else "BYE" for u in q.players],
-                            "games": [(x if x is not None else "TIE") for x in q.gwinners]
-                            if "-1" not in [p.player_id for p in q.players]
-                            else [],
+                            "games": [(x if x is not None else "TIE") for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else [],
                             "drops": {k: v for (k, v) in q.drops.items() if k != "-1"},
                             # "bye": "-1" in [p.player_id for p in q.players],
                         }
@@ -92,10 +90,7 @@ class Draft:
                 indices.append((halfway_around - math.floor(leng / div)) % leng)
                 indices.append((first_player.seat + math.ceil(leng / div)) % leng)
                 indices.append((first_player.seat - math.floor(leng / div)) % leng)
-            player_opponents[first_player.player_id] = [
-                self.get_player_by_seat(x)
-                for x in [i for n, i in enumerate(indices) if i not in indices[:n] and i != 0]
-            ]
+            player_opponents[first_player.player_id] = [self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n] and i != 0]]
         sorted_players = [y for y in self.players if not y.dropped]
         sorted_players.sort(key=lambda p: (p.score, p.gpts), reverse=True)
         pairs: list[list[Player]] = []
@@ -210,9 +205,7 @@ class Draft:
                 wasTie = len(set(match.gwinners)) == len(match.gwinners)
                 wasBye = "-1" in [o.player_id for o in match.players]
                 for player in match.players:
-                    if (
-                        player.player_id == "-1"
-                    ):  # Catch fake bye player. Might not be needed, since they aren't in the players list.
+                    if player.player_id == "-1":  # Catch fake bye player. Might not be needed, since they aren't in the players list.
                         continue
                     if wasBye:
                         player.score += 3
@@ -230,9 +223,7 @@ class Draft:
                         player.gpts += len([i for i in match.gwinners if i == player.player_id])
                         player.dropped = match.drops[player.player_id]
                     else:
-                        won = len([i for i in match.gwinners if i == player.player_id]) > len(
-                            [i for i in match.gwinners if i != player.player_id]
-                        )
+                        won = len([i for i in match.gwinners if i == player.player_id]) > len([i for i in match.gwinners if i != player.player_id])
                         player.score += 3 if won else 0
                         player.mcount += 1
                         player.gcount += len([i for i in match.gwinners if i is not None])
@@ -292,12 +283,8 @@ class Draft:
             player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
             player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
         for player in self.players:
-            player.ogp = sum(h := [p.gwp if p.gwp is not None else 0 for p in player.opponents]) / (
-                len(h) if len(h) > 0 else 1
-            )
-            player.omp = sum(j := [p.mwp if p.mwp is not None else 0 for p in player.opponents]) / (
-                len(j) if len(j) > 0 else 1
-            )
+            player.ogp = sum(h := [p.gwp if p.gwp is not None else 0 for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
+            player.omp = sum(j := [p.mwp if p.mwp is not None else 0 for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
         return
 
 
@@ -312,7 +299,7 @@ class Round:
 
 
 class Player:
-    def __init__(self, n: str, id: str, s: int = 0, s_c = "chair_white"):
+    def __init__(self, n: str, id: str, s: int = 0, s_c="chair_white"):
         self.player_id: str = id
         """Discord user ID for the player."""
         self.seat: int = s

@@ -100,9 +100,7 @@ def ps_collection(cardlist, out_dict=False):
             s = get_ps_set(cd)
             if s:
                 blob_json += [x for x in s if [x["collector_number"], x["set"]] in cardlist]
-                n = {
-                    f"{x['collector_number']}{x['set']}": x for x in s if [x["collector_number"], x["set"]] in cardlist
-                }
+                n = {f"{x['collector_number']}{x['set']}": x for x in s if [x["collector_number"], x["set"]] in cardlist}
                 out = {**out, **n}
     if out_dict:
         return out

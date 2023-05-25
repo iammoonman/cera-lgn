@@ -37,10 +37,7 @@ def scryfall_set(setcode):
     """Returns list of JSON data containing all cards from the set. Deprecated."""
     full_set_json = []
     time.sleep(0.25)
-    response = requests.get(
-        f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints",
-        headers={"User-Agent": "Python 3.9.13 CERA"},
-    )
+    response = requests.get(f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints", headers={"User-Agent": "Python 3.9.13 CERA"})
     full_set_json += (resjson := response.json())["data"]
     while resjson["has_more"]:
         time.sleep(0.25)

@@ -119,18 +119,14 @@ class Deck:
             self.Memo = cardData["oracle_id"]
             """Contains oracle id for tracking using the importer."""
             self.Description = ""
-            # self.SidewaysCard = False
-            # """Rotates the image clockwise."""
             """Contains oracle text, power/toughness, and loyalty if any.
             
             Formatted on import."""
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 self.Description = cardData["card_faces"][0]["oracle_text"]
-                # self.SidewaysCard = "Battle" in cardData["card_faces"][0]["type_line"]
             else:
                 # Oracle text formatting is applied on import
                 self.Description = cardData["oracle_text"]
-                # self.SidewaysCard = cardData["layout"] in ["planar", "battle"]
             self.Transform = transformAttrs
             self.ColorDiffuse = colorAttrs
             self.CardID = counter * 100
@@ -138,11 +134,7 @@ class Deck:
                 "FaceURL": re.sub(
                     "\?\d+$",
                     "",
-                    cardData["card_faces"][0]["image_uris"]["normal"]
-                    if "card_faces" in cardData.keys()
-                    and "adventure" != cardData["layout"]
-                    and "split" != cardData["layout"]
-                    else cardData["image_uris"]["normal"],
+                    cardData["card_faces"][0]["image_uris"]["normal"] if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"] else cardData["image_uris"]["normal"],
                 ),
                 "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
@@ -171,36 +163,9 @@ class Deck:
                         "Nickname": backName,
                         "Description": backDescription,
                         "Transform": transformAttrs,
-                        "AltLookAngle": (
-                            {
-                                "x": 180.0,
-                                "y": 0.0,
-                                "z": 90.0,
-                            }
-                            if cardData["card_faces"][1]["planar"]
-                            else {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0,
-                            }
-                        )
-                        if "planar" in cardData["card_faces"][1]
-                        else (
-                            {
-                                "x": 180.0,
-                                "y": 0.0,
-                                "z": 180.0,
-                            }
-                            if cardData["layout"] == "flip"
-                            else {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0,
-                            }
-                        ),
+                        "AltLookAngle": ({"x": 180.0, "y": 0.0, "z": 90.0} if cardData["card_faces"][1]["planar"] else {"x": 0.0, "y": 0.0, "z": 0.0}) if "planar" in cardData["card_faces"][1] else ({"x": 180.0, "y": 0.0, "z": 180.0} if cardData["layout"] == "flip" else {"x": 0.0, "y": 0.0, "z": 0.0}),
                         "ColorDiffuse": colorAttrs,
-                        "CardID": int((counter * 1000) - 100) * 100
-                        + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
+                        "CardID": int((counter * 1000) - 100) * 100 + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
                         # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
@@ -227,9 +192,7 @@ class Deck:
     def import_cards(self, cardDataList, foilIndexes=[]):
         """Takes a list of card objects from a Scryfall search."""
         for index, item in enumerate(cardDataList):
-            self.ContainedObjects.append(
-                tempCard := self.CardBlob(item, self.Counter + 1, index in foilIndexes, self.Decals).toDict()
-            )
+            self.ContainedObjects.append(tempCard := self.CardBlob(item, self.Counter + 1, index in foilIndexes, self.Decals).toDict())
             self.DeckIDs.append(int((self.Counter + 1) * 100))
             self.CustomDeck[str((self.Counter + 1) * 100)] = tempCard["CustomDeck"]
             self.Counter += 1
@@ -243,9 +206,6 @@ class Deck:
             "ColorDiffuse": colorAttrs,
             "Nickname": self.Nickname,
             "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
-            "CustomDeck": {
-                str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)]
-                for card in self.ContainedObjects
-            },
+            "CustomDeck": {str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)] for card in self.ContainedObjects},
             "ContainedObjects": self.ContainedObjects,
         }

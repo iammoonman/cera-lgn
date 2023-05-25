@@ -11,7 +11,7 @@ im_height = 204
 
 def make_p1p1(setcode):
     """Creates a composite image of a pack from the set.
-    
+
     Returns a BytesIO object."""
     # Grab from get_p1p1_v3
     pack, foils = p_getter.get_p1p1_v3(setcode)
@@ -36,9 +36,7 @@ def make_p1p1(setcode):
         uri = re.sub(
             "\?\d+$",
             "",
-            card["card_faces"][0]["image_uris"]["small"]
-            if "card_faces" in card.keys() and "adventure" != card["layout"] and "split" != card["layout"]
-            else card["image_uris"]["small"],
+            card["card_faces"][0]["image_uris"]["small"] if "card_faces" in card.keys() and "adventure" != card["layout"] and "split" != card["layout"] else card["image_uris"]["small"],
         )
         resp = requests.get(uri, stream=True)
         new_im = Image.open(io.BytesIO(resp.content))

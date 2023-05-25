@@ -104,20 +104,8 @@ class Tournament:
                     "playerID": p.p_id,
                     "rank": p.rank,
                     "seed": p.seed,
-                    "wins": sum(
-                        [
-                            1 if n.match.getWinnerLoser()[0] == p else 0
-                            for n in self.nodes
-                            if None not in n.match.players
-                        ]
-                    ),
-                    "losses": sum(
-                        [
-                            1 if n.match.getWinnerLoser()[1] == p else 0
-                            for n in self.nodes
-                            if p in n.match.players and None not in n.match.players
-                        ]
-                    ),
+                    "wins": sum([1 if n.match.getWinnerLoser()[0] == p else 0 for n in self.nodes if None not in n.match.players]),
+                    "losses": sum([1 if n.match.getWinnerLoser()[1] == p else 0 for n in self.nodes if p in n.match.players and None not in n.match.players]),
                 }
                 for p in self.players
             ],
@@ -206,10 +194,7 @@ class Tournament:
                 while len(tempnodes2) > 0:
                     maxnode: Tournament.BracketNode = tempnodes2.pop()
                     minnode: Tournament.BracketNode = tempnodes2.pop(0)
-                    if (
-                        Tournament.TournamentPlayer(id="0", seed=999) in maxnode.match.players
-                        and Tournament.TournamentPlayer(id="0", seed=999) in minnode.match.players
-                    ) and dropByes:
+                    if (Tournament.TournamentPlayer(id="0", seed=999) in maxnode.match.players and Tournament.TournamentPlayer(id="0", seed=999) in minnode.match.players) and dropByes:
                         p1 = [i for i in maxnode.match.players if i.id != "0"][0]
                         p2 = [i for i in minnode.match.players if i.id != "0"][0]
                         nd = Tournament.BracketNode(

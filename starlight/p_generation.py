@@ -175,9 +175,7 @@ def pack_gen_v3(
         drop_choice: dict = {}
         if "drops" in distro.keys():
             if slot_key in distro["drops"].keys():
-                drop_choice = random.choices(
-                    [o for o in distro["drops"][slot_key]], [o["freq"] for o in distro["drops"][slot_key]], k=1
-                )[0]
+                drop_choice = random.choices([o for o in distro["drops"][slot_key]], [o["freq"] for o in distro["drops"][slot_key]], k=1)[0]
         # For each key in slot[option]['struct']
         for sheet_key, sheet_take in struct.items():
             # If "duplicate_control" in slot['flags'], pop number from d_c
@@ -199,11 +197,7 @@ def pack_gen_v3(
             # print(slot_key, sheet_key, sheet_take, drop_sheet)
             for c in range(sheet_take - drop_sheet):
                 # Take a card from slot['sheets'][key] according to the number plus x
-                pack += [
-                    set["slots"][slot_key]["sheets"][sheet_key][
-                        (index + c) % len(set["slots"][slot_key]["sheets"][sheet_key])
-                    ][:]
-                ]
+                pack += [set["slots"][slot_key]["sheets"][sheet_key][(index + c) % len(set["slots"][slot_key]["sheets"][sheet_key])][:]]
                 # If "foil" in slot['flags'], add that index to the foil array
                 if "foil" in set["slots"][slot_key]["flags"]:
                     foil_indexes.append(len(pack))
