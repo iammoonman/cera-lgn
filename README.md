@@ -1,4 +1,4 @@
-# cera
+# cera-lgn
 
 This monorepo contains various connected projects surrounding the operation and management of the Discord server, MTG Limited on TTS.  
 
