@@ -1,0 +1,1 @@
+from glintwing.draft_class import Draft
