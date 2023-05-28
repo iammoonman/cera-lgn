@@ -308,7 +308,7 @@ class IG_View(discord.ui.View):
                     self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
                     await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
                 else:
-                    with open(f"pagessite/src/data/{ctx.message.id}.json", "w") as f:
+                    with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                         json.dump(self.bot.drafts[ctx.message.id][-1].tojson(), f, ensure_ascii=False, indent=4)
                     await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id][-1])], view=None)
             else:

@@ -79,7 +79,7 @@ def tts_parse(card):
         "collector_number": card["collector_number"],
         "planar": "Battle " in card["type_line"] or "Plane " in card["type_line"] if "type_line" in card else False,
     }
-    if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle"]:
+    if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle", "double_faced_token"]:
         extra_obj = {
             "stitched": card["stitched"] if "stitched" in card else False,
             "card_faces": [
