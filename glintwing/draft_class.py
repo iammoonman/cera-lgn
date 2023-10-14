@@ -15,6 +15,8 @@ class Draft:
         description: str,
         title: str,
         max_rounds: int = 3,
+        cube_id: str = '',
+        set_code: str = '',
     ):
         self.draftID: str = draftID
         """Unique ID."""
@@ -29,6 +31,8 @@ class Draft:
         self.players: list[Player] = []
         self.rounds: list[Round] = []
         self.max_rounds: int = max_rounds
+        self.cube_id: str = cube_id
+        self.set_code: str = set_code
 
     def get_player_by_id(self, id: str):
         return next(player for player in self.players if player.player_id == id)
@@ -39,44 +43,35 @@ class Draft:
     def tojson(self):
         """Calculates the final scores of the draft and returns a JSON."""
         self.calculate()
+        matches = {
+            d: [
+                {
+                    "p_ids": [u.player_id for u in q.players if u.player_id != "-1"],
+                    "games": [[j.player_id for j in q.players].index(x) for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else None,
+                }
+                for q in i.matches
+            ]
+            for [d, i] in enumerate(self.rounds)
+        }
         draftobj = {
             "id": self.draftID,
-            "tag": self.tag,
-            "date": self.date,
-            "description": self.description,
-            "title": self.title,
-            "rounds": [
-                {
-                    "title": i.title,
-                    "matches": [
-                        {
-                            "p_ids": [u.player_id if u.player_id != "-1" else "BYE" for u in q.players],
-                            "games": [(x if x is not None else "TIE") for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else [],
-                            "drops": {k: v for (k, v) in q.drops.items() if k != "-1"},
-                            # "bye": "-1" in [p.player_id for p in q.players],
-                        }
-                        for q in i.matches
-                    ],
-                }
-                for i in self.rounds
-            ],
-            "scores": {
-                i.player_id: {
-                    "id": i.player_id,
-                    "points": i.score,
-                    "gwp": f"{i.gwp:.2f}",
-                    "ogp": f"{i.ogp:.2f}",
-                    "omp": f"{i.omp:.2f}",
-                }
-                for i in self.players
+            "meta": {
+                "date": self.date,
+                "title": self.title,
+                **({"tag": self.tag} if self.tag != 'anti' and self.tag else {}),
+                **({"description": self.description} if self.description else {}),
+                **({"host": self.host} if self.host else {}),
+                **({"cube_id": self.cube_id} if self.cube_id else {}),
+                **({"set_code": self.set_code} if self.set_code else {}),
             },
+            **matches,
         }
         return draftobj
 
     def rotation_pairings(self):
         player_opponents = {}
         leng = len(self.players)
-        players_sorted = [p for p in self.players if not p.dropped]
+        players_sorted = [p for p in self.players]
         players_sorted.sort(key=lambda p: (p.score, p.gpts), reverse=True)
         for first_player in players_sorted:
             # Players have a hierarchy of who they want to play against.
@@ -90,7 +85,7 @@ class Draft:
                 indices.append((halfway_around - math.floor(leng / div)) % leng)
                 indices.append((first_player.seat + math.ceil(leng / div)) % leng)
                 indices.append((first_player.seat - math.floor(leng / div)) % leng)
-            player_opponents[first_player.player_id] = [self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n] and i != 0]]
+            player_opponents[first_player.player_id] = [self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n]] if x != first_player.seat]
         sorted_players = [y for y in self.players if not y.dropped]
         sorted_players.sort(key=lambda p: (p.score, p.gpts), reverse=True)
         pairs: list[list[Player]] = []
@@ -171,21 +166,6 @@ class Draft:
                 match.players = [p_id, Player("Bye", "-1")]
                 match.gwinners = [p_id, p_id]
         return
-
-    # def parse_match_list(self, p_id, result):
-    #     """Parses a match result report from a player. Uses a list of player ids to reference game results, with None as a tie."""
-    #     player = [p for p in self.players if p.player_id == p_id][0]
-    #     round = [r for r in self.rounds if r.completed == False][0]
-    #     for match in [m for m in round.matches if player in m.players]:
-    #         if match.players.index(player) == 0:
-    #             p_index = 0
-    #             o_index = 1
-    #         else:
-    #             p_index = 1
-    #             o_index = 0
-    #         # result = [p_id,o_id,None]
-    #         self.gwinners = [(p_index if i == p_id else o_index) if i is not None else None for i in result]
-    #     return
 
     def finish_round(self):
         """Checks and completes a round in preparation of ending the event or starting a new round."""
