@@ -123,7 +123,7 @@ class Glintwing(commands.Cog):
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
-        self.drafts[msg.id] = [glintwing.Draft(draftID=msg.id, date=datetime.datetime.today().strftime("%Y-%m-%d"), host=str(ctx.author.id), tag=tag, description=desc, title=title, max_rounds=rounds, set_code=set_code, cube_id=cube_id)]
+        self.drafts[msg.id] = [glintwing.Draft(draftID=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, max_rounds=rounds, set_code=set_code, cube_id=cube_id)]
         self.drafts[msg.id][-1].add_player(
             p_name=ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
             p_id=str(ctx.author.id),
