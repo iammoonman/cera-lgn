@@ -10,6 +10,7 @@ import datetime
 taglist = {
     "ptm": "Prime Time With Moon",
     "ths": "Thursday Night Draft",
+    "deb": "Draft Every Block",
     "anti": "No Tag",
 }
 bslash = "\n"

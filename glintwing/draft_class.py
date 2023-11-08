@@ -44,17 +44,17 @@ class Draft:
         """Calculates the final scores of the draft and returns a JSON."""
         self.calculate()
         matches = {
-            d: [
+            f'R_{d}': [
                 {
-                    "p_ids": [u.player_id for u in q.players if u.player_id != "-1"],
-                    "games": [[j.player_id for j in q.players].index(x) for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else None,
+                    "players": [u.player_id for u in q.players if u.player_id != "-1"],
+                    "games": [[j.player_id for j in q.players].index(x) for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else [],
                 }
                 for q in i.matches
             ]
             for [d, i] in enumerate(self.rounds)
         }
         draftobj = {
-            "id": self.draftID,
+            "id": f'{self.draftID}',
             "meta": {
                 "date": self.date,
                 "title": self.title,
