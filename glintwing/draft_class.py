@@ -113,15 +113,17 @@ class Draft:
                 recursive_score(None, deepScore, [*deepPairings, [nextPlayer, Player("BYE", "-1")]])
             return
 
-        recursive_score([p for p in self.players if not p.dropped][0], 0, [])
+        pairing_players = [p for p in self.players if not p.dropped]
+        pairing_players.sort()
+        recursive_score(pairing_players[0], 0, [])
         pairscores.sort(key=lambda x: x[1], reverse=True)
         pairings = pairscores[0][0]
-        print(f'The best pairing score is: {pairscores[0][1]}')
+        # print(f'The best pairing score is: {pairscores[0][1]}')
         for pair in pairings:
-            if pair[0].player_id == '-1':
+            if pair[0].player_id == "-1":
                 pair[0].had_bye = True
                 continue
-            if pair[1].player_id == '-1':
+            if pair[1].player_id == "-1":
                 pair[1].had_bye = True
                 continue
             pair[1].opponents.append(pair[0])
@@ -386,7 +388,7 @@ class Player:
         return self.score < other.score
 
     def __repr__(self):
-        return f"{self.name} (pts:{self.score}) (st:{self.seat})"
+        return f"{self.name} (pts:{self.score})"  # (st:{self.seat})"
 
     def __eq__(self, other):
         return self.player_id == other.player_id
