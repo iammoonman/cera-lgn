@@ -71,7 +71,7 @@ class Draft:
     def idiot_pairings(self):
         player_opponents = {}
 
-        def sortfunc(pA: Player, pB: Player):
+        def scoringFunc(pA: Player, pB: Player):
             out_val = 0
             if pB.score == pA.score:
                 out_val += 11
@@ -92,12 +92,9 @@ class Draft:
 
         for player in [p for p in self.players if not p.dropped]:
             opponents_sorted = [p for p in self.players if not p.dropped and not p == player]
-            opponents_sorted.sort(key=lambda x: sortfunc(player, x), reverse=True)
+            opponents_sorted.sort(key=lambda x: scoringFunc(player, x), reverse=True)
             # print(player.seat, [o.seat for o in opponents_sorted], [o.seat for o in player.opponents])
             player_opponents[player.player_id] = opponents_sorted
-        # sorted_players = [y for y in self.players if not y.dropped]
-        # pairs: list[list[Player]] = []
-        # This should be a brute force search rather than just a dumping.
         pairscores: list[list[list[list[Player]], float]] = []
 
         def recursive_score(nextPlayer, deepScore, deepPairings: list):
@@ -109,9 +106,9 @@ class Draft:
             l = [o for o in player_opponents[nextPlayer.player_id] if o not in [item for sublist in deepPairings for item in sublist]]
             for i, opponent in enumerate(l):
                 if i == len(l) - 1:
-                    recursive_score(None, deepScore + sortfunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
+                    recursive_score(None, deepScore + scoringFunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
                 else:
-                    recursive_score(l[i + 1], deepScore + sortfunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
+                    recursive_score(l[i + 1], deepScore + scoringFunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
             if len(l) == 0:
                 recursive_score(None, deepScore, [*deepPairings, [nextPlayer, Player("BYE", "-1")]])
             return
@@ -119,7 +116,7 @@ class Draft:
         recursive_score([p for p in self.players if not p.dropped][0], 0, [])
         pairscores.sort(key=lambda x: x[1], reverse=True)
         pairings = pairscores[0][0]
-        print(pairscores[0][1])
+        print(f'The best pairing score is: {pairscores[0][1]}')
         for pair in pairings:
             if pair[0].player_id == '-1':
                 pair[0].had_bye = True
@@ -129,7 +126,6 @@ class Draft:
                 continue
             pair[1].opponents.append(pair[0])
             pair[0].opponents.append(pair[1])
-        # print(len(pairscores), pairscores[0:10])
         new_round = Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [Match(p=i) for i in pairings]
         self.rounds.append(new_round)
@@ -390,7 +386,7 @@ class Player:
         return self.score < other.score
 
     def __repr__(self):
-        return f"{self.name} ({self.score})"
+        return f"{self.name} (pts:{self.score}) (st:{self.seat})"
 
     def __eq__(self, other):
         return self.player_id == other.player_id
