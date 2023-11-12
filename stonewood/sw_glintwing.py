@@ -126,7 +126,7 @@ class Glintwing(commands.Cog):
         msg = await ctx.interaction.original_response()
         self.drafts[msg.id] = [glintwing.Draft(draftID=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, max_rounds=rounds, set_code=set_code, cube_id=cube_id)]
         self.drafts[msg.id][-1].add_player(
-            p_name=ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
+            p_name=ctx.author.display_name,
             p_id=str(ctx.author.id),
             is_host=True,
             seat=0,
@@ -157,8 +157,11 @@ class StartingView(discord.ui.View):
             return
         if len(self.bot.drafts[ctx.message.id][-1].players) == 10:
             return
+        member = discord.utils.get(ctx.guild.members, id=ctx.user.id)
+        if member is None:
+            member = ctx.user
         self.bot.drafts[ctx.message.id][-1].add_player(
-            ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
+            member.display_name,
             str(ctx.user.id),
             seat=len(self.bot.drafts[ctx.message.id][-1].players),
         )

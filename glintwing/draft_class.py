@@ -15,8 +15,8 @@ class Draft:
         description: str,
         title: str,
         max_rounds: int = 3,
-        cube_id: str = '',
-        set_code: str = '',
+        cube_id: str = "",
+        set_code: str = "",
     ):
         self.draftID: str = draftID
         """Unique ID."""
@@ -44,7 +44,7 @@ class Draft:
         """Calculates the final scores of the draft and returns a JSON."""
         self.calculate()
         matches = {
-            f'R_{d}': [
+            f"R_{d}": [
                 {
                     "players": [u.player_id for u in q.players if u.player_id != "-1"],
                     "games": [[j.player_id for j in q.players].index(x) for x in q.gwinners] if "-1" not in [p.player_id for p in q.players] else [],
@@ -54,11 +54,11 @@ class Draft:
             for [d, i] in enumerate(self.rounds)
         }
         draftobj = {
-            "id": f'{self.draftID}',
+            "id": f"{self.draftID}",
             "meta": {
                 "date": self.date,
                 "title": self.title,
-                **({"tag": self.tag} if self.tag != 'anti' and self.tag else {}),
+                **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
                 **({"description": self.description} if self.description else {}),
                 **({"host": self.host} if self.host else {}),
                 **({"cube_id": self.cube_id} if self.cube_id else {}),
@@ -67,6 +67,73 @@ class Draft:
             **matches,
         }
         return draftobj
+
+    def idiot_pairings(self):
+        player_opponents = {}
+
+        def sortfunc(pA: Player, pB: Player):
+            out_val = 0
+            if pB.score == pA.score:
+                out_val += 11
+            if pB.seat + len(self.players) // 2 == pA.seat or pB.seat - len(self.players) // 2 == pA.seat:
+                out_val += 5
+            if pB.seat + len(self.players) // 4 == pA.seat or pB.seat - len(self.players) // 4 == pA.seat:
+                out_val += 2
+            if pB.seat + len(self.players) // 8 == pA.seat or pB.seat - len(self.players) // 8 == pA.seat:
+                out_val += 1
+            if pB.seat + 1 == pA.seat or pB.seat - 1 == pA.seat:
+                out_val -= 3
+            if pB in pA.opponents:
+                out_val -= 999
+            # print(pA.seat, pB.seat, out_val)
+            if pA.had_bye or pB.had_bye:
+                out_val += 7
+            return out_val
+
+        for player in [p for p in self.players if not p.dropped]:
+            opponents_sorted = [p for p in self.players if not p.dropped and not p == player]
+            opponents_sorted.sort(key=lambda x: sortfunc(player, x), reverse=True)
+            # print(player.seat, [o.seat for o in opponents_sorted], [o.seat for o in player.opponents])
+            player_opponents[player.player_id] = opponents_sorted
+        # sorted_players = [y for y in self.players if not y.dropped]
+        # pairs: list[list[Player]] = []
+        # This should be a brute force search rather than just a dumping.
+        pairscores: list[list[list[list[Player]], float]] = []
+
+        def recursive_score(nextPlayer, deepScore, deepPairings: list):
+            if nextPlayer is None:
+                pairscores.append([deepPairings, deepScore])
+                return
+            if deepScore < 0:
+                return
+            l = [o for o in player_opponents[nextPlayer.player_id] if o not in [item for sublist in deepPairings for item in sublist]]
+            for i, opponent in enumerate(l):
+                if i == len(l) - 1:
+                    recursive_score(None, deepScore + sortfunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
+                else:
+                    recursive_score(l[i + 1], deepScore + sortfunc(nextPlayer, opponent), [*deepPairings, [nextPlayer, opponent]])
+            if len(l) == 0:
+                recursive_score(None, deepScore, [*deepPairings, [nextPlayer, Player("BYE", "-1")]])
+            return
+
+        recursive_score([p for p in self.players if not p.dropped][0], 0, [])
+        pairscores.sort(key=lambda x: x[1], reverse=True)
+        pairings = pairscores[0][0]
+        print(pairscores[0][1])
+        for pair in pairings:
+            if pair[0].player_id == '-1':
+                pair[0].had_bye = True
+                continue
+            if pair[1].player_id == '-1':
+                pair[1].had_bye = True
+                continue
+            pair[1].opponents.append(pair[0])
+            pair[0].opponents.append(pair[1])
+        # print(len(pairscores), pairscores[0:10])
+        new_round = Round(title=f"{len(self.rounds) + 1}")
+        new_round.matches = [Match(p=i) for i in pairings]
+        self.rounds.append(new_round)
+        return new_round
 
     def rotation_pairings(self):
         player_opponents = {}
@@ -216,11 +283,11 @@ class Draft:
             # If either of those: somehow signal that the draft is over, dont make pairings
             if len(self.rounds) < self.max_rounds:
                 # self.blossom_pairings()
-                self.rotation_pairings()
+                self.idiot_pairings()
             return True
         else:
             # Beginning the draft.
-            self.rotation_pairings()
+            self.idiot_pairings()
             return True
 
     def drop_player(self, p_id):
@@ -312,6 +379,8 @@ class Player:
             Not output to JSON."""
         self.seat_color: str = s_c
         """Seat color. Used for initial seating from TTS."""
+        self.had_bye: bool = False
+        """For preventing double byes."""
 
     def __lt__(self, other):
         if self.score == other.score:
