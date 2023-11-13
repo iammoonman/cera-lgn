@@ -137,7 +137,7 @@ class Draft:
         player_opponents = {}
         leng = len(self.players)
         players_sorted = [p for p in self.players]
-        players_sorted.sort(key=lambda p: (p.score, p.gpts), reverse=True)
+        players_sorted.sort(key=lambda p: (p.score, p.gwins), reverse=True)
         for first_player in players_sorted:
             # Players have a hierarchy of who they want to play against.
             # It starts with the player with the highest distance from them.
@@ -152,7 +152,7 @@ class Draft:
                 indices.append((first_player.seat - math.floor(leng / div)) % leng)
             player_opponents[first_player.player_id] = [self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n]] if x != first_player.seat]
         sorted_players = [y for y in self.players if not y.dropped]
-        sorted_players.sort(key=lambda p: (p.score, p.gpts), reverse=True)
+        sorted_players.sort(key=lambda p: (p.score, p.gwins), reverse=True)
         pairs: list[list[Player]] = []
         while sorted_players:
             is_paired = False
@@ -257,7 +257,7 @@ class Draft:
                         player.mcount += 1
                         player.gcount += 0
                         player.mpts += 3
-                        player.gpts += 0
+                        player.gwins += 0
                         player.dropped = match.drops[player.player_id]
                         continue
                     if wasTie:
@@ -265,15 +265,16 @@ class Draft:
                         player.mcount += 1
                         player.gcount += len([i for i in match.gwinners if i is not None])
                         player.mpts += 1
-                        player.gpts += len([i for i in match.gwinners if i == player.player_id])
+                        player.gwins += len([i for i in match.gwinners if i == player.player_id])
                         player.dropped = match.drops[player.player_id]
                     else:
                         won = len([i for i in match.gwinners if i == player.player_id]) > len([i for i in match.gwinners if i != player.player_id])
                         player.score += 3 if won else 0
                         player.mcount += 1
+                        player.mwins += 1
                         player.gcount += len([i for i in match.gwinners if i is not None])
                         player.mpts += 3 if won else 0
-                        player.gpts += len([i for i in match.gwinners if i == player.player_id])
+                        player.gwins += len([i for i in match.gwinners if i == player.player_id])
                         player.dropped = match.drops[player.player_id]
             next_incomplete_round.completed = True
             # Check if it's the max number of rounds
@@ -325,8 +326,8 @@ class Draft:
 
     def calculate(self):
         for player in self.players:
-            player.gwp = player.gpts / (player.gcount if player.gcount > 0 else 1)
-            player.mwp = player.mpts / ((player.mcount * 3) if player.mcount > 0 else 1)
+            player.gwp = player.gwins / (player.gcount if player.gcount > 0 else 1)
+            player.mwp = player.mwins / (player.mcount if player.mcount > 0 else 1)
         for player in self.players:
             player.ogp = sum(h := [p.gwp if p.gwp is not None else 0 for p in player.opponents]) / (len(h) if len(h) > 0 else 1)
             player.omp = sum(j := [p.mwp if p.mwp is not None else 0 for p in player.opponents]) / (len(j) if len(j) > 0 else 1)
@@ -353,14 +354,16 @@ class Player:
         """Used for quick access. Not output to JSON."""
         self.score: int = 0
         """Final score. 3 for wins and byes, 1 for tie, 0 for loss."""
-        self.gpts: int = 0
+        self.gwins: int = 0
         """Games won. Does not increment for byes."""
         self.mpts: int = 0
         """Match points. Similar to score."""
         self.gcount: int = 0
-        """Total games played. Does not increment for byes."""
+        """Total games played. Does not increment with byes."""
         self.mcount: int = 0
         """Total matches played. *Does* increment with byes."""
+        self.mwins: int = 0
+        """Won matches. Does not increment with byes."""
         self.opponents: list[Player] = []
         """Used for quick access. Not output to JSON."""
         self.dropped: bool = False
@@ -382,13 +385,13 @@ class Player:
 
     def __lt__(self, other):
         if self.score == other.score:
-            if self.gpts == other.gpts:
+            if self.gwins == other.gwins:
                 return random.random() > 0.5
-            return self.gpts < other.gpts
+            return self.gwins < other.gwins
         return self.score < other.score
 
     def __repr__(self):
-        return f"{self.name} (pts:{self.score})"  # (st:{self.seat})"
+        return f"{self.name} ({self.score})"  # (st:{self.seat})"
 
     def __eq__(self, other):
         return self.player_id == other.player_id
