@@ -115,11 +115,14 @@ class Draft:
 
         pairing_players = [p for p in self.players if not p.dropped]
         pairing_players.sort()
+        pairing_players.sort(key=lambda player: player.had_bye, reverse=True)
         recursive_score(pairing_players[0], 0, [])
         pairscores.sort(key=lambda x: x[1], reverse=True)
         pairings = pairscores[0][0]
         # print(f'The best pairing score is: {pairscores[0][1]}')
         for pair in pairings:
+            pair[0].had_bye = False
+            pair[1].had_bye = False
             if pair[0].player_id == "-1":
                 pair[0].had_bye = True
                 continue
@@ -130,47 +133,6 @@ class Draft:
             pair[0].opponents.append(pair[1])
         new_round = Round(title=f"{len(self.rounds) + 1}")
         new_round.matches = [Match(p=i) for i in pairings]
-        self.rounds.append(new_round)
-        return new_round
-
-    def rotation_pairings(self):
-        player_opponents = {}
-        leng = len(self.players)
-        players_sorted = [p for p in self.players]
-        players_sorted.sort(key=lambda p: (p.score, p.gwins), reverse=True)
-        for first_player in players_sorted:
-            # Players have a hierarchy of who they want to play against.
-            # It starts with the player with the highest distance from them.
-            # Continues with half that distance away from each of those two players.
-            # Then half again away from the player and their first opponent.
-            halfway_around = (first_player.seat + math.ceil(leng / 2)) % leng
-            indices = [halfway_around]
-            for div in [2, 4, 8, 16, 32]:
-                indices.append((halfway_around + math.ceil(leng / div)) % leng)
-                indices.append((halfway_around - math.floor(leng / div)) % leng)
-                indices.append((first_player.seat + math.ceil(leng / div)) % leng)
-                indices.append((first_player.seat - math.floor(leng / div)) % leng)
-            player_opponents[first_player.player_id] = [self.get_player_by_seat(x) for x in [i for n, i in enumerate(indices) if i not in indices[:n]] if x != first_player.seat]
-        sorted_players = [y for y in self.players if not y.dropped]
-        sorted_players.sort(key=lambda p: (p.score, p.gwins), reverse=True)
-        pairs: list[list[Player]] = []
-        while sorted_players:
-            is_paired = False
-            player = sorted_players.pop(0)
-            sorted_opps = player_opponents[player.player_id]
-            sorted_opps.sort(key=lambda p: (p.score, p.gpts), reverse=True)
-            for opp in [x for x in sorted_opps if x in sorted_players]:
-                if opp in player.opponents:
-                    continue
-                pairs.append([player, opp])
-                is_paired = True
-                sorted_players.remove(opp)
-                player.opponents.append(opp)
-                break
-            if not is_paired:
-                pairs.append([player, Player("BYE", "-1")])
-        new_round = Round(title=f"{len(self.rounds) + 1}")
-        new_round.matches = [Match(p=i) for i in pairs]
         self.rounds.append(new_round)
         return new_round
 
