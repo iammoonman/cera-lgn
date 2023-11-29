@@ -136,7 +136,7 @@ class Deck:
                     "",
                     cardData["card_faces"][0]["image_uris"]["normal"] if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"] else cardData["image_uris"]["normal"],
                 ),
-                "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
+                "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
                 "BackIsHidden": True,
@@ -149,7 +149,7 @@ class Deck:
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
-                    "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
+                    "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                     "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
                     "BackIsHidden": True,

@@ -10,6 +10,7 @@ import datetime
 taglist = {
     "ptm": "Prime Time With Moon",
     "ths": "Thursday Night Draft",
+    "deb": "Draft Every Block",
     "anti": "No Tag",
 }
 bslash = "\n"
@@ -116,24 +117,16 @@ class Glintwing(commands.Cog):
     @discord.option(name="title", description="The name of the draft event.")
     @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")
     @discord.option(name="desc", description="Describe the event.", default="")
-    @discord.option(name="rounds", description="The maximum number of rounds for the draft. Default is 3.", min_value=1, max_value=5, default=3)
-    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", rounds: int = 3):
+    # @discord.option(name="rounds", description="The maximum number of rounds for the draft. Default is 3.", min_value=1, max_value=5, default=3)
+    @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
+    @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
+    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", cube_id: str = "", set_code: str = ""):
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
-        self.drafts[msg.id] = [
-            glintwing.Draft(
-                draftID=msg.id,
-                date=datetime.datetime.today().strftime("%Y-%m-%d"),
-                host=str(ctx.author.id),
-                tag=tag,
-                description=desc,
-                title=title,
-                max_rounds=rounds,
-            )
-        ]
+        self.drafts[msg.id] = [glintwing.Draft(draftID=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, max_rounds=3, set_code=set_code, cube_id=cube_id)]
         self.drafts[msg.id][-1].add_player(
-            p_name=ctx.author.nick if ctx.author.nick is not None else ctx.author.name,
+            p_name=ctx.author.display_name,
             p_id=str(ctx.author.id),
             is_host=True,
             seat=0,
@@ -164,8 +157,11 @@ class StartingView(discord.ui.View):
             return
         if len(self.bot.drafts[ctx.message.id][-1].players) == 10:
             return
+        member = discord.utils.get(ctx.guild.members, id=ctx.user.id)
+        if member is None:
+            member = ctx.user
         self.bot.drafts[ctx.message.id][-1].add_player(
-            ctx.user.nick if ctx.user.nick is not None else ctx.user.name,
+            member.display_name,
             str(ctx.user.id),
             seat=len(self.bot.drafts[ctx.message.id][-1].players),
         )

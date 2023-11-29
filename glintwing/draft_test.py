@@ -1,5 +1,5 @@
 import json
-import glintwing
+import draft_class as glintwing
 
 test_draft = glintwing.Draft("test", "", "1", "anti", "", "", 3)
 test_draft.add_player("1", is_host=True, p_id="1", seat=0)
@@ -91,6 +91,28 @@ print("---------------")
 test_draft_3.finish_round()
 print(test_draft_3.players)
 print(json.dumps(test_draft_3.tojson()))
+print("---------------")
+print("---------------")
+print("---------------")
+test_draft_4 = glintwing.Draft("test", "", "1", "anti", "", "", 3)
+test_draft_4.add_player("237059875073556481", is_host=True, p_id="237059875073556481", seat=0)
+test_draft_4.add_player("211543853398753281", p_id="211543853398753281", seat=1)
+test_draft_4.add_player("203186629542805505", p_id="203186629542805505", seat=2)
+test_draft_4.add_player("220346925260603393", p_id="220346925260603393", seat=3)
+test_draft_4.add_player("200342701147684864", p_id="200342701147684864", seat=4)
+test_draft_4.add_player("291284546769649674", p_id="291284546769649674", seat=5)
+test_draft_4.finish_round()
+test_draft_4.parse_match("237059875073556481", "5")
+test_draft_4.parse_match("211543853398753281", "0")
+test_draft_4.parse_match("203186629542805505", "2")
+for match in test_draft_4.rounds[0].matches:
+    print(f"{match.players} {match.gwinners}")
+print("---------------")
+test_draft_4.finish_round()
+for match in test_draft_4.rounds[1].matches:
+    print(f"{match.players} {match.gwinners}")
+print(test_draft_4.players)
+print(json.dumps(test_draft_4.tojson()))
 print("---------------")
 print("---------------")
 print("---------------")
