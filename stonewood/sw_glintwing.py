@@ -319,7 +319,7 @@ class IG_View(discord.ui.View):
         if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
             if len(self.bot.drafts[ctx.message.id]) > 1:
                 self.bot.drafts[ctx.message.id].pop()
-            return
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
@@ -336,6 +336,16 @@ class IG_View(discord.ui.View):
             return
         if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
             self.bot.drafts[ctx.message.id][-1].max_rounds = len(self.bot.drafts[ctx.message.id][-1].rounds)
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+
+    @discord.ui.button(label="DUMP", style=discord.ButtonStyle.gray, row=0)
+    async def dump_json(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        if ctx.message.id not in self.bot.drafts.keys():
+            return
+        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
+            with open(f"glintwing/{ctx.message.id}.json", "w") as f:
+                # Call this with the calculate method might break something.
+                json.dump(self.bot.drafts[ctx.message.id][-1].tojson(), f, ensure_ascii=False, indent=4)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 

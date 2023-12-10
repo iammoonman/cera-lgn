@@ -73,7 +73,7 @@ class Draft:
 
         def scoringFunc(pA: Player, pB: Player):
             out_val = 0
-            if pB.score == pA.score:
+            if pB.score == pA.score or pB.score + 1 == pA.score or pB.score == pA.score + 1 or pB.score + 2 == pA.score or pB.score == pA.score + 2:
                 out_val += 11
             if pB.seat + len(self.players) // 2 == pA.seat or pB.seat - len(self.players) // 2 == pA.seat:
                 out_val += 5
@@ -82,7 +82,7 @@ class Draft:
             if pB.seat + len(self.players) // 8 == pA.seat or pB.seat - len(self.players) // 8 == pA.seat:
                 out_val += 1
             if pB.seat + 1 == pA.seat or pB.seat - 1 == pA.seat:
-                out_val -= 3
+                out_val += 0 # Help out very low player counts.
             if pB in pA.opponents:
                 out_val -= 999
             # print(pA.seat, pB.seat, out_val)
@@ -209,9 +209,9 @@ class Draft:
                 if match.gwinners == []:
                     return False
             for match in next_incomplete_round.matches:
-                wasTie = len(set(match.gwinners)) == len(match.gwinners)
                 wasBye = "-1" in [o.player_id for o in match.players]
                 for player in match.players:
+                    wasTie = len([i for i in match.gwinners if i == player.player_id]) == len([i for i in match.gwinners if i != player.player_id])
                     if player.player_id == "-1":  # Catch fake bye player. Might not be needed, since they aren't in the players list.
                         continue
                     if wasBye:

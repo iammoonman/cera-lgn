@@ -25,10 +25,14 @@ def full_draftmancer_log(draft_file: io.FileIO):
     users = {}
     users_generator = ijson.kvitems(draft_file, "users")
     for k, v in users_generator:
-        users[k] = {"name": v["userName"], "picks": v["decklist"]["main"], "pack": flamewave.tts_classes.Deck(f'maindeck cards for {v["userName"]}')}
-        users[k]["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[k]["picks"]])
-        users[f'{k}_side'] = {"name": v["userName"], "picks": v["decklist"]["side"], "pack": flamewave.tts_classes.Deck(f'sideboard cards for {v["userName"]}')}
-        users[f'{k}_side']["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[f'{k}_side']["picks"]])
+        if v['isBot']:
+            users[k] = {"name": v["userName"], "picks": v["cards"], "pack": flamewave.tts_classes.Deck(f'cards for {v["userName"]}')}
+            users[k]["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[k]["picks"]])
+        else:
+            users[k] = {"name": v["userName"], "picks": v["decklist"]["main"], "pack": flamewave.tts_classes.Deck(f'maindeck cards for {v["userName"]}')}
+            users[k]["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[k]["picks"]])
+            users[f'{k}_side'] = {"name": v["userName"], "picks": v["decklist"]["side"], "pack": flamewave.tts_classes.Deck(f'sideboard cards for {v["userName"]}')}
+            users[f'{k}_side']["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[f'{k}_side']["picks"]])
     s = flamewave.tts_classes.Save(f"Big Draft Bag")
     for k, v in users.items():
         s.addObject(v["pack"])
