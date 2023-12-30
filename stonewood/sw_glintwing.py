@@ -2,6 +2,7 @@ import copy
 import json
 from typing import Union
 import discord
+from discord.utils import get
 from discord.ext import commands
 import glintwing
 import pickle
@@ -32,45 +33,52 @@ with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
 
 
-def starting_em(draft: glintwing.Draft):
+def get_name(bot, id):
+    u = get(bot.get_all_memebers(), id)
+    if u is not None:
+        return u.display_name
+    return "Unknown User"
+
+
+def starting_em(draft: glintwing.SwissEvent, bot):
     return discord.Embed(
         title=f"{draft.title} | ENTRY",
         fields=[
             discord.EmbedField(
                 name="PLAYERS",
-                value=f"{bslash.join([f'{p.name} | Seat: {p.seat}' for p in draft.players])}",
+                value=f"{bslash.join([f'{get_name(bot, p.id)} | Seat: {p.seat}' for p in draft.players])}",
             ),
         ],
         description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
     )
 
 
-def ig_em(draft: glintwing.Draft, timekeepstamp: datetime.datetime):
+def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot, round=0):
     return discord.Embed(
-        title=f"{draft.title} | Round: {(w:=[r for r in draft.rounds if not r.completed][0]).title}",
+        title=f"{draft.title} | Round 0",
         fields=[
             discord.EmbedField(
                 inline=True,
-                name=f"GAME: {match.players[0]} vs {match.players[1]}",
-                value=f"G1 Winner: {draft.get_player_by_id(match.gwinners[0]) if len(match.gwinners) > 0 and match.gwinners[0] is not None else 'NONE'}{bslash}" + f"G2 Winner: {draft.get_player_by_id(match.gwinners[1]) if len(match.gwinners) > 1 and match.gwinners[1] is not None else 'NONE'}{bslash}" + f"G3 Winner: {draft.get_player_by_id(match.gwinners[2]) if len(match.gwinners) > 2 and match.gwinners[2] is not None else 'NONE'}{bslash}" + (f"{match.players[0]} has dropped.{bslash}" if match.drops[match.players[0].player_id] else "") + (f"{match.players[1]} has dropped.{bslash}" if match.drops[match.players[1].player_id] else ""),
+                name=f"GAME: {get_name(bot, match.player_one.id)} vs {get_name(bot, match.player_two.id)}",
+                value=f"G1W: {get_name(bot, match.game_one.id)}{bslash}G2W: {bot, get_name(match.game_two.id)}{bslash}G3W: {bot, get_name(match.game_three.id)}" + (f"{bslash}{get_name(bot, match.player_one.id)} has dropped." if match.player_one.dropped else "") + (f"{bslash}{get_name(bot, match.player_two.id)} has dropped." if match.player_two.dropped else ""),
             )
-            for match in w.matches
+            for match in (draft.round_one if round == 0 else draft.round_two if round == 1 else draft.round_three)
         ]
         + [discord.EmbedField(name="ROUND TIMER", value=f"The round ends <t:{int(timekeepstamp.timestamp())}:R>.")],
         description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
     )
 
 
-def end_em(draft: glintwing.Draft):
+def end_em(draft: glintwing.SwissEvent, bot):
     return discord.Embed(
         title=f"{draft.title} | FINAL",
         fields=[
             discord.EmbedField(
                 inline=True,
-                name=f"{player.name}",
-                value=f"SCORE: {player.score}{bslash}" + f"GWP: {player.gwp:.2f}{bslash}" + f"OGP: {player.ogp:.2f}{bslash}" + f"OMP: {player.omp:.2f}",
+                name=f"{get_name(bot, player.id)}",
+                value=f"SCORE: {(stats:=draft.secondary_stats(player.id))[0]}{bslash}" + f"GWP: {stats[1]:.2f}{bslash}" + f"OGP: {stats[2]:.2f}{bslash}" + f"OMP: {stats[3]:.2f}",
             )
-            for player in sorted(draft.players, key=lambda pl: (pl.score, pl.gwp, pl.ogp, pl.omp), reverse=True)
+            for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
         description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
     )
@@ -79,7 +87,7 @@ def end_em(draft: glintwing.Draft):
 class Glintwing(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
-        self.drafts: dict[str, list[glintwing.Draft]] = {}
+        self.drafts: dict[str, glintwing.SwissEvent] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
         self.pages = []
 
@@ -124,15 +132,9 @@ class Glintwing(commands.Cog):
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
-        self.drafts[msg.id] = [glintwing.Draft(draftID=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, max_rounds=3, set_code=set_code, cube_id=cube_id)]
-        self.drafts[msg.id][-1].add_player(
-            p_name=ctx.author.display_name,
-            p_id=str(ctx.author.id),
-            is_host=True,
-            seat=0,
-        )
+        self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
-        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id][-1])], content="", view=new_view)
+        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id])], content="", view=new_view)
         # await msg.add_reaction("<:seat_white:1104759507311145012>")
         # await msg.add_reaction("<:seat_brown:1104759527808708698>")
         # await msg.add_reaction("<:seat_red:1104759572696141915>")
@@ -155,43 +157,40 @@ class StartingView(discord.ui.View):
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if len(self.bot.drafts[ctx.message.id][-1].players) == 10:
+        if len(self.bot.drafts[ctx.message.id].players) == 10:
             return
         member = discord.utils.get(ctx.guild.members, id=ctx.user.id)
         if member is None:
             member = ctx.user
-        self.bot.drafts[ctx.message.id][-1].add_player(
-            member.display_name,
-            str(ctx.user.id),
-            seat=len(self.bot.drafts[ctx.message.id][-1].players),
-        )
-        await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id][-1])], view=self)
+        this_draft = self.bot.drafts[ctx.message.id]
+        this_draft.players.append(glintwing.SwissPlayer(str(ctx.user.id), len(this_draft.players)))
+        await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        self.bot.drafts[ctx.message.id][-1].drop_player(str(ctx.user.id))
-        await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id][-1])], view=self)
+        self.bot.drafts[ctx.message.id].players.remove(glintwing.SwissPlayer(str(ctx.user.id)))
+        await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
-            if not all(x.seat > -1 for x in self.bot.drafts[ctx.message.id][-1].players):
+        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+            if not all(x.seat > -1 for x in self.bot.drafts[ctx.message.id].players):
                 return await ctx.response.send_message(content="Interaction received. Players are not seated.", ephemeral=True)
-            if len(self.bot.drafts[ctx.message.id][-1].players) < 4 or len(self.bot.drafts[ctx.message.id][-1].players) > 10:
+            if len(self.bot.drafts[ctx.message.id].players) < 4 or len(self.bot.drafts[ctx.message.id].players) > 10:
                 return await ctx.response.send_message(content="Interaction received. Not enough players or too many players.", ephemeral=True)
             new_view = IG_View(self.bot)
             # self.bot.drafts[ctx.message.id] = [self.bot.drafts[ctx.message.id][-1]]
             # self.bot.timekeep[ctx.message.id] = self.bot.timekeep[ctx.message.id]
-            self.bot.drafts[ctx.message.id][-1].finish_round()
+            self.bot.drafts[ctx.message.id].finish_round()
             self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
             new_view.after_load(ctx.message.id)
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=new_view)
+            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=new_view)
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -219,7 +218,7 @@ class IG_View(discord.ui.View):
         super().__init__(timeout=None)
 
     def after_load(self, id):
-        for p in self.bot.drafts[id][-1].players:
+        for p in self.bot.drafts[id].players:
             self.children[4].append_option(discord.SelectOption(label=f"{p.name}", value=f"{p.player_id}"))
 
     @discord.ui.select(
@@ -280,72 +279,75 @@ class IG_View(discord.ui.View):
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        self.bot.drafts[ctx.message.id][-1].parse_match(str(ctx.user.id), select.values[0])
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
+        this_draft = self.bot.drafts[ctx.message.id]
+        round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
+        for pairing in this_round:
+            pass
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        self.bot.drafts[ctx.message.id][-1].drop_player(str(ctx.user.id))
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
+        this_draft = self.bot.drafts[ctx.message.id]
+        round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
+        pi = this_draft.players.index(glintwing.SwissPlayer(str(ctx.user.id)))
+        this_draft.players[pi].dropped = True
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
-            newRoundDraft = copy.deepcopy(self.bot.drafts[ctx.message.id][-1])
-            self.bot.drafts[ctx.message.id].append(newRoundDraft)
-            if self.bot.drafts[ctx.message.id][-1].finish_round():
-                if len([r for r in self.bot.drafts[ctx.message.id][-1].rounds if not r.completed]) > 0:
-                    self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                    await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
-                else:
-                    with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                        json.dump(self.bot.drafts[ctx.message.id][-1].tojson(), f, ensure_ascii=False, indent=4)
-                    await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id][-1])], view=None)
+        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+            this_draft = self.bot.drafts[ctx.message.id]
+            round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
+            if len([r for r in self.bot.drafts[ctx.message.id].rounds if not r.completed]) > 0:
+                self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
+                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
             else:
-                self.bot.drafts[ctx.message.id].pop()
-                await ctx.message.edit(content="Not all results reported.", embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
+                with open(f"glintwing/{ctx.message.id}.json", "w") as f:
+                    json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
+                await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=None)
+            # await ctx.message.edit(content="Not all results reported.", embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
-    async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        if ctx.message.id not in self.bot.drafts.keys():
-            return
-        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
-            if len(self.bot.drafts[ctx.message.id]) > 1:
-                self.bot.drafts[ctx.message.id].pop()
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
+    # async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
+    #     if ctx.message.id not in self.bot.drafts.keys():
+    #         return
+    #     if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+    #         if len(self.bot.drafts[ctx.message.id]) > 1:
+    #             self.bot.drafts[ctx.message.id].pop()
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
-    async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
-        if ctx.message.id not in self.bot.drafts.keys():
-            return
-        if str(ctx.user.id) == self.bot.drafts[ctx.message.id][-1].host or str(select.values[0]) == str(ctx.user.id):
-            self.bot.drafts[ctx.message.id][-1].drop_player(str(select.values[0]))
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id][-1], self.bot.timekeep[ctx.message.id])], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
+    # async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
+    #     if ctx.message.id not in self.bot.drafts.keys():
+    #         return
+    #     if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
+    #         self.bot.drafts[ctx.message.id].drop_player(str(select.values[0]))
+    #     await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
-    async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
-        if ctx.message.id not in self.bot.drafts.keys():
-            return
-        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
-            self.bot.drafts[ctx.message.id][-1].max_rounds = len(self.bot.drafts[ctx.message.id][-1].rounds)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    # @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
+    # async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
+    #     if ctx.message.id not in self.bot.drafts.keys():
+    #         return
+    #     if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+    #         self.bot.drafts[ctx.message.id].max_rounds = len(self.bot.drafts[ctx.message.id].rounds)
+    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DUMP", style=discord.ButtonStyle.gray, row=0)
     async def dump_json(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id][-1].host == str(ctx.user.id):
+        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 # Call this with the calculate method might break something.
-                json.dump(self.bot.drafts[ctx.message.id][-1].tojson(), f, ensure_ascii=False, indent=4)
+                json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 

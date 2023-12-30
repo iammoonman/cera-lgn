@@ -1,3 +1,5 @@
+import datetime
+import json
 from typing import Union
 
 
@@ -6,16 +8,43 @@ def distance(pA, pB, players):
 
 
 class SwissEvent:
-    def __init__(self):
-        self.id = ""
-        self.host = ""
+    def __init__(self, id: str, host: str, tag: str, description: str, title: str, cube_id: str = "", set_code: str = ""):
+        self.id = id
+        self.host = host
+        self.title = title
+        self.description = description
+        self.cube_id = cube_id
+        self.set_code = set_code
+        self.tag = tag
         self.round_one = []
         self.round_two = []
         self.round_three = []
         self.players = []
+    
+    def get_player_by_id(self, id):
+        for p in self.players:
+            if p.id == id:
+                return p
+        return None
 
-    def __json__(self):
-        return ""
+    def to_json(self):
+        return json.dumps(
+            {
+                "id": self.id,
+                "meta": {
+                    "date": f"{datetime.datetime.now().isoformat()}-5:00",
+                    "title": self.title,
+                    **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
+                    **({"description": self.description} if self.description else {}),
+                    **({"host": self.host} if self.host else {}),
+                    **({"cube_id": self.cube_id} if self.cube_id else {}),
+                    **({"set_code": self.set_code} if self.set_code else {}),
+                },
+                "R_0": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_one],
+                "R_1": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_two],
+                "R_2": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_three],
+            }
+        )
 
     def pair_round_one(self):
         # Pair per seat
@@ -67,8 +96,8 @@ class SwissEvent:
         non_dropped_players = [p for p in self.players if not p.dropped]
 
         def sort_func(player):
-            first_score, first_priority = self.match_one(player).score(player)
-            second_score, second_priority = self.match_two(player).score(player)
+            first_score, first_priority, _, _ = self.match_one(player).score(player)
+            second_score, second_priority, _, _ = self.match_two(player).score(player)
             bye = self.match_two(player).is_bye()
             flawless = self.match_two(player).game_one == player and self.match_two(player).game_two == player
             clutched = self.match_two(player).game_three == player
@@ -92,8 +121,54 @@ class SwissEvent:
                 pairings.append(SwissPairing(pl, None))
         return pairings
 
-    def stats(self, player_id):
-        pass
+    def stats(self, player_id) -> (float, float):
+        game_total = 0
+        score_total = 0
+        wins_total = 0
+        m_one = self.match_one(SwissPlayer(player_id))
+        m_two = self.match_two(SwissPlayer(player_id))
+        m_three = self.match_three(SwissPlayer(player_id))
+        if m_one is not None:
+            score, _, games, wins = m_one.score(SwissPlayer(player_id))
+            game_total += games
+            score_total += score
+            wins_total += wins
+        if m_two is not None:
+            score, _, games, wins = m_one.score(SwissPlayer(player_id))
+            game_total += games
+            score_total += score
+            wins_total += wins
+        if m_three is not None:
+            score, _, games, wins = m_one.score(SwissPlayer(player_id))
+            game_total += games
+            score_total += score
+            wins_total += wins
+        return wins_total / game_total, score_total
+
+    def secondary_stats(self, player_id) -> (float, float):
+        gwp, mwp = self.stats(player_id)
+        opponent_total = 0
+        gwp_sum = 0
+        mwp_sum = 0
+        o_one = self.match_one(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
+        o_two = self.match_two(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
+        o_three = self.match_three(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
+        if o_one is not None:
+            gwp, mwp = self.stats(SwissPlayer(player_id))
+            gwp_sum += gwp
+            mwp_sum += mwp
+            opponent_total += 1
+        if o_two is not None:
+            gwp, mwp = self.stats(SwissPlayer(player_id))
+            gwp_sum += gwp
+            mwp_sum += mwp
+            opponent_total += 1
+        if o_three is not None:
+            gwp, mwp = self.stats(SwissPlayer(player_id))
+            gwp_sum += gwp
+            mwp_sum += mwp
+            opponent_total += 1
+        return mwp, gwp, gwp_sum / opponent_total, mwp_sum / opponent_total
 
     def match_one(self, player):
         for m in self.round_one:
@@ -138,8 +213,8 @@ class SwissPairing:
         self.game_three = None
 
     def __repr__(self):
-        p1_score, _ = self.score(self.player_one)
-        p2_score, _ = self.score(self.player_two)
+        p1_score, _, _, _ = self.score(self.player_one)
+        p2_score, _, _, _ = self.score(self.player_two)
         return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else self.player_two}"
 
     def is_tie(self) -> bool:
@@ -151,6 +226,9 @@ class SwissPairing:
 
     def is_bye(self) -> bool:
         return self.player_two is None
+    
+    def has_player(self, player):
+        return self.player_one == player or self.player_two == player
 
     def opponent(self, player) -> Union[SwissPlayer, None]:
         if player == self.player_one:
@@ -159,20 +237,21 @@ class SwissPairing:
             return self.player_one
         return None
 
-    def score(self, player) -> (int, int):
+    def score(self, player) -> (int, int, int, int):
+        """match points, priority, games played, games won"""
         if player is None:
-            return 0, 0
+            return 0, 0, 0, 0
         if self.is_bye():
-            return 3, 3
+            return 3, 3, 0, 0
         if self.is_tie():
-            return 1, 0
+            return 1, 0, (1 if self.game_one is not None else 0) + (1 if self.game_two is not None else 0), (1 if self.game_one == player else 0) + (1 if self.game_two == player else 0)
         if player == self.game_one and player == self.game_two:
-            return 3, 4
+            return 3, 4, 2, 2
         if player == self.game_two and player == self.game_three:
-            return 3, 2
+            return 3, 2, 3, 2
         if player == self.game_one and player == self.game_three:
-            return 3, 1
-        return 0, 0
+            return 3, 1, 3, 2
+        return 0, 0, 0, 0
 
 
 if __name__ == "__main__":
