@@ -1,6 +1,10 @@
 from typing import Union
 
 
+def distance(pA, pB, players):
+    return min(abs(pB.seat - pA.seat), len(players) - pB.seat + pA.seat, len(players) - pA.seat + pB.seat)
+
+
 class SwissEvent:
     def __init__(self):
         self.id = ""
@@ -45,7 +49,9 @@ class SwissEvent:
         while non_dropped_players:
             pl = non_dropped_players.pop(0)
             for opp in non_dropped_players:
-                if self.match_one(pl).opponent(pl) == opp or (pl.seat + 1 == opp.seat or pl.seat - 1 == opp.seat):
+                if self.match_one(pl).opponent(pl) == opp:
+                    continue
+                if (pl.seat + 1 == opp.seat or pl.seat - 1 == opp.seat) and len(non_dropped_players) > 3:
                     continue
                 pairings.append(SwissPairing(pl, opp))
                 non_dropped_players.remove(opp)
@@ -134,7 +140,7 @@ class SwissPairing:
     def __repr__(self):
         p1_score, _ = self.score(self.player_one)
         p2_score, _ = self.score(self.player_two)
-        return f"{self.player_one}|{p1_score} vs {self.player_two}|{p2_score}"
+        return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else self.player_two}"
 
     def is_tie(self) -> bool:
         if (self.game_one == self.player_one or self.game_one == self.player_two) and self.game_one != self.game_two and self.game_three is None:
@@ -192,6 +198,12 @@ if __name__ == "__main__":
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         print(drft.round_two)
+        c = 0
+        for pairing in drft.round_two:
+            if pairing.player_two is None:
+                c += 1
+            if len(drft.players) > 4:
+                assert c < 2
         after_round_two(drft)
         drft.round_three = drft.pair_round_three()
         if score_round_three is not None:
@@ -201,22 +213,40 @@ if __name__ == "__main__":
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         print(drft.round_three)
+        c = 0
+        for pairing in drft.round_three:
+            if pairing.player_two is None:
+                c += 1
+            if len(drft.players) > 4:
+                assert c < 2
+        print("----------")
 
     def drop_seat(seat):
         def drp(draft):
             for player in draft.players:
                 if player.seat == seat:
                     player.dropped = True
+                    print(f"PLAYER {player} DROP")
+
+        return drp
+
+    def drop_ids(ids):
+        def drp(draft):
+            for player in draft.players:
+                if player.id in ids:
+                    player.dropped = True
+                    print(f"PLAYER {player} DROP")
 
         return drp
 
     def test_first_pairs(pairs):
         def tst(draft):
             for test in pairs:
+                test_pair = [SwissPlayer(test[0]), SwissPlayer(test[1]) if test[1] is not None else None]
                 did_test = False
                 for pair in draft.round_one:
-                    if pair.player_one in test or pair.player_two in test:
-                        assert pair.player_one in test and pair.player_two in test
+                    if pair.player_one in test_pair or pair.player_two in test_pair:
+                        assert pair.player_one in test_pair and pair.player_two in test_pair
                         did_test = True
                 assert did_test == True
 
@@ -225,10 +255,11 @@ if __name__ == "__main__":
     def test_second_pairs(pairs):
         def tst(draft):
             for test in pairs:
+                test_pair = [SwissPlayer(test[0]), SwissPlayer(test[1]) if test[1] is not None else None]
                 did_test = False
                 for pair in draft.round_two:
-                    if pair.player_one in test or pair.player_two in test:
-                        assert pair.player_one in test and pair.player_two in test
+                    if pair.player_one in test_pair or pair.player_two in test_pair:
+                        assert pair.player_one in test_pair and pair.player_two in test_pair
                         did_test = True
                 assert did_test == True
 
@@ -237,25 +268,23 @@ if __name__ == "__main__":
     def test_third_pairs(pairs):
         def tst(draft):
             for test in pairs:
+                test_pair = [SwissPlayer(test[0]), SwissPlayer(test[1]) if test[1] is not None else None]
                 did_test = False
                 for pair in draft.round_three:
-                    if pair.player_one in test or pair.player_two in test:
-                        assert pair.player_one in test and pair.player_two in test
+                    if pair.player_one in test_pair or pair.player_two in test_pair:
+                        assert pair.player_one in test_pair and pair.player_two in test_pair
                         did_test = True
                 assert did_test == True
 
         return tst
 
-    test(
-        8,
-        after_round_one=test_first_pairs(
-            [
-                [SwissPlayer("1"), SwissPlayer("5")],
-                [SwissPlayer("2"), SwissPlayer("6")],
-                [SwissPlayer("3"), SwissPlayer("7")],
-                [SwissPlayer("4"), SwissPlayer("8")],
-            ]
-        ),
-    )
-    test(8, after_round_one=drop_seat(0), after_round_two=test_second_pairs([[SwissPlayer("3"), SwissPlayer("5")], [SwissPlayer("6"), SwissPlayer("8")], [SwissPlayer("2"), SwissPlayer("4")], [SwissPlayer("7"), None]]))
+    test(8, after_round_one=test_first_pairs([["1", "5"], ["2", "6"], ["3", "7"], ["4", "8"]]))
+    test(8, after_round_one=drop_seat(0))
     test(8, after_round_two=drop_seat(1))
+    test(8, after_round_two=drop_ids(["1", "2"]))
+    test(8, after_round_two=drop_ids(["1", "2", "3"]))
+    test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))
+    test(8, after_round_one=drop_ids(["1", "4"]), after_round_two=drop_ids(["2", "7"]))
+    test(7)
+    test(6)
+    test(6, after_round_one=drop_ids(["1"]))
