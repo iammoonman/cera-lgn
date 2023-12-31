@@ -1,4 +1,3 @@
-import copy
 import json
 from typing import Union
 import discord
@@ -15,18 +14,7 @@ taglist = {
     "anti": "No Tag",
 }
 bslash = "\n"
-seat_order = [
-    "chair_white",
-    "chair_brown",
-    "chair_red",
-    "chair_orange",
-    "chair_yellow",
-    "chair_green",
-    "chair_teal",
-    "chair_blue",
-    "chair_purple",
-    "chair_pink",
-]
+seat_order = ["chair_white", "chair_brown", "chair_red", "chair_orange", "chair_yellow", "chair_green", "chair_teal", "chair_blue", "chair_purple", "chair_pink"]
 """Names of the seat emojis in order."""
 
 with open("guild.pickle", "rb") as f:
@@ -76,7 +64,7 @@ def end_em(draft: glintwing.SwissEvent, bot):
             discord.EmbedField(
                 inline=True,
                 name=f"{get_name(bot, player.id)}",
-                value=f"SCORE: {(stats:=draft.secondary_stats(player.id))[0]}{bslash}" + f"GWP: {stats[1]:.2f}{bslash}" + f"OGP: {stats[2]:.2f}{bslash}" + f"OMP: {stats[3]:.2f}",
+                value=f"SCORE: {(stats:=draft.secondary_stats(player.id))[0]}{bslash}" + f"GWP: {stats[1]:.2f}{bslash}" + f"OGP: {stats[3]:.2f}{bslash}" + f"OMP: {stats[4]:.2f}",
             )
             for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
@@ -89,7 +77,6 @@ class Glintwing(commands.Cog):
         self.bot = bot
         self.drafts: dict[str, glintwing.SwissEvent] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
-        self.pages = []
 
     # Have players select what color they were on the table.
     # Players react with emoji of colored squares, use custom emoji for the 10 colors.
@@ -185,12 +172,11 @@ class StartingView(discord.ui.View):
             if len(self.bot.drafts[ctx.message.id].players) < 4 or len(self.bot.drafts[ctx.message.id].players) > 10:
                 return await ctx.response.send_message(content="Interaction received. Not enough players or too many players.", ephemeral=True)
             new_view = IG_View(self.bot)
-            # self.bot.drafts[ctx.message.id] = [self.bot.drafts[ctx.message.id][-1]]
-            # self.bot.timekeep[ctx.message.id] = self.bot.timekeep[ctx.message.id]
-            self.bot.drafts[ctx.message.id].finish_round()
+            this_draft = self.bot.drafts[ctx.message.id]
+            this_draft.round_one = this_draft.pair_round_one()
             self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
             new_view.after_load(ctx.message.id)
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=new_view)
+            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot)], view=new_view)
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -219,7 +205,7 @@ class IG_View(discord.ui.View):
 
     def after_load(self, id):
         for p in self.bot.drafts[id].players:
-            self.children[4].append_option(discord.SelectOption(label=f"{p.name}", value=f"{p.player_id}"))
+            self.children[4].append_option(discord.SelectOption(label=f"{get_name(self.bot.bot, p.id)}", value=f"{p.id}"))
 
     @discord.ui.select(
         placeholder="Report the games you won.",
@@ -270,9 +256,9 @@ class IG_View(discord.ui.View):
                 description="You won game 1 and the match went to time.",
             ),
             discord.SelectOption(
-                label="LATE BYE",
+                label="UNSET",
                 value="-1",
-                description="Your opponent didn't show up or had intended to drop.",
+                description="Removes previously entered result.",
             ),
         ],
     )
@@ -280,9 +266,55 @@ class IG_View(discord.ui.View):
         if ctx.message.id not in self.bot.drafts.keys():
             return
         this_draft = self.bot.drafts[ctx.message.id]
-        round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
+        round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+        selection = select.values[0]
         for pairing in this_round:
-            pass
+            if pairing.player_one.id == ctx.user.id:
+                if selection == "0":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_one, None
+                elif selection == "1":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_one
+                elif selection == "2":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_one
+                elif selection == "3":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_two
+                elif selection == "4":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_two
+                elif selection == "5":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_two, None
+                elif selection == "6":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, None
+                elif selection == "7":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, None
+                elif selection == "8":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, None, None
+                elif selection == "9":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, None, None
+                elif selection == "-1":
+                    pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
+            elif pairing.player_two.id == ctx.user.id:
+                if selection == "0":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_two, None
+                elif selection == "1":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_two
+                elif selection == "2":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_two
+                elif selection == "3":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_one
+                elif selection == "4":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_one
+                elif selection == "5":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_one, None
+                elif selection == "6":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, None
+                elif selection == "7":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, None
+                elif selection == "8":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, None, None
+                elif selection == "9":
+                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, None, None
+                elif selection == "-1":
+                    pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
         await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -303,51 +335,58 @@ class IG_View(discord.ui.View):
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
-            round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
-            if len([r for r in self.bot.drafts[ctx.message.id].rounds if not r.completed]) > 0:
+            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            if round_num == 0:
+                this_draft.round_two = this_draft.pair_round_two()
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
-            else:
+                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 1)], view=self)
+            if round_num == 1:
+                this_draft.round_three = this_draft.pair_round_three()
+                self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
+                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2)], view=self)
+            if round_num == 2:
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=None)
             # await ctx.message.edit(content="Not all results reported.", embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    # @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
-    # async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
-    #     if ctx.message.id not in self.bot.drafts.keys():
-    #         return
-    #     if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
-    #         if len(self.bot.drafts[ctx.message.id]) > 1:
-    #             self.bot.drafts[ctx.message.id].pop()
-    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
+    async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        if ctx.message.id not in self.bot.drafts.keys():
+            return
+        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+            this_draft = self.bot.drafts[ctx.message.id]
+            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            if round_num == 2:
+                this_draft.round_three = []
+                round_num = 1
+            if round_num == 1:
+                this_draft.round_two = []
+                round_num = 0
+            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)])
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    # @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
-    # async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
-    #     if ctx.message.id not in self.bot.drafts.keys():
-    #         return
-    #     if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
-    #         self.bot.drafts[ctx.message.id].drop_player(str(select.values[0]))
-    #     await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
-    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+    @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
+    async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
+        if ctx.message.id not in self.bot.drafts.keys():
+            return
+        if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
+            this_draft = self.bot.drafts[ctx.message.id]
+            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            myplayer = this_draft.players.get_player_by_id(str(select.values[0]))
+            myplayer.dropped = True
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    # @discord.ui.button(label="TRIM", style=discord.ButtonStyle.red, row=0)
-    # async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
-    #     if ctx.message.id not in self.bot.drafts.keys():
-    #         return
-    #     if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
-    #         self.bot.drafts[ctx.message.id].max_rounds = len(self.bot.drafts[ctx.message.id].rounds)
-    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
-
-    @discord.ui.button(label="DUMP", style=discord.ButtonStyle.gray, row=0)
-    async def dump_json(self, btn: discord.ui.Button, ctx: discord.Interaction):
+    @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0)
+    async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                # Call this with the calculate method might break something.
                 json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
+            await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=None)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 

@@ -16,11 +16,11 @@ class SwissEvent:
         self.cube_id = cube_id
         self.set_code = set_code
         self.tag = tag
-        self.round_one = []
-        self.round_two = []
-        self.round_three = []
+        self.round_one: list[SwissPairing] = []
+        self.round_two: list[SwissPairing] = []
+        self.round_three: list[SwissPairing] = []
         self.players = []
-    
+
     def get_player_by_id(self, id):
         for p in self.players:
             if p.id == id:
@@ -121,54 +121,66 @@ class SwissEvent:
                 pairings.append(SwissPairing(pl, None))
         return pairings
 
-    def stats(self, player_id) -> (float, float):
-        game_total = 0
+    def stats(self, player_id: str) -> (float, int, float):
+        """GWP, Match Points, MWP"""
+        player = self.get_player_by_id(player_id)
+        game_count = 0
         score_total = 0
-        wins_total = 0
-        m_one = self.match_one(SwissPlayer(player_id))
-        m_two = self.match_two(SwissPlayer(player_id))
-        m_three = self.match_three(SwissPlayer(player_id))
+        game_wins_count = 0
+        match_wins_count = 0
+        match_count = 0
+        m_one = self.match_one(player)
+        m_two = self.match_two(player)
+        m_three = self.match_three(player)
         if m_one is not None:
-            score, _, games, wins = m_one.score(SwissPlayer(player_id))
-            game_total += games
+            score, _, games, wins = m_one.score(player)
             score_total += score
-            wins_total += wins
+            game_count += games
+            game_wins_count += wins
+            match_count += 1
+            match_wins_count += 1 if score == 3 else 0
         if m_two is not None:
-            score, _, games, wins = m_one.score(SwissPlayer(player_id))
-            game_total += games
+            score, _, games, wins = m_two.score(player)
             score_total += score
-            wins_total += wins
+            game_count += games
+            game_wins_count += wins
+            match_count += 1
+            match_wins_count += 1 if score == 3 else 0
         if m_three is not None:
-            score, _, games, wins = m_one.score(SwissPlayer(player_id))
-            game_total += games
+            score, _, games, wins = m_three.score(player)
             score_total += score
-            wins_total += wins
-        return wins_total / game_total, score_total
+            game_count += games
+            game_wins_count += wins
+            match_count += 1
+            match_wins_count += 1 if score == 3 else 0
+        return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
-    def secondary_stats(self, player_id) -> (float, float):
-        gwp, mwp = self.stats(player_id)
-        opponent_total = 0
-        gwp_sum = 0
-        mwp_sum = 0
-        o_one = self.match_one(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
-        o_two = self.match_two(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
-        o_three = self.match_three(SwissPlayer(player_id)).opponent(SwissPlayer(player_id))
+    def secondary_stats(self, player_id: str) -> (int, float, float, float, float):
+        """Match Points, GWP, MWP, OGP, OMP"""
+        player = self.get_player_by_id(player_id)
+        gwp, mp, mwp = self.stats(player_id)
+        o_count = 0
+        o_gwp_sum = 0
+        o_mwp_sum = 0
+        o_one = self.match_one(player).opponent(player) if self.match_one(player) is not None else None
+        o_two = self.match_two(player).opponent(player) if self.match_two(player) is not None else None
+        o_three = self.match_three(player).opponent(player) if self.match_three(player) is not None else None
         if o_one is not None:
-            gwp, mwp = self.stats(SwissPlayer(player_id))
-            gwp_sum += gwp
-            mwp_sum += mwp
-            opponent_total += 1
+            o_gwp, _, o_mwp = self.stats(o_one.id)
+            o_gwp_sum += o_gwp
+            o_mwp_sum += o_mwp
+            o_count += 1
         if o_two is not None:
-            gwp, mwp = self.stats(SwissPlayer(player_id))
-            gwp_sum += gwp
-            mwp_sum += mwp
-            opponent_total += 1
+            o_gwp, _, o_mwp = self.stats(o_two.id)
+            o_gwp_sum += o_gwp
+            o_mwp_sum += o_mwp
+            o_count += 1
         if o_three is not None:
-            gwp, mwp = self.stats(SwissPlayer(player_id))
-            gwp_sum += gwp
-            mwp_sum += mwp
-            opponent_total += 1
-        return mwp, gwp, gwp_sum / opponent_total, mwp_sum / opponent_total
+            o_gwp, _, o_mwp = self.stats(o_three.id)
+            o_gwp_sum += o_gwp
+            o_mwp_sum += o_mwp
+            o_count += 1
+        return mp, gwp, mwp, o_gwp_sum / o_count if o_count > 0 else 0, o_mwp_sum / o_count if o_count > 0 else 0
 
     def match_one(self, player):
         for m in self.round_one:
@@ -190,7 +202,7 @@ class SwissEvent:
 
 
 class SwissPlayer:
-    def __init__(self, id, seat=0):
+    def __init__(self, id: str, seat=0):
         self.id = id
         self.seat = seat
         self.dropped = False
@@ -205,7 +217,7 @@ class SwissPlayer:
 
 
 class SwissPairing:
-    def __init__(self, player_one, player_two):
+    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer):
         self.player_one = player_one
         self.player_two = player_two
         self.game_one = None
@@ -226,38 +238,52 @@ class SwissPairing:
 
     def is_bye(self) -> bool:
         return self.player_two is None
-    
-    def has_player(self, player):
+
+    def has_player(self, player: SwissPlayer):
         return self.player_one == player or self.player_two == player
 
-    def opponent(self, player) -> Union[SwissPlayer, None]:
+    def opponent(self, player: SwissPlayer) -> Union[SwissPlayer, None]:
         if player == self.player_one:
             return self.player_two
         if player == self.player_two:
             return self.player_one
         return None
 
-    def score(self, player) -> (int, int, int, int):
+    def score(self, player: SwissPlayer) -> (int, int, int, int):
         """match points, priority, games played, games won"""
-        if player is None:
+        me = None
+        op = None
+        if player == self.player_one:
+            me = self.player_one
+            op = self.player_two
+        if player == self.player_two:
+            me = self.player_two
+            op = self.player_one
+        if me is None:
             return 0, 0, 0, 0
         if self.is_bye():
             return 3, 3, 0, 0
         if self.is_tie():
-            return 1, 0, (1 if self.game_one is not None else 0) + (1 if self.game_two is not None else 0), (1 if self.game_one == player else 0) + (1 if self.game_two == player else 0)
-        if player == self.game_one and player == self.game_two:
+            return 1, 0, (1 if self.game_one is not None else 0) + (1 if self.game_two is not None else 0), (1 if self.game_one == me else 0) + (1 if self.game_two == me else 0)
+        if me == self.game_one and me == self.game_two:
             return 3, 4, 2, 2
-        if player == self.game_two and player == self.game_three:
+        if me == self.game_two and me == self.game_three:
             return 3, 2, 3, 2
-        if player == self.game_one and player == self.game_three:
+        if me == self.game_one and me == self.game_three:
             return 3, 1, 3, 2
+        if op == self.game_one and op == self.game_two:
+            return 0, -2, 2, 0
+        if op == self.game_two and op == self.game_three:
+            return 0, -1, 3, 1
+        if op == self.game_one and op == self.game_three:
+            return 0, -1, 3, 1
         return 0, 0, 0, 0
 
 
 if __name__ == "__main__":
     # Do tests
     def test(num_players, score_round_one=None, after_round_one=lambda x: x, score_round_two=None, after_round_two=lambda x: x, score_round_three=None):
-        drft = SwissEvent()
+        drft = SwissEvent("", "", "", "", "")
         drft.players = [SwissPlayer(f"{i + 1}", i) for i in range(0, num_players)]
         print(drft.players)
         drft.round_one = drft.pair_round_one()
@@ -298,6 +324,8 @@ if __name__ == "__main__":
                 c += 1
             if len(drft.players) > 4:
                 assert c < 2
+        for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
+            print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         print("----------")
 
     def drop_seat(seat):
