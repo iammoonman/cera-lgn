@@ -20,6 +20,14 @@ class SwissEvent:
         self.round_two: list[SwissPairing] = []
         self.round_three: list[SwissPairing] = []
         self.players = []
+    
+    @property
+    def current_round(self):
+        if len(self.round_three) > 0:
+            return 2, self.round_three
+        if len(self.round_two) > 0:
+            return 1, self.round_two
+        return 0, self.round_one
 
     def get_player_by_id(self, id):
         for p in self.players:

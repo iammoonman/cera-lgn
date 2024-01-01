@@ -41,16 +41,16 @@ def starting_em(draft: glintwing.SwissEvent, bot):
     )
 
 
-def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot, round=0):
+def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot, round_num, round):
     return discord.Embed(
-        title=f"{draft.title} | Round 0",
+        title=f"{draft.title} | Round {round_num}",
         fields=[
             discord.EmbedField(
                 inline=True,
                 name=f"GAME: {get_name(bot, match.player_one.id)} vs {get_name(bot, match.player_two.id)}",
                 value=f"G1W: {get_name(bot, match.game_one.id)}{bslash}G2W: {bot, get_name(match.game_two.id)}{bslash}G3W: {bot, get_name(match.game_three.id)}" + (f"{bslash}{get_name(bot, match.player_one.id)} has dropped." if match.player_one.dropped else "") + (f"{bslash}{get_name(bot, match.player_two.id)} has dropped." if match.player_two.dropped else ""),
             )
-            for match in (draft.round_one if round == 0 else draft.round_two if round == 1 else draft.round_three)
+            for match in round
         ]
         + [discord.EmbedField(name="ROUND TIMER", value=f"The round ends <t:{int(timekeepstamp.timestamp())}:R>.")],
         description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
@@ -176,7 +176,7 @@ class StartingView(discord.ui.View):
             this_draft.round_one = this_draft.pair_round_one()
             self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
             new_view.after_load(ctx.message.id)
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot)], view=new_view)
+            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 0, this_draft.round_one)], view=new_view)
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -214,59 +214,23 @@ class IG_View(discord.ui.View):
         max_values=1,
         options=[
             discord.SelectOption(label="you - you", value="0", description="You won both games."),
-            discord.SelectOption(
-                label="you - them - you",
-                value="1",
-                description="You won the first and third games.",
-            ),
-            discord.SelectOption(
-                label="them - you - you",
-                value="2",
-                description="You lost the first game, but won overall.",
-            ),
-            discord.SelectOption(
-                label="them - you - them",
-                value="3",
-                description="You won the second game, but lost the match.",
-            ),
-            discord.SelectOption(
-                label="you - them - them",
-                value="4",
-                description="You won the first game, but lost overall.",
-            ),
+            discord.SelectOption(label="you - them - you", value="1", description="You won the first and third games."),
+            discord.SelectOption(label="them - you - you", value="2", description="You lost the first game, but won overall."),
+            discord.SelectOption(label="them - you - them", value="3", description="You won the second game, but lost the match."),
+            discord.SelectOption(label="you - them - them", value="4", description="You won the first game, but lost overall."),
             discord.SelectOption(label="them - them", value="5", description="You lost both games."),
-            discord.SelectOption(
-                label="you - them",
-                value="6",
-                description="You tied, winning the first game.",
-            ),
-            discord.SelectOption(
-                label="them - you",
-                value="7",
-                description="You tied, winning the second game.",
-            ),
-            discord.SelectOption(
-                label="them",
-                value="8",
-                description="Your opponent won game 1 and the match went to time.",
-            ),
-            discord.SelectOption(
-                label="you",
-                value="9",
-                description="You won game 1 and the match went to time.",
-            ),
-            discord.SelectOption(
-                label="UNSET",
-                value="-1",
-                description="Removes previously entered result.",
-            ),
+            discord.SelectOption(label="you - them", value="6", description="You tied, winning the first game."),
+            discord.SelectOption(label="them - you", value="7", description="You tied, winning the second game."),
+            discord.SelectOption(label="them", value="8", description="Your opponent won game 1 and the match went to time."),
+            discord.SelectOption(label="you", value="9", description="You won game 1 and the match went to time."),
+            discord.SelectOption(label="UNSET", value="-1", description="Removes previously entered result."),
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
         this_draft = self.bot.drafts[ctx.message.id]
-        round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+        round_num, this_round = this_draft.current_round
         selection = select.values[0]
         for pairing in this_round:
             if pairing.player_one.id == ctx.user.id:
@@ -292,6 +256,7 @@ class IG_View(discord.ui.View):
                     pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, None, None
                 elif selection == "-1":
                     pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
+                break
             elif pairing.player_two.id == ctx.user.id:
                 if selection == "0":
                     pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_two, None
@@ -315,7 +280,8 @@ class IG_View(discord.ui.View):
                     pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, None, None
                 elif selection == "-1":
                     pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
+                break
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
@@ -323,10 +289,10 @@ class IG_View(discord.ui.View):
         if ctx.message.id not in self.bot.drafts.keys():
             return
         this_draft = self.bot.drafts[ctx.message.id]
-        round_num, this_round = (2, this_draft.round_three) if this_draft.round_three is not None else (1, this_draft.round_two) if this_draft.round_two is not None else (0, this_draft.round_one)
+        round_num, this_round = this_draft.current_round
         pi = this_draft.players.index(glintwing.SwissPlayer(str(ctx.user.id)))
         this_draft.players[pi].dropped = True
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
@@ -335,15 +301,15 @@ class IG_View(discord.ui.View):
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
-            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            round_num, this_round = this_draft.current_round
             if round_num == 0:
                 this_draft.round_two = this_draft.pair_round_two()
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 1)], view=self)
+                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 1, this_draft.round_two)], view=self)
             if round_num == 1:
                 this_draft.round_three = this_draft.pair_round_three()
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2)], view=self)
+                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2, this_draft.round_three)], view=self)
             if round_num == 2:
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
@@ -357,14 +323,14 @@ class IG_View(discord.ui.View):
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
-            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            round_num, this_round = this_draft.current_round
             if round_num == 2:
                 this_draft.round_three = []
                 round_num = 1
             if round_num == 1:
                 this_draft.round_two = []
                 round_num = 0
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)])
+            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)])
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
@@ -373,10 +339,10 @@ class IG_View(discord.ui.View):
             return
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
-            round_num, this_round = (2, this_draft.round_three) if len(this_draft.round_three) > 0 else (1, this_draft.round_two) if len(this_draft.round_two) > 0 else (0, this_draft.round_one)
+            round_num, this_round = this_draft.current_round
             myplayer = this_draft.players.get_player_by_id(str(select.values[0]))
             myplayer.dropped = True
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num)], view=self)
+        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0)
