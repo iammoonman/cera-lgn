@@ -21,14 +21,14 @@ with open("guild.pickle", "rb") as f:
     guild: int = pickle.load(f)
 
 
-def get_name(bot, id):
+def get_name(bot: discord.Bot, id) -> str:
     u = get(bot.get_all_memebers(), id)
     if u is not None:
         return u.display_name
     return "Unknown User"
 
 
-def starting_em(draft: glintwing.SwissEvent, bot):
+def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot):
     return discord.Embed(
         title=f"{draft.title} | ENTRY",
         fields=[
@@ -41,7 +41,7 @@ def starting_em(draft: glintwing.SwissEvent, bot):
     )
 
 
-def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot, round_num, round):
+def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot: discord.Bot, round_num, round):
     return discord.Embed(
         title=f"{draft.title} | Round {round_num}",
         fields=[
@@ -57,7 +57,7 @@ def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot, ro
     )
 
 
-def end_em(draft: glintwing.SwissEvent, bot):
+def end_em(draft: glintwing.SwissEvent, bot: discord.Bot):
     return discord.Embed(
         title=f"{draft.title} | FINAL",
         fields=[
@@ -213,17 +213,17 @@ class IG_View(discord.ui.View):
         min_values=1,
         max_values=1,
         options=[
-            discord.SelectOption(label="you - you", value="0", description="You won both games."),
-            discord.SelectOption(label="you - them - you", value="1", description="You won the first and third games."),
-            discord.SelectOption(label="them - you - you", value="2", description="You lost the first game, but won overall."),
-            discord.SelectOption(label="them - you - them", value="3", description="You won the second game, but lost the match."),
-            discord.SelectOption(label="you - them - them", value="4", description="You won the first game, but lost overall."),
-            discord.SelectOption(label="them - them", value="5", description="You lost both games."),
-            discord.SelectOption(label="you - them", value="6", description="You tied, winning the first game."),
-            discord.SelectOption(label="them - you", value="7", description="You tied, winning the second game."),
-            discord.SelectOption(label="them", value="8", description="Your opponent won game 1 and the match went to time."),
-            discord.SelectOption(label="you", value="9", description="You won game 1 and the match went to time."),
-            discord.SelectOption(label="UNSET", value="-1", description="Removes previously entered result."),
+            discord.SelectOption(label="you - you", value="aa0", description="You won both games."),
+            discord.SelectOption(label="you - them - you", value="aba", description="You won the first and third games."),
+            discord.SelectOption(label="them - you - you", value="baa", description="You lost the first game, but won overall."),
+            discord.SelectOption(label="them - you - them", value="bab", description="You won the second game, but lost the match."),
+            discord.SelectOption(label="you - them - them", value="abb", description="You won the first game, but lost overall."),
+            discord.SelectOption(label="them - them", value="bb0", description="You lost both games."),
+            discord.SelectOption(label="you - them", value="ab0", description="You tied, winning the first game."),
+            discord.SelectOption(label="them - you", value="ba0", description="You tied, winning the second game."),
+            discord.SelectOption(label="them", value="b00", description="Your opponent won game 1 and the match went to time."),
+            discord.SelectOption(label="you", value="a00", description="You won game 1 and the match went to time."),
+            discord.SelectOption(label="UNSET", value="000", description="Removes previously entered result."),
         ],
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
@@ -234,53 +234,43 @@ class IG_View(discord.ui.View):
         selection = select.values[0]
         for pairing in this_round:
             if pairing.player_one.id == ctx.user.id:
-                if selection == "0":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_one, None
-                elif selection == "1":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_one
-                elif selection == "2":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_one
-                elif selection == "3":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_two
-                elif selection == "4":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_two
-                elif selection == "5":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_two, None
-                elif selection == "6":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, None
-                elif selection == "7":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, None
-                elif selection == "8":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, None, None
-                elif selection == "9":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, None, None
-                elif selection == "-1":
-                    pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
-                break
+                if selection[0:1] == "a":
+                    pairing.game_one = pairing.player_one
+                elif selection[0:1] == "b":
+                    pairing.game_one = pairing.player_two
+                elif selection[0:1] == "0":
+                    pairing.game_one = None
+                if selection[1:2] == "a":
+                    pairing.game_two = pairing.player_one
+                elif selection[1:2] == "b":
+                    pairing.game_two = pairing.player_two
+                elif selection[1:2] == "0":
+                    pairing.game_two = None
+                if selection[2:3] == "a":
+                    pairing.game_three = pairing.player_one
+                elif selection[2:3] == "b":
+                    pairing.game_three = pairing.player_two
+                elif selection[2:3] == "0":
+                    pairing.game_three = None
             elif pairing.player_two.id == ctx.user.id:
-                if selection == "0":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_two, None
-                elif selection == "1":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_two
-                elif selection == "2":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_two
-                elif selection == "3":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, pairing.player_one
-                elif selection == "4":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, pairing.player_one
-                elif selection == "5":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_one, None
-                elif selection == "6":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, pairing.player_one, None
-                elif selection == "7":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, pairing.player_two, None
-                elif selection == "8":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_one, None, None
-                elif selection == "9":
-                    pairing.game_one, pairing.game_two, pairing.game_three = pairing.player_two, None, None
-                elif selection == "-1":
-                    pairing.game_one, pairing.game_two, pairing.game_three = None, None, None
-                break
+                if selection[0:1] == "a":
+                    pairing.game_one = pairing.player_two
+                elif selection[0:1] == "b":
+                    pairing.game_one = pairing.player_one
+                elif selection[0:1] == "0":
+                    pairing.game_one = None
+                if selection[1:2] == "a":
+                    pairing.game_two = pairing.player_two
+                elif selection[1:2] == "b":
+                    pairing.game_two = pairing.player_one
+                elif selection[1:2] == "0":
+                    pairing.game_two = None
+                if selection[2:3] == "a":
+                    pairing.game_three = pairing.player_two
+                elif selection[2:3] == "b":
+                    pairing.game_three = pairing.player_one
+                elif selection[2:3] == "0":
+                    pairing.game_three = None
         await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
