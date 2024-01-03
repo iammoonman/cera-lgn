@@ -8,7 +8,7 @@ def distance(pA, pB, players):
 
 
 class SwissEvent:
-    def __init__(self, id: str, host: str, tag: str, description: str, title: str, cube_id: str = "", set_code: str = ""):
+    def __init__(self, id: str, host: str, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", date: str = ''):
         self.id = id
         self.host = host
         self.title = title
@@ -45,13 +45,13 @@ class SwissEvent:
                     "title": self.title,
                     **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
                     **({"description": self.description} if self.description else {}),
-                    **({"host": self.host} if self.host else {}),
+                    **({"host": str(self.host)} if self.host else {}),
                     **({"cube_id": self.cube_id} if self.cube_id else {}),
                     **({"set_code": self.set_code} if self.set_code else {}),
                 },
-                "R_0": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_one],
-                "R_1": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_two],
-                "R_2": [{"players": [p.player_one.id, p.player_two.id if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_three],
+                "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_one],
+                "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_two],
+                "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_three],
             }
         )
 

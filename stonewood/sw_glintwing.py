@@ -22,7 +22,7 @@ with open("guild.pickle", "rb") as f:
 
 
 def get_name(bot: discord.Bot, id) -> str:
-    u = get(bot.get_all_memebers(), id)
+    u = bot.get_user(id)
     if u is not None:
         return u.display_name
     return "Unknown User"
@@ -121,7 +121,7 @@ class Glintwing(commands.Cog):
         msg = await ctx.interaction.original_response()
         self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
-        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id])], content="", view=new_view)
+        await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id], self.bot)], content="", view=new_view)
         # await msg.add_reaction("<:seat_white:1104759507311145012>")
         # await msg.add_reaction("<:seat_brown:1104759527808708698>")
         # await msg.add_reaction("<:seat_red:1104759572696141915>")
@@ -146,11 +146,8 @@ class StartingView(discord.ui.View):
             return
         if len(self.bot.drafts[ctx.message.id].players) == 10:
             return
-        member = discord.utils.get(ctx.guild.members, id=ctx.user.id)
-        if member is None:
-            member = ctx.user
         this_draft = self.bot.drafts[ctx.message.id]
-        this_draft.players.append(glintwing.SwissPlayer(str(ctx.user.id), len(this_draft.players)))
+        this_draft.players.append(glintwing.SwissPlayer(ctx.user.id, len(this_draft.players)))
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -158,7 +155,7 @@ class StartingView(discord.ui.View):
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        self.bot.drafts[ctx.message.id].players.remove(glintwing.SwissPlayer(str(ctx.user.id)))
+        self.bot.drafts[ctx.message.id].players.remove(glintwing.SwissPlayer(ctx.user.id))
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -280,7 +277,7 @@ class IG_View(discord.ui.View):
             return
         this_draft = self.bot.drafts[ctx.message.id]
         round_num, this_round = this_draft.current_round
-        pi = this_draft.players.index(glintwing.SwissPlayer(str(ctx.user.id)))
+        pi = this_draft.players.index(glintwing.SwissPlayer(ctx.user.id))
         this_draft.players[pi].dropped = True
         await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
