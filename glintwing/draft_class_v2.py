@@ -8,19 +8,22 @@ def distance(pA, pB, players):
 
 
 class SwissEvent:
-    def __init__(self, id: str, host: str, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", date: str = ''):
+    def __init__(self, id, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = ""):
         self.id = id
         self.host = host
+        """Discord User ID"""
         self.title = title
         self.description = description
         self.cube_id = cube_id
+        """CubeCobra ID, short or long"""
         self.set_code = set_code
+        """Three-character set code from Scryfall"""
         self.tag = tag
         self.round_one: list[SwissPairing] = []
         self.round_two: list[SwissPairing] = []
         self.round_three: list[SwissPairing] = []
-        self.players = []
-        self.stats_cache = {}
+        self.players: list[SwissPlayer] = []
+        self.stats_cache: dict[str, tuple[float, int, float]] = {}
 
     @property
     def current_round(self):
@@ -83,7 +86,7 @@ class SwissEvent:
             return (not bye, not flawless, not clutched, not game_tied, not to_time, not flubbed, not blown, player.seat)
 
         non_dropped_players.sort(key=sort_func)
-        pairings = []
+        pairings: list[SwissPairing] = []
         while non_dropped_players:
             pl = non_dropped_players.pop(0)
             for opp in non_dropped_players:
@@ -117,7 +120,7 @@ class SwissEvent:
             return (-1 * (first_score + second_score), -1 * (first_priority + second_priority), not bye, not flawless, not clutched, not game_tied, not to_time, not flubbed, not blown, player.seat)
 
         non_dropped_players.sort(key=sort_func)
-        pairings = []
+        pairings: list[SwissPairing] = []
         while non_dropped_players:
             pl = non_dropped_players.pop(0)
             for opp in non_dropped_players:
@@ -130,7 +133,7 @@ class SwissEvent:
                 pairings.append(SwissPairing(pl, None))
         return pairings
 
-    def stats(self, player_id: str) -> (float, int, float):
+    def stats(self, player_id: str) -> tuple[float, int, float]:
         """GWP, Match Points, MWP"""
         player = self.get_player_by_id(player_id)
         game_count = 0
@@ -162,10 +165,10 @@ class SwissEvent:
             game_wins_count += wins
             match_count += 1
             match_wins_count += 1 if score == 3 else 0
-        self.stats_cache = game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
+        self.stats_cache[player_id] = game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
-    def secondary_stats(self, player_id: str) -> (int, float, float, float, float):
+    def secondary_stats(self, player_id: str) -> tuple[int, float, float, float, float]:
         """Match Points, GWP, MWP, OGP, OMP"""
         player = self.get_player_by_id(player_id)
         gwp, mp, mwp = self.stats_cache[player_id] if player_id in self.stats_cache else self.stats(player_id)
@@ -234,9 +237,12 @@ class SwissPairing:
     def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer):
         self.player_one = player_one
         self.player_two = player_two
-        self.game_one = None
-        self.game_two = None
-        self.game_three = None
+        self.game_one: Union[SwissPlayer, None] = None
+        """The winner of game one. If None, then there isn't a winner."""
+        self.game_two: Union[SwissPlayer, None] = None
+        """The winner of game one. If None, then there isn't a winner."""
+        self.game_three: Union[SwissPlayer, None] = None
+        """The winner of game one. If None, then there isn't a winner."""
 
     def __repr__(self):
         p1_score, _, _, _ = self.score(self.player_one)
@@ -263,7 +269,7 @@ class SwissPairing:
             return self.player_one
         return None
 
-    def score(self, player: SwissPlayer) -> (int, int, int, int):
+    def score(self, player: SwissPlayer) -> tuple[int, int, int, int]:
         """match points, priority, games played, games won"""
         me = None
         op = None

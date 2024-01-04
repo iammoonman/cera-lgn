@@ -1,8 +1,5 @@
 import json
-from typing import Union
 import discord
-from discord.utils import get
-from discord.ext import commands
 import glintwing
 import pickle
 import datetime
@@ -72,7 +69,7 @@ def end_em(draft: glintwing.SwissEvent, bot: discord.Bot):
     )
 
 
-class Glintwing(commands.Cog):
+class Glintwing(discord.ext.commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
         self.drafts: dict[str, glintwing.SwissEvent] = {}
@@ -108,7 +105,7 @@ class Glintwing(commands.Cog):
     #             # await reaction.clear()
     #     return
 
-    @commands.slash_command(guilds=[guild])
+    @discord.ext.commands.slash_command(guilds=[guild])
     @discord.option(name="title", description="The name of the draft event.")
     @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")
     @discord.option(name="desc", description="Describe the event.", default="")
@@ -119,7 +116,7 @@ class Glintwing(commands.Cog):
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
-        self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, date=datetime.datetime.today().isoformat(), host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
+        self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
         await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id], self.bot)], content="", view=new_view)
         # await msg.add_reaction("<:seat_white:1104759507311145012>")
