@@ -178,23 +178,6 @@ class StartingView(discord.ui.View):
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    # @discord.ui.user_select(placeholder="ADD PLAYER", row=1)
-    # async def add_player(self, select: discord.ui.Select, ctx: discord.Interaction):
-    #     if self.id not in self.bot.drafts.keys():
-    #         # await ctx.delete_original_message()
-    #         return
-    #     if self.bot.drafts[self.id][-1].host == str(ctx.user.id):
-    #         user = ctx.data["resolved"]["users"][ctx.data["values"][-1]]
-    #         self.bot.drafts[self.id][-1].add_player(
-    #             user["nick"] if "nick" in user else user["username"],
-    #             str(user["id"]),
-    #         )
-    #     await ctx.message.edit(
-    #         embeds=[self.bot.starting_em(self.bot.drafts[self.id][-1])],
-    #         view=self,
-    #     )
-    #     return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
-
 
 class IG_View(discord.ui.View):
     def __init__(self, bot: Glintwing):
