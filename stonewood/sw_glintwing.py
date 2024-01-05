@@ -34,7 +34,7 @@ def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot):
                 value=f"{bslash.join([f'{get_name(bot, p.id)} | Seat: {p.seat}' for p in draft.players])}",
             ),
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag]}*{bslash}Don't share seats!",
     )
 
 
@@ -78,32 +78,36 @@ class Glintwing(discord.ext.commands.Cog):
     # Have players select what color they were on the table.
     # Players react with emoji of colored squares, use custom emoji for the 10 colors.
     # When someone reacts on one already taken, clear the previous sitter of that seat.
-    # @commands.Cog.listener()
-    # async def on_reaction_add(self, reaction: discord.Reaction, user: Union[discord.Member, discord.User]):
-    #     # print(reaction.message) # Find the id of this message's views.
-    #     if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
-    #         return
-    #     this_draft = self.drafts[reaction.message.id][-1]
-    #     if len(this_draft.rounds) == 0:
-    #         if type(reaction.emoji) != "str":
-    #             if reaction.emoji.name not in seat_order:
-    #                 return
-    #             try:
-    #                 this_player = this_draft.get_player_by_id(str(user.id))
-    #             except StopIteration:
-    #                 await reaction.clear()
-    #                 return
-    #             this_player.seat_color = reaction.emoji.name
-    #             counter = 0
-    #             for color in seat_order:
-    #                 for player in self.drafts[reaction.message.id][-1].players:
-    #                     if player.seat_color == color:
-    #                         player.seat = counter
-    #                         counter += 1
-    #             new_view = StartingView(self)
-    #             await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id][-1])], view=new_view)
-    #             # await reaction.clear()
-    #     return
+    @discord.ext.commands.Cog.listener()
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+        # print(reaction.message) # Find the id of this message's views.
+        if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
+            return
+        this_draft = self.drafts[reaction.message.id]
+        if len(this_draft.round_one) == 0:
+            if type(reaction.emoji) != "str":
+                if reaction.emoji.name not in seat_order:
+                    return
+                this_player = this_draft.get_player_by_id(user.id)
+                if this_player is None:
+                    return
+                for idx, color in enumerate(seat_order):
+                    if color == reaction.emoji.name:
+                        this_player.seat = idx
+                new_view = StartingView(self)
+                await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id], self.bot)], view=new_view)
+                await reaction.message.clear_reactions()
+                await reaction.message.add_reaction("<:seat_white:1104759507311145012>")
+                await reaction.message.add_reaction("<:seat_brown:1104759527808708698>")
+                await reaction.message.add_reaction("<:seat_red:1104759572696141915>")
+                await reaction.message.add_reaction("<:seat_orange:1104759633693909092>")
+                await reaction.message.add_reaction("<:seat_yellow:1104759560905969804>")
+                await reaction.message.add_reaction("<:seat_green:1104759586369572874>")
+                await reaction.message.add_reaction("<:seat_teal:1104759619739471955>")
+                await reaction.message.add_reaction("<:seat_blue:1104759698076479539>")
+                await reaction.message.add_reaction("<:seat_purple:1104759602274381884>")
+                await reaction.message.add_reaction("<:seat_pink:1104759547228336138>")
+        return
 
     @discord.ext.commands.slash_command(guilds=[guild])
     @discord.option(name="title", description="The name of the draft event.")
@@ -119,16 +123,16 @@ class Glintwing(discord.ext.commands.Cog):
         self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
         await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id], self.bot)], content="", view=new_view)
-        # await msg.add_reaction("<:seat_white:1104759507311145012>")
-        # await msg.add_reaction("<:seat_brown:1104759527808708698>")
-        # await msg.add_reaction("<:seat_red:1104759572696141915>")
-        # await msg.add_reaction("<:seat_orange:1104759633693909092>")
-        # await msg.add_reaction("<:seat_yellow:1104759560905969804>")
-        # await msg.add_reaction("<:seat_green:1104759586369572874>")
-        # await msg.add_reaction("<:seat_teal:1104759619739471955>")
-        # await msg.add_reaction("<:seat_blue:1104759698076479539>")
-        # await msg.add_reaction("<:seat_purple:1104759602274381884>")
-        # await msg.add_reaction("<:seat_pink:1104759547228336138>")
+        await msg.add_reaction("<:seat_white:1104759507311145012>")
+        await msg.add_reaction("<:seat_brown:1104759527808708698>")
+        await msg.add_reaction("<:seat_red:1104759572696141915>")
+        await msg.add_reaction("<:seat_orange:1104759633693909092>")
+        await msg.add_reaction("<:seat_yellow:1104759560905969804>")
+        await msg.add_reaction("<:seat_green:1104759586369572874>")
+        await msg.add_reaction("<:seat_teal:1104759619739471955>")
+        await msg.add_reaction("<:seat_blue:1104759698076479539>")
+        await msg.add_reaction("<:seat_purple:1104759602274381884>")
+        await msg.add_reaction("<:seat_pink:1104759547228336138>")
         return
 
 
