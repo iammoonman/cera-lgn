@@ -287,9 +287,9 @@ class IG_View(discord.ui.View):
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
                 await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2, this_draft.round_three, ctx.guild_id)], view=self)
             if round_num == 2:
+                await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].to_json(), f, ensure_ascii=False, indent=4)
-                await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             # await ctx.message.edit(content="Not all results reported.", embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
