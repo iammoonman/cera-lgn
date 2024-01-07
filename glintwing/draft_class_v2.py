@@ -40,23 +40,21 @@ class SwissEvent:
         return None
 
     def to_json(self):
-        return json.dumps(
-            {
-                "id": self.id,
-                "meta": {
-                    "date": f"{datetime.datetime.now().isoformat()}-5:00",
-                    "title": self.title,
-                    **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
-                    **({"description": self.description} if self.description else {}),
-                    **({"host": str(self.host)} if self.host else {}),
-                    **({"cube_id": self.cube_id} if self.cube_id else {}),
-                    **({"set_code": self.set_code} if self.set_code else {}),
-                },
-                "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_one],
-                "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_two],
-                "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_three],
-            }
-        )
+        return {
+            "id": self.id,
+            "meta": {
+                "date": f"{datetime.datetime.now().isoformat()}-5:00",
+                "title": self.title,
+                **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
+                **({"description": self.description} if self.description else {}),
+                **({"host": str(self.host)} if self.host else {}),
+                **({"cube_id": self.cube_id} if self.cube_id else {}),
+                **({"set_code": self.set_code} if self.set_code else {}),
+            },
+            "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_one],
+            "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_two],
+            "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [p.game_one, p.game_two, p.game_three]} for p in self.round_three],
+        }
 
     def pair_round_one(self):
         # Pair per seat
@@ -247,7 +245,7 @@ class SwissPairing:
     def __repr__(self):
         p1_score, _, _, _ = self.score(self.player_one)
         p2_score, _, _, _ = self.score(self.player_two)
-        return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else self.player_two}"
+        return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else 'TIE'}"
 
     def is_tie(self) -> bool:
         if (self.game_one == self.player_one or self.game_one == self.player_two) and self.game_one != self.game_two and self.game_three is None:
@@ -405,9 +403,19 @@ if __name__ == "__main__":
 
         return tst
 
+    def ties(pairs):
+        for i, pair in enumerate(pairs):
+            if i == 0:
+                pair.game_one = pair.player_one
+                pair.game_two = pair.player_two
+            else:
+                pair.game_one = pair.player_one
+                pair.game_two = pair.player_one
+
     test(8, after_round_one=test_first_pairs([["1", "5"], ["2", "6"], ["3", "7"], ["4", "8"]]))
     test(8, after_round_one=drop_seat(0))
     test(8, after_round_two=drop_seat(1))
+    test(8, score_round_one=lambda x: ties(x), after_round_one=drop_seat(0))
     test(8, after_round_two=drop_ids(["1", "2"]))
     test(8, after_round_two=drop_ids(["1", "2", "3"]))
     test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))
