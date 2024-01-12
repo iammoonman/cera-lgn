@@ -1,9 +1,9 @@
 import datetime
-import json
 from typing import Union
 
 
 def distance(pA, pB, players):
+    """Thanks, Metro!"""
     return min(abs(pB.seat - pA.seat), len(players) - pB.seat + pA.seat, len(players) - pA.seat + pB.seat)
 
 
@@ -27,6 +27,7 @@ class SwissEvent:
 
     @property
     def current_round(self):
+        """Returns the round index and round object for the currently played round."""
         if len(self.round_three) > 0:
             return 2, self.round_three
         if len(self.round_two) > 0:
@@ -57,13 +58,17 @@ class SwissEvent:
         }
 
     def pair_round_one(self):
-        # Pair per seat
+        # The first round is always paired by seat.
         # 1-5, 2-6, 3-7, 4-8
         self.players.sort(key=lambda p: p.seat)
         leftover = len(self.players) % 2 == 1
         return [SwissPairing(self.players[i], self.players[x] if (x := i + len(self.players) // 2) < len(self.players) else None) for i in range(0, len(self.players) // 2)] + ([] if not leftover else [SwissPairing(self.players[-1], None)])
 
     def pair_round_two(self):
+        """Returns pairs for a round two. Depends on round one having been played."""
+        # The second round is paired by seat at best.
+        # The winners and losers of 1-5 and 3-7 play against each other, and same for 2-6 and 4-8.
+        #
         # Get winning players; bye counts as 2-0
         # Get losing and tying players
         # Pair up winning players, 2-0s first, then 2-1s
@@ -100,6 +105,7 @@ class SwissEvent:
         return pairings
 
     def pair_round_three(self):
+        """Returns pairs for a round three. Depends on round two having been played."""
         # Sort by score, then game-win-percentage
         # Choose top non-prior opponent
         # Pair
@@ -194,18 +200,21 @@ class SwissEvent:
         return mp, gwp, mwp, o_gwp_sum / o_count if o_count > 0 else 0, o_mwp_sum / o_count if o_count > 0 else 0
 
     def match_one(self, player):
+        """Returns the first round match of the given player."""
         for m in self.round_one:
             if m.player_one == player or m.player_two == player:
                 return m
         return None
 
     def match_two(self, player):
+        """Returns the second round match of the given player."""
         for m in self.round_two:
             if m.player_one == player or m.player_two == player:
                 return m
         return None
 
     def match_three(self, player):
+        """Returns the third round match of the given player."""
         for m in self.round_three:
             if m.player_one == player or m.player_two == player:
                 return m
@@ -228,7 +237,7 @@ class SwissPlayer:
         return False
 
     def __repr__(self):
-        return f"{self.id}"  # @{self.seat}"
+        return f"{self.id}"
 
 
 class SwissPairing:

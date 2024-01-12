@@ -39,7 +39,7 @@ def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
     )
 
 
-def ig_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot: discord.Bot, round_num, round, guild_id):
+def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot: discord.Bot, round_num, round, guild_id):
     return discord.Embed(
         title=f"{draft.title} | Round {round_num + 1}",
         fields=[
@@ -76,12 +76,8 @@ class Glintwing(discord.ext.commands.Cog):
         self.drafts: dict[str, glintwing.SwissEvent] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
 
-    # Have players select what color they were on the table.
-    # Players react with emoji of colored squares, use custom emoji for the 10 colors.
-    # When someone reacts on one already taken, clear the previous sitter of that seat.
     @discord.ext.commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        # print(reaction.message) # Find the id of this message's views.
         if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
             return
         this_draft = self.drafts[reaction.message.id]
@@ -118,7 +114,6 @@ class Glintwing(discord.ext.commands.Cog):
     @discord.option(name="title", description="The name of the draft event.")
     @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")
     @discord.option(name="desc", description="Describe the event.", default="")
-    # @discord.option(name="rounds", description="The maximum number of rounds for the draft. Default is 3.", min_value=1, max_value=5, default=3)
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
     async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", cube_id: str = "", set_code: str = ""):
@@ -179,7 +174,7 @@ class StartingView(discord.ui.View):
             this_draft.round_one = this_draft.pair_round_one()
             self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=60)
             new_view.after_load(ctx.message.id, ctx.guild_id)
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 0, this_draft.round_one, ctx.guild_id)], view=new_view)
+            await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 0, this_draft.round_one, ctx.guild_id)], view=new_view)
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -257,7 +252,7 @@ class IG_View(discord.ui.View):
                     pairing.game_three = pairing.player_one
                 elif selection[2:3] == "0":
                     pairing.game_three = None
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
@@ -268,7 +263,7 @@ class IG_View(discord.ui.View):
         round_num, this_round = this_draft.current_round
         this_player = this_draft.get_player_by_id(ctx.user.id)
         this_player.dropped = True
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
@@ -281,16 +276,15 @@ class IG_View(discord.ui.View):
             if round_num == 0:
                 this_draft.round_two = this_draft.pair_round_two()
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 1, this_draft.round_two, ctx.guild_id)], view=self)
+                await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 1, this_draft.round_two, ctx.guild_id)], view=self)
             if round_num == 1:
                 this_draft.round_three = this_draft.pair_round_three()
                 self.bot.timekeep[ctx.message.id] = datetime.datetime.now() + datetime.timedelta(minutes=50)
-                await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2, this_draft.round_three, ctx.guild_id)], view=self)
+                await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, 2, this_draft.round_three, ctx.guild_id)], view=self)
             if round_num == 2:
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].to_json(), f, ensure_ascii=False, indent=4)
-            # await ctx.message.edit(content="Not all results reported.", embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id])], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
@@ -306,7 +300,7 @@ class IG_View(discord.ui.View):
             if round_num == 1:
                 this_draft.round_two = []
                 round_num = 0
-            await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)])
+            await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)])
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
@@ -318,7 +312,7 @@ class IG_View(discord.ui.View):
             round_num, this_round = this_draft.current_round
             myplayer = this_draft.players.get_player_by_id(str(select.values[0]))
             myplayer.dropped = True
-        await ctx.message.edit(embeds=[ig_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0)
