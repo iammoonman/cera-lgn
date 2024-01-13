@@ -284,7 +284,7 @@ class IG_View(discord.ui.View):
             if round_num == 2:
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                    json.dump(self.bot.drafts[ctx.message.id].to_json(), f, ensure_ascii=False, indent=4)
+                    json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
