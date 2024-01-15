@@ -171,13 +171,13 @@ class SwissEvent:
             game_wins_count += wins
             match_count += 1
             match_wins_count += 1 if score == 3 else 0
-        self.stats_cache[player_id] = game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
+        # self.stats_cache[player_id] = game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
     def secondary_stats(self, player_id: str) -> tuple[int, float, float, float, float]:
         """Match Points, GWP, MWP, OGP, OMP"""
         player = self.get_player_by_id(player_id)
-        gwp, mp, mwp = self.stats_cache[player_id] if player_id in self.stats_cache else self.stats(player_id)
+        gwp, mp, mwp = self.stats(player_id)
         o_count = 0
         o_gwp_sum = 0
         o_mwp_sum = 0
@@ -235,6 +235,8 @@ class SwissPlayer:
         if isinstance(other, SwissPlayer):
             return self.id == other.id
         if isinstance(other, str):
+            return self.id == other
+        if isinstance(other, int):
             return self.id == other
         return False
 

@@ -3,6 +3,8 @@ import discord
 import glintwing
 import datetime
 
+from glintwing.draft_class_v2 import SwissPlayer
+
 taglist = {
     "ptm": "Prime Time With Moon",
     "ths": "Thursday Night Draft",
@@ -45,8 +47,8 @@ def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetim
         fields=[
             discord.EmbedField(
                 inline=True,
-                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) if match.player_two is not None else ''}",
-                value=f"G1W: {get_name(bot, match.game_one.id, guild_id) if match.game_one is not None else ''}{bslash}G2W: {get_name(bot, match.game_two.id, guild_id) if match.game_two is not None else ''}{bslash}G3W: {get_name(bot, match.game_three.id, guild_id) if match.game_three is not None else ''}" + (f"{bslash}{get_name(bot, match.player_one.id, guild_id)} has dropped." if match.player_one.dropped and match.player_one is not None else "") + (f"{bslash}{get_name(bot, match.player_two.id, guild_id)} has dropped." if match.player_two.dropped and match.player_two is not None else ""),
+                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_one.id)[0]) + ')' if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_two.id)[0]) + ')' if match.player_two is not None else 'BYE'}",
+                value=f"G1W: {get_name(bot, match.game_one.id, guild_id) if match.game_one is not None else ''}{bslash}G2W: {get_name(bot, match.game_two.id, guild_id) if match.game_two is not None else ''}{bslash}G3W: {get_name(bot, match.game_three.id, guild_id) if match.game_three is not None else ''}" + ((f"{bslash}{get_name(bot, match.player_one.id, guild_id)} has dropped." if match.player_one.dropped else "") if match.player_one is not None else "") + ((f"{bslash}{get_name(bot, match.player_two.id, guild_id)} has dropped." if match.player_two.dropped else "") if match.player_two is not None else ""),
             )
             for match in round
         ]
@@ -62,7 +64,7 @@ def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             discord.EmbedField(
                 inline=True,
                 name=f"{get_name(bot, player.id, guild_id)}",
-                value=f"SCORE: {(stats:=draft.secondary_stats(player.id))[0]}{bslash}" + f"GWP: {stats[1]:.2f}{bslash}" + f"OGP: {stats[3]:.2f}{bslash}" + f"OMP: {stats[4]:.2f}",
+                value=f"SCORE: {(stats:=draft.secondary_stats(player.id))[0]}{bslash}GWP: {stats[1]:.2f}{bslash}OGP: {stats[3]:.2f}{bslash}OMP: {stats[4]:.2f}",
             )
             for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
@@ -76,6 +78,7 @@ class Glintwing(discord.ext.commands.Cog):
         self.drafts: dict[str, glintwing.SwissEvent] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
 
+    # Seats are kinda dumb
     @discord.ext.commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
@@ -141,6 +144,8 @@ class StartingView(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
+    # player can join more than once
+    # seat position should care about taken seats
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
@@ -148,6 +153,8 @@ class StartingView(discord.ui.View):
         if len(self.bot.drafts[ctx.message.id].players) == 10:
             return
         this_draft = self.bot.drafts[ctx.message.id]
+        if ctx.user.id in this_draft.players:
+            return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
         this_draft.players.append(glintwing.SwissPlayer(ctx.user.id, len(this_draft.players)))
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
@@ -214,6 +221,8 @@ class IG_View(discord.ui.View):
         round_num, this_round = this_draft.current_round
         selection = select.values[0]
         for pairing in this_round:
+            if pairing.player_one is None or pairing.player_two is None:
+                continue
             if pairing.player_one.id == ctx.user.id:
                 if selection[0:1] == "a":
                     pairing.game_one = pairing.player_one
@@ -310,9 +319,9 @@ class IG_View(discord.ui.View):
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.players.get_player_by_id(str(select.values[0]))
+            myplayer = this_draft.get_player_by_id(str(select.values[0]))
             myplayer.dropped = True
-        await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
+            await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0)
