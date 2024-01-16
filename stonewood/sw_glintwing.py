@@ -47,7 +47,7 @@ def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetim
         fields=[
             discord.EmbedField(
                 inline=True,
-                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_one.id)[0]) + ')' if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_two.id)[0]) + ')' if match.player_two is not None else 'BYE'}",
+                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_one.id)[0], round_num) + ')' if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_two.id)[0], round_num) + ')' if match.player_two is not None else 'BYE'}",
                 value=f"G1W: {get_name(bot, match.game_one.id, guild_id) if match.game_one is not None else ''}{bslash}G2W: {get_name(bot, match.game_two.id, guild_id) if match.game_two is not None else ''}{bslash}G3W: {get_name(bot, match.game_three.id, guild_id) if match.game_three is not None else ''}" + ((f"{bslash}{get_name(bot, match.player_one.id, guild_id)} has dropped." if match.player_one.dropped else "") if match.player_one is not None else "") + ((f"{bslash}{get_name(bot, match.player_two.id, guild_id)} has dropped." if match.player_two.dropped else "") if match.player_two is not None else ""),
             )
             for match in round
@@ -319,7 +319,7 @@ class IG_View(discord.ui.View):
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(str(select.values[0]))
+            myplayer = this_draft.get_player_by_id(select.values[0])
             myplayer.dropped = True
             await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
@@ -331,7 +331,7 @@ class IG_View(discord.ui.View):
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
-            await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
+            await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id].json, self.bot.bot, ctx.guild_id)], view=None)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
