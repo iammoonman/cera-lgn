@@ -24,7 +24,6 @@ class SwissEvent:
         self.round_two: list[SwissPairing] = []
         self.round_three: list[SwissPairing] = []
         self.players: list[SwissPlayer] = []
-        self.stats_cache: dict[str, tuple[float, int, float]] = {}
 
     @property
     def current_round(self):
@@ -171,7 +170,6 @@ class SwissEvent:
             game_wins_count += wins
             match_count += 1
             match_wins_count += 1 if score == 3 else 0
-        # self.stats_cache[player_id] = game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
     def secondary_stats(self, player_id: str, round=3) -> tuple[int, float, float, float, float]:

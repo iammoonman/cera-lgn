@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 import glintwing
@@ -78,7 +79,6 @@ class Glintwing(discord.ext.commands.Cog):
         self.drafts: dict[str, glintwing.SwissEvent] = {}
         self.timekeep: dict[str, datetime.datetime] = {}
 
-    # Seats are kinda dumb
     @discord.ext.commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if reaction.message.id not in self.drafts.keys() or user.id == self.bot.user.id:
@@ -100,17 +100,7 @@ class Glintwing(discord.ext.commands.Cog):
                         this_player.seat = idx
                 new_view = StartingView(self)
                 await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id], self.bot, reaction.message.guild.id)], view=new_view)
-                await reaction.message.clear_reactions()
-                await reaction.message.add_reaction("<:seat_white:1104759507311145012>")
-                await reaction.message.add_reaction("<:seat_brown:1104759527808708698>")
-                await reaction.message.add_reaction("<:seat_red:1104759572696141915>")
-                await reaction.message.add_reaction("<:seat_orange:1104759633693909092>")
-                await reaction.message.add_reaction("<:seat_yellow:1104759560905969804>")
-                await reaction.message.add_reaction("<:seat_green:1104759586369572874>")
-                await reaction.message.add_reaction("<:seat_teal:1104759619739471955>")
-                await reaction.message.add_reaction("<:seat_blue:1104759698076479539>")
-                await reaction.message.add_reaction("<:seat_purple:1104759602274381884>")
-                await reaction.message.add_reaction("<:seat_pink:1104759547228336138>")
+                await reaction.message.remove_reaction(reaction.emoji, user)
         return
 
     @discord.ext.commands.slash_command()
@@ -126,16 +116,18 @@ class Glintwing(discord.ext.commands.Cog):
         self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
         await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id], self.bot, ctx.guild_id)], content="", view=new_view)
-        await msg.add_reaction("<:seat_white:1104759507311145012>")
-        await msg.add_reaction("<:seat_brown:1104759527808708698>")
-        await msg.add_reaction("<:seat_red:1104759572696141915>")
-        await msg.add_reaction("<:seat_orange:1104759633693909092>")
-        await msg.add_reaction("<:seat_yellow:1104759560905969804>")
-        await msg.add_reaction("<:seat_green:1104759586369572874>")
-        await msg.add_reaction("<:seat_teal:1104759619739471955>")
-        await msg.add_reaction("<:seat_blue:1104759698076479539>")
-        await msg.add_reaction("<:seat_purple:1104759602274381884>")
-        await msg.add_reaction("<:seat_pink:1104759547228336138>")
+        await asyncio.gather(
+            msg.add_reaction("<:seat_white:1104759507311145012>"),
+            msg.add_reaction("<:seat_brown:1104759527808708698>"),
+            msg.add_reaction("<:seat_red:1104759572696141915>"),
+            msg.add_reaction("<:seat_orange:1104759633693909092>"),
+            msg.add_reaction("<:seat_yellow:1104759560905969804>"),
+            msg.add_reaction("<:seat_green:1104759586369572874>"),
+            msg.add_reaction("<:seat_teal:1104759619739471955>"),
+            msg.add_reaction("<:seat_blue:1104759698076479539>"),
+            msg.add_reaction("<:seat_purple:1104759602274381884>"),
+            msg.add_reaction("<:seat_pink:1104759547228336138>"),
+        )
         return
 
 
@@ -144,8 +136,6 @@ class StartingView(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
-    # player can join more than once
-    # seat position should care about taken seats
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
@@ -156,6 +146,8 @@ class StartingView(discord.ui.View):
         if ctx.user.id in this_draft.players:
             return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
         this_draft.players.append(glintwing.SwissPlayer(ctx.user.id, len(this_draft.players)))
+        for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
+            player.seat = i
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
