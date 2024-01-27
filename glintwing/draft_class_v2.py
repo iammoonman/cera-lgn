@@ -138,7 +138,7 @@ class SwissEvent:
                 pairings.append(SwissPairing(pl, None))
         return pairings
 
-    def stats(self, player_id: str, round=3) -> tuple[float, int, float]:
+    def stats(self, player_id: str) -> tuple[float, int, float]:
         """GWP, Match Points, MWP"""
         player = self.get_player_by_id(player_id)
         game_count = 0
@@ -149,21 +149,22 @@ class SwissEvent:
         m_one = self.match_one(player)
         m_two = self.match_two(player)
         m_three = self.match_three(player)
-        if m_one is not None and round == 1:
+        # print(m_one, m_two, m_three)
+        if m_one is not None:
             score, _, games, wins = m_one.score(player)
             score_total += score
             game_count += games
             game_wins_count += wins
             match_count += 1
             match_wins_count += 1 if score == 3 else 0
-        if m_two is not None and round == 2:
+        if m_two is not None:
             score, _, games, wins = m_two.score(player)
             score_total += score
             game_count += games
             game_wins_count += wins
             match_count += 1
             match_wins_count += 1 if score == 3 else 0
-        if m_three is not None and round == 3:
+        if m_three is not None:
             score, _, games, wins = m_three.score(player)
             score_total += score
             game_count += games
@@ -172,10 +173,11 @@ class SwissEvent:
             match_wins_count += 1 if score == 3 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
-    def secondary_stats(self, player_id: str, round=3) -> tuple[int, float, float, float, float]:
+    def secondary_stats(self, player_id: str, round=2) -> tuple[int, float, float, float, float]:
         """Match Points, GWP, MWP, OGP, OMP"""
+        # print(player_id, round)
         player = self.get_player_by_id(player_id)
-        gwp, mp, mwp = self.stats(player_id, round)
+        gwp, mp, mwp = self.stats(player_id)
         o_count = 0
         o_gwp_sum = 0
         o_mwp_sum = 0
@@ -183,17 +185,17 @@ class SwissEvent:
         o_two = self.match_two(player).opponent(player) if self.match_two(player) is not None else None
         o_three = self.match_three(player).opponent(player) if self.match_three(player) is not None else None
         if o_one is not None:
-            o_gwp, _, o_mwp = self.stats(o_one.id, round)
+            o_gwp, _, o_mwp = self.stats(o_one.id)
             o_gwp_sum += o_gwp
             o_mwp_sum += o_mwp
             o_count += 1
         if o_two is not None:
-            o_gwp, _, o_mwp = self.stats(o_two.id, round)
+            o_gwp, _, o_mwp = self.stats(o_two.id)
             o_gwp_sum += o_gwp
             o_mwp_sum += o_mwp
             o_count += 1
         if o_three is not None:
-            o_gwp, _, o_mwp = self.stats(o_three.id, round)
+            o_gwp, _, o_mwp = self.stats(o_three.id)
             o_gwp_sum += o_gwp
             o_mwp_sum += o_mwp
             o_count += 1
@@ -332,6 +334,9 @@ if __name__ == "__main__":
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         print(drft.round_two)
+        for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
+            print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+        print('----------')
         c = 0
         for pairing in drft.round_two:
             if pairing.player_two is None:
@@ -347,6 +352,9 @@ if __name__ == "__main__":
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         print(drft.round_three)
+        for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
+            print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+        print('----------')
         c = 0
         for pairing in drft.round_three:
             if pairing.player_two is None:

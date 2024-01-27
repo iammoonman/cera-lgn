@@ -42,7 +42,7 @@ def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
     )
 
 
-def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot: discord.Bot, round_num, round, guild_id):
+def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetime, bot: discord.Bot, round_num: int, round: list[glintwing.SwissPairing], guild_id):
     return discord.Embed(
         title=f"{draft.title} | Round {round_num + 1}",
         fields=[
@@ -322,7 +322,7 @@ class IG_View(discord.ui.View):
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                json.dump(self.bot.drafts[ctx.message.id], f, ensure_ascii=False, indent=4)
+                json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id].json, self.bot.bot, ctx.guild_id)], view=None)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
