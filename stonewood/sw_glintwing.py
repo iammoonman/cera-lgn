@@ -311,7 +311,7 @@ class IG_View(discord.ui.View):
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(select.values[0])
+            myplayer = this_draft.get_player_by_id(select.values[0].id)
             myplayer.dropped = True
             await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
