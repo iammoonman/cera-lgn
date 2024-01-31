@@ -43,9 +43,9 @@ class SwissEvent:
     @property
     def json(self):
         return {
-            "id": f'{self.id}',
+            "id": f"{self.id}",
             "meta": {
-                "date": f"{datetime.datetime.now().isoformat()}-5:00",
+                "date": f"{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}",
                 "title": self.title,
                 **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
                 **({"description": self.description} if self.description else {}),
@@ -53,9 +53,9 @@ class SwissEvent:
                 **({"cube_id": self.cube_id} if self.cube_id else {}),
                 **({"set_code": self.set_code} if self.set_code else {}),
             },
-            "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [str(p.game_one.id if p.game_one is not None else ''), str(p.game_two.id if p.game_two is not None else ''), str(p.game_three.id if p.game_three is not None else '')]} for p in self.round_one],
-            "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [str(p.game_one.id if p.game_one is not None else ''), str(p.game_two.id if p.game_two is not None else ''), str(p.game_three.id if p.game_three is not None else '')]} for p in self.round_two],
-            "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None], "games": [str(p.game_one.id if p.game_one is not None else ''), str(p.game_two.id if p.game_two is not None else ''), str(p.game_three.id if p.game_three is not None else '')]} for p in self.round_three],
+            "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_one],
+            "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_two],
+            "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_three],
         }
 
     def pair_round_one(self):
@@ -336,7 +336,7 @@ if __name__ == "__main__":
         print(drft.round_two)
         for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
             print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
-        print('----------')
+        print("----------")
         c = 0
         for pairing in drft.round_two:
             if pairing.player_two is None:
@@ -354,7 +354,7 @@ if __name__ == "__main__":
         print(drft.round_three)
         for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
             print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
-        print('----------')
+        print("----------")
         c = 0
         for pairing in drft.round_three:
             if pairing.player_two is None:
