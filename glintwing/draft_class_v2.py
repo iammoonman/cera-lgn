@@ -43,7 +43,7 @@ class SwissEvent:
     @property
     def json(self):
         return {
-            "id": self.id,
+            "id": f'{self.id}',
             "meta": {
                 "date": f"{datetime.datetime.now().isoformat()}-5:00",
                 "title": self.title,
