@@ -48,7 +48,7 @@ def intermediate_em(draft: glintwing.SwissEvent, timekeepstamp: datetime.datetim
         fields=[
             discord.EmbedField(
                 inline=True,
-                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_one.id, round_num)[0]) + ')' if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_two.id, round_num)[0]) + ')' if match.player_two is not None else 'BYE'}",
+                name=f"GAME: {get_name(bot, match.player_one.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_one.id)[0]) + ')' if match.player_one is not None else ''} vs {get_name(bot, match.player_two.id, guild_id) + ' (' + str(draft.secondary_stats(match.player_two.id)[0]) + ')' if match.player_two is not None else 'BYE'}",
                 value=f"G1W: {get_name(bot, match.game_one.id, guild_id) if match.game_one is not None else ''}{bslash}G2W: {get_name(bot, match.game_two.id, guild_id) if match.game_two is not None else ''}{bslash}G3W: {get_name(bot, match.game_three.id, guild_id) if match.game_three is not None else ''}" + ((f"{bslash}{get_name(bot, match.player_one.id, guild_id)} has dropped." if match.player_one.dropped else "") if match.player_one is not None else "") + ((f"{bslash}{get_name(bot, match.player_two.id, guild_id)} has dropped." if match.player_two.dropped else "") if match.player_two is not None else ""),
             )
             for match in round
@@ -321,9 +321,9 @@ class IG_View(discord.ui.View):
         if ctx.message.id not in self.bot.drafts.keys():
             return
         if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+            await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-            await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id].json, self.bot.bot, ctx.guild_id)], view=None)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 

@@ -173,7 +173,7 @@ class SwissEvent:
             match_wins_count += 1 if score == 3 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
-    def secondary_stats(self, player_id: str, round=2) -> tuple[int, float, float, float, float]:
+    def secondary_stats(self, player_id: str) -> tuple[int, float, float, float, float]:
         """Match Points, GWP, MWP, OGP, OMP"""
         # print(player_id, round)
         player = self.get_player_by_id(player_id)
