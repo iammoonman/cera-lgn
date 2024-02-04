@@ -1,6 +1,7 @@
 import asyncio
 import json
 import discord
+import requests
 import glintwing
 import datetime
 
@@ -286,6 +287,7 @@ class IG_View(discord.ui.View):
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
+                requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.loads(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
@@ -311,7 +313,7 @@ class IG_View(discord.ui.View):
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(select.values[0].id)
+            myplayer = this_draft.get_player_by_id(str(select.values[0]))
             myplayer.dropped = True
             await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
@@ -324,6 +326,7 @@ class IG_View(discord.ui.View):
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
+            requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.loads(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
