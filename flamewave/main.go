@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -324,9 +325,6 @@ func getStuff(c *gin.Context) {
 	stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
 	stuff = append(stuff, Identifier{ScryfallId: "ee3b2aaa-f04e-4a2a-8d5f-b3cc54605b28"})
 	stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
-	// if err := c.BindJSON(&stuff); err != nil {
-	// 	return
-	// }
 	f, err := os.Open("../default-cards.json")
 	if err != nil {
 		log.Fatal(err)
@@ -343,24 +341,17 @@ func getStuff(c *gin.Context) {
 }
 
 func main() {
-	// ctx := context.Background()
-	// client, err := scryfall.NewClient()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// sco := scryfall.SearchCardsOptions{}
-	// result, err := client.SearchCards(ctx, "aberrantresearcher", sco)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// for i := 0; i < len(result.Cards); i++ {
-	// 	log.Printf("%s", NewCard(*&result.Cards[i], i).Description)
-	// }
+	ctx := context.Background()
+	client, err := scryfall.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 	router := gin.Default()
 	router.GET("/", getStuff)
 	// router.GET("/playground", getStuff) // There's also a JSON representation for stuff here.
 	// router.GET("/simulator", getStuff)  // Returns full JSON string for spawning an object. Pass directly into spawnObjectData.
-	router.POST("/simulator/cards", getStuff)
+	router.POST("/simulator/collection", getStuff)
+	router.GET("/update", updateBulk(ctx, client))
 	router.Run("localhost:8080")
 }
 
@@ -368,8 +359,6 @@ func decodeStream(reader io.Reader, identifiers []Identifier) ([]scryfall.Card, 
 	dec := json.NewDecoder(reader)
 	var output []scryfall.Card = make([]scryfall.Card, len(identifiers))
 	var outputMap map[string]IntermediateCard = make(map[string]IntermediateCard)
-	// var o = []scryfall.Card{}
-	// fmt.Printf("%T: %v\n", t, t)
 	for dec.More() {
 		var m scryfall.Card
 		err := dec.Decode(&m)
@@ -385,15 +374,36 @@ func decodeStream(reader io.Reader, identifiers []Identifier) ([]scryfall.Card, 
 				outputMap[m.OracleID] = IntermediateCard{Card: m, Priority: true}
 			}
 		}
-		// o = append(o, m)
-		// fmt.Printf("%v: %v\n", m.Name, m.OracleID)
 	}
-	var ctr int8 = 0
+	var ctr int32 = 0
 	for _, v := range outputMap {
 		output[ctr] = v.Card
-		fmt.Printf("%s %s\n", v.Card.Name, v.Card.OracleID)
+		// fmt.Printf("%s %s\n", v.Card.Name, v.Card.OracleID)
 		ctr++
 	}
-	// fmt.Printf("%T: %v\n", t, t)
 	return output, nil
+}
+
+func updateBulk(cx context.Context, ct *scryfall.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		bulkList, err := ct.ListBulkData(cx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, entry := range bulkList {
+			if entry.Type == "default_cards" {
+				out, err := os.Create("default-cards.json")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer out.Close()
+				resp, err := http.Get(entry.DownloadURI)
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer resp.Body.Close()
+				io.Copy(out, resp.Body)
+			}
+		}
+	}
 }
