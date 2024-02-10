@@ -355,25 +355,31 @@ func main() {
 	router.Run("localhost:8080")
 }
 
+func decodeWorker(dec *json.Decoder, identifiers []Identifier, outputMap map[string]IntermediateCard) {
+	var m scryfall.Card
+	err := dec.Decode(&m)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, identity := range identifiers {
+		if identity.OracleId == m.OracleID && len(identity.OracleId) > 0 {
+			if o, err := outputMap[m.OracleID]; !err {
+				if !o.Priority {
+					outputMap[m.OracleID] = IntermediateCard{Card: m, Priority: false}
+				}
+			}
+		} else if (identity.CollectorNumber == m.CollectorNumber && identity.SetCode == m.Set) || identity.ScryfallId == m.ID {
+			outputMap[m.OracleID] = IntermediateCard{Card: m, Priority: true}
+		}
+	}
+}
+
 func decodeStream(reader io.Reader, identifiers []Identifier) ([]scryfall.Card, error) {
 	dec := json.NewDecoder(reader)
 	var output []scryfall.Card = make([]scryfall.Card, len(identifiers))
 	var outputMap map[string]IntermediateCard = make(map[string]IntermediateCard)
 	for dec.More() {
-		var m scryfall.Card
-		err := dec.Decode(&m)
-		if err != nil {
-			return []scryfall.Card{}, err
-		}
-		for _, identity := range identifiers {
-			if identity.OracleId == m.OracleID && len(identity.OracleId) > 0 {
-				if _, err := outputMap[m.OracleID]; !err {
-					outputMap[m.OracleID] = IntermediateCard{Card: m, Priority: false}
-				}
-			} else if (identity.CollectorNumber == m.CollectorNumber && identity.SetCode == m.Set) || identity.ScryfallId == m.ID {
-				outputMap[m.OracleID] = IntermediateCard{Card: m, Priority: true}
-			}
-		}
+		go decodeWorker(dec, identifiers, outputMap)
 	}
 	var ctr int32 = 0
 	for _, v := range outputMap {
