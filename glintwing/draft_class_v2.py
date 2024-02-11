@@ -261,11 +261,23 @@ class SwissPairing:
         return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else 'TIE'}"
 
     def is_tie(self) -> bool:
-        if (self.game_one == self.player_one or self.game_one == self.player_two) and self.game_one != self.game_two and self.game_three is None:
+        if self.game_one is not None:
+            if self.game_two is None:
+                # 1-0
+                return False
+            else:
+                if self.game_two == self.game_one or self.game_three == self.game_one:
+                    # 2-0 or 2-1
+                    return False
+                if self.game_two != self.game_one and self.game_three is None:
+                    # 1-1
+                    return True
+                if self.game_two == self.game_three:
+                    # 1-2
+                    return False
+        else:
+            # 0-0
             return True
-        if self.game_one is None and self.game_two is None:
-            return True
-        return False
 
     def is_bye(self) -> bool:
         return self.player_two is None
@@ -308,6 +320,8 @@ class SwissPairing:
             return 0, -1, 3, 1
         if op == self.game_one and op == self.game_three:
             return 0, -1, 3, 1
+        if me == self.game_one and self.game_two is None:
+            return 3, 4, 1, 1
         return 0, 0, 0, 0
 
 
@@ -325,6 +339,9 @@ if __name__ == "__main__":
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         print(drft.round_one)
+        for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
+            print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+        print("----------")
         after_round_one(drft)
         drft.round_two = drft.pair_round_two()
         if score_round_two is not None:

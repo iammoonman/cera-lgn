@@ -287,7 +287,7 @@ class IG_View(discord.ui.View):
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-                requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.loads(self.bot.drafts[ctx.message.id].json))
+                requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
@@ -326,7 +326,7 @@ class IG_View(discord.ui.View):
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-            requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.loads(self.bot.drafts[ctx.message.id].json))
+            requests.post(url="https://cera-roe.vercel.app/events", method="POST", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
