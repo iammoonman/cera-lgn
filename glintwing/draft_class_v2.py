@@ -322,6 +322,8 @@ class SwissPairing:
             return 0, -1, 3, 1
         if me == self.game_one and self.game_two is None:
             return 3, 4, 1, 1
+        if op == self.game_one and self.game_two is None:
+            return 0, -2, 1, 0
         return 0, 0, 0, 0
 
 
