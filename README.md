@@ -3,6 +3,10 @@
 This monorepo contains various connected projects surrounding the operation and management of the Discord server, MTG Limited on TTS.  
 Contributions, feature requests, and bug reports are welcome either via DM to an admin of MTG Limited on TTS on Discord or through the issues page on this repo.
 
+## Docker
+Create a .env file with a Discord bot token defined within, then run ``docker build -f docker.dockerfile --env-file .env``. You'll have to run ``/scryfall-update`` on the Discord bot to populate the card data file.
+
+
 ## Credits
 
 Thanks to the [lethe.xyz](https://www.lethe.xyz/mtg/collation/index.html) collation project for the collation data. This project is not affiliated with them, though. Consider donating to their Patreon.  

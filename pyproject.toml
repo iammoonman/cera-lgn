@@ -1,3 +1,19 @@
 [tool.black]
 line-length = 999
 include = '\.pyi?$'
+[project]
+name = "cera-lgn"
+version = "0.0.1"
+[tool.poetry]
+name = "hello world"
+version = "0.0.1"
+description = ""
+authors = []
+[tool.poetry.dependencies]
+python = "3.11.7"
+py-cord = { git = "https://github.com/Pycord-Development/pycord.git", rev="8a7ea476ac4c51bce80bfedb5c77739e51eeec6b" }
+pillow = "10.2.0"
+ijson = "3.2.3"
+requests = "2.31.0"
+urllib3 = "2.1.0"
+orjson = "3.9.10"
