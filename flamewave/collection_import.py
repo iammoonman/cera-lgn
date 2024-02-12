@@ -61,6 +61,10 @@ def ijson_collection(cardlist, out_dict=False):
             card_obj = flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}{o["set"]}'] = card_obj
+        if o['set'] == 'plst' and f'{o["collector_number"]}mb1' in str_l:
+            card_obj = flamewave.tts_parse(o)
+            blob_json.append(card_obj)
+            out[f'{o["collector_number"]}mb1'] = card_obj
         if len(blob_json) == len(cardlist):
             break
     f.close()
@@ -93,6 +97,10 @@ def mm_collection(cardlist, out_dict=False):
         except:
             break
         if f'{card["collector_number"]}{card["set"]}' in string_list:
+            card_obj = flamewave.tts_parse(card)
+            blob_json.append(card_obj)
+            out[f'{card["collector_number"]}{card["set"]}'] = card_obj
+        if card['set'] == 'plst' and f'{card["collector_number"]}mb1' in string_list:
             card_obj = flamewave.tts_parse(card)
             blob_json.append(card_obj)
             out[f'{card["collector_number"]}{card["set"]}'] = card_obj

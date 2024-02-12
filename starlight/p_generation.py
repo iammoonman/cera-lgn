@@ -1,5 +1,6 @@
 import random
-import pickle
+
+prev_rares = [[], 0]
 
 
 def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.randint(0, 121), setJSON=None):
@@ -70,13 +71,6 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
         # This might introduce some real lag.
         # Also, whiffs on double rares; if taking more than one rare, it could choose X-1 as the pointer and take the duplicate. Not too likely, but possible.
 
-        try:
-            with open("prevrares.pickle", "rb") as f:
-                prev_rares = pickle.load(f)
-        except:
-            with open("prevrares.pickle", "wb") as f:
-                prev_rares = [[], 0]
-                pickle.dump(prev_rares, f)
         while sheet_index in prev_rares[0]:
             # Loop while the rare chosen had been chosen recently. Pick a new one unless the "recent" rares aren't recent anymore.
             prev_rares[1] += 1
@@ -86,8 +80,6 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
             else:
                 sheet_index = sheet_index_func(value)
         prev_rares[0] += [sheet_index]
-        with open("prevrares.pickle", "wb") as f:
-            pickle.dump(prev_rares, f)
 
         # Now that the number has been checked, actually put in the rare.
         for p in range(value - keydrops_r):
