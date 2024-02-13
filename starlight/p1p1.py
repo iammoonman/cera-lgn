@@ -1,4 +1,3 @@
-import time
 from PIL import Image
 import starlight
 import io

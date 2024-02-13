@@ -1,0 +1,5 @@
+default-cards.json
+.env
+starlight/boxtesting.py
+*/__pycache__*
+*/*/__pycache__*
