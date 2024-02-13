@@ -53,6 +53,7 @@ type Identifier struct {
 	OracleId        string `json:"oracle_id"`
 	CollectorNumber string `json:"cn"`
 	SetCode         string `json:"set"`
+	Quantity        uint8  `json:"quantity"`
 }
 
 type IntermediateCard struct {
@@ -86,23 +87,26 @@ func getStuff(c *gin.Context) {
 			if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
 				if o, err := outputMap[c.OracleID]; !err {
 					if !o.Priority {
-						fmt.Printf("ONE: %s | %s\n", identity.OracleId, c.OracleID)
 						outputMap[c.OracleID] = IntermediateCard{Card: c, Priority: false}
 					}
 				}
 			}
 			if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
-				fmt.Printf("TWO: %s | %s\n", identity.OracleId, c.OracleID)
 				outputMap[c.OracleID] = IntermediateCard{Card: c, Priority: true}
 				identity.OracleId = c.OracleID
 			}
 		}
 	}
-	fmt.Printf("Size: %d\n", len(outputMap))
-	for _, c := range outputMap {
-		deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
-		deck.DeckIDs = append(deck.DeckIDs, int(c.Card.DeckIDEntry))
-		deck.CustomDeck[c.Card.CustomDeckID] = c.Card.CustomDeckEntry
+	for _, i := range stuff {
+		if i.Quantity == 0 {
+			i.Quantity++
+		}
+		for q := 0; q <= int(i.Quantity); q++ {
+			var c = outputMap[i.OracleId]
+			deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
+			deck.DeckIDs = append(deck.DeckIDs, int(c.Card.DeckIDEntry))
+			deck.CustomDeck[c.Card.CustomDeckID] = c.Card.CustomDeckEntry
+		}
 	}
 	outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
 	c.JSON(http.StatusOK, outputSave)
