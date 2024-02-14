@@ -1,4 +1,4 @@
-module wildheart
+module flamewave
 
 go 1.21.5
 

@@ -64,7 +64,7 @@ type IntermediateCard struct {
 func getStuff(c *gin.Context) {
 	var stuff []Identifier
 	stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
-	stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea"})
+	stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
 	stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
 	f, err := os.Open("default-cards.json")
 	defer f.Close()
@@ -83,7 +83,7 @@ func getStuff(c *gin.Context) {
 	outputMap := make(map[string]IntermediateCard)
 	var deck = NewEmptyDeckObject()
 	for _, c := range l {
-		for _, identity := range stuff {
+		for x, identity := range stuff {
 			if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
 				if o, err := outputMap[c.OracleID]; !err {
 					if !o.Priority {
@@ -93,14 +93,11 @@ func getStuff(c *gin.Context) {
 			}
 			if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
 				outputMap[c.OracleID] = IntermediateCard{Card: c, Priority: true}
-				identity.OracleId = c.OracleID
+				stuff[x].OracleId = c.OracleID
 			}
 		}
 	}
 	for _, i := range stuff {
-		if i.Quantity == 0 {
-			i.Quantity++
-		}
 		for q := 0; q <= int(i.Quantity); q++ {
 			var c = outputMap[i.OracleId]
 			deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
@@ -108,8 +105,8 @@ func getStuff(c *gin.Context) {
 			deck.CustomDeck[c.Card.CustomDeckID] = c.Card.CustomDeckEntry
 		}
 	}
-	outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
-	c.JSON(http.StatusOK, outputSave)
+	// outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
+	c.JSON(http.StatusOK, deck)
 }
 
 func main() {
