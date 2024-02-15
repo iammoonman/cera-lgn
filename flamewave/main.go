@@ -62,11 +62,21 @@ type IntermediateCard struct {
 }
 
 func getStuff(c *gin.Context) {
+	// var stuff []Identifier
+	// stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
+	// stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
+	// stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
+	bdydec := json.NewDecoder(c.Request.Body)
 	var stuff []Identifier
-	stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
-	stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
-	stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
+	err := bdydec.Decode(&stuff)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
 	f, err := os.Open("default-cards.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer f.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -389,9 +399,9 @@ func NewFWCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
 		ContainedObjectsEntry.Nickname = namebuffer.String()
 		CustomDeckEntry.FaceURL = c.ImageURIs.Normal
 	}
-	if c.Layout == scryfall.LayoutBattle {
-		// No cards exist with this layout.
-	}
+	// if c.Layout == scryfall.LayoutBattle {
+	// No cards exist with this layout.
+	// }
 	if c.Layout == scryfall.LayoutPlanar {
 		var descriptionbuffer bytes.Buffer
 		descriptionbuffer.WriteString(fmt.Sprintf("[b]%s %s[/b]\n%s %s\n%s", c.Name, c.ManaCost, c.TypeLine, RarityTexter(c.Rarity), OracleTexter(c.OracleText)))
