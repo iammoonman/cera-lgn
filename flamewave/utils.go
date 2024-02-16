@@ -47,13 +47,13 @@ type FlamewaveIdentifier struct {
 }
 
 type FlamewaveTTSCard struct {
-	CollectorNumber       string                       `json:"CollectorNumber"`
-	SetCode               string                       `json:"SetCode"`
-	OracleID              string                       `json:"OracleID"`
-	ScryfallID            string                       `json:"ScryfallID"`
-	FlamewaveID           string                       `json:"FlamewaveID"`
-	CustomDeckEntry       tabletopsimulator.ImageEntry `json:"CustomDeckEntry"`
-	ContainedObjectsEntry tabletopsimulator.CardEntry  `json:"ContainedObjectsEntry"`
+	CollectorNumber       string                      `json:"CollectorNumber"`
+	SetCode               string                      `json:"SetCode"`
+	OracleID              string                      `json:"OracleID"`
+	ScryfallID            string                      `json:"ScryfallID"`
+	FlamewaveID           string                      `json:"FlamewaveID"`
+	CustomDeckEntry       tabletopsimulator.CardImage `json:"CustomDeckEntry"`
+	ContainedObjectsEntry tabletopsimulator.Card      `json:"ContainedObjectsEntry"`
 }
 
 func NewFlamewaveTTSCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
@@ -63,7 +63,7 @@ func NewFlamewaveTTSCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
 	var memo = ""
 	var luaScript = ""
 	var extraState = false
-	var additionalState tabletopsimulator.StateEntry
+	var additionalState tabletopsimulator.CardState
 
 	if len(c.OracleID) == 0 {
 		memo = *c.CardFaces[0].OracleID
@@ -206,9 +206,9 @@ func NewFlamewaveTTSCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
 		ScryfallID:            c.ID,
 		FlamewaveID:           c.ID,
 		CustomDeckEntry:       tabletopsimulator.NewImageEntry(faceURL, "https://i.imgur.com/TyC0LWj.jpg"),
-		ContainedObjectsEntry: tabletopsimulator.CardEntry{},
+		ContainedObjectsEntry: tabletopsimulator.Card{},
 	}
-	var ContainedObjectsEntry tabletopsimulator.CardEntry = tabletopsimulator.NewCardEntry(nickName, description, memo)
+	var ContainedObjectsEntry tabletopsimulator.Card = tabletopsimulator.NewCardEntry(nickName, description, memo)
 	ContainedObjectsEntry.LuaScript = luaScript
 	if extraState {
 		ContainedObjectsEntry.States["2"] = additionalState
