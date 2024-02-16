@@ -1,0 +1,34 @@
+services:
+  bot:
+    build: .
+    networks:
+      - net
+    env_file:
+      - path: ./.env
+        required: true
+  fw:
+    build: ./flamewave
+    networks:
+      - net
+    env_file:
+      - path: ./flamewave/.env
+        required: true
+    ports:
+      - "8080:8080"
+  mong:
+    image: mongo
+    networks:
+      - net
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+  mong-exp:
+    image: mongo-express
+    networks:
+      - net
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://root:password@mong:27017/
+networks:
+  net: {}

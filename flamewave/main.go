@@ -54,6 +54,7 @@ type Identifier struct {
 	CollectorNumber string `json:"cn"`
 	SetCode         string `json:"set"`
 	Quantity        uint8  `json:"quantity"`
+	FlamewaveId     string `json:"flamewave_id"`
 }
 
 type IntermediateCard struct {
@@ -61,7 +62,7 @@ type IntermediateCard struct {
 	Priority bool
 }
 
-func getStuff(c *gin.Context) {
+func postCollection(c *gin.Context) {
 	// var stuff []Identifier
 	// stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
 	// stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
@@ -107,12 +108,12 @@ func getStuff(c *gin.Context) {
 			}
 		}
 	}
-	for _, i := range stuff {
+	for n, i := range stuff {
 		for q := 0; q <= int(i.Quantity); q++ {
 			var c = outputMap[i.OracleId]
 			deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
-			deck.DeckIDs = append(deck.DeckIDs, int(c.Card.DeckIDEntry))
-			deck.CustomDeck[c.Card.CustomDeckID] = c.Card.CustomDeckEntry
+			deck.DeckIDs = append(deck.DeckIDs, int(n*100))
+			deck.CustomDeck[fmt.Sprintf("%d", n)] = c.Card.CustomDeckEntry
 		}
 	}
 	// outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
@@ -126,10 +127,10 @@ func main() {
 		log.Fatal(err)
 	}
 	router := gin.Default()
-	router.GET("/", getStuff)
+	router.GET("/", postCollection)
 	// router.GET("/playground", getStuff) // There's also a JSON representation for stuff here.
 	// router.GET("/simulator", getStuff)  // Returns full JSON string for spawning an object. Pass directly into spawnObjectData.
-	router.POST("/simulator/collection", getStuff)
+	router.POST("/simulator/collection", postCollection)
 	router.GET("/update", updateBulk(ctx, client))
 	router.Run("localhost:8080")
 }
@@ -232,8 +233,7 @@ type FlamewaveTTSCard struct {
 	SetCode               string             `json:"SetCode"`
 	OracleID              string             `json:"OracleID"`
 	ScryfallID            string             `json:"ScryfallID"`
-	DeckIDEntry           uint32             `json:"DeckIDEntry"`
-	CustomDeckID          string             `json:"CustomDeckID"`
+	FlamewaveID           string             `json:"FlamewaveID"`
 	CustomDeckEntry       TTSImageEntry      `json:"CustomDeckEntry"`
 	ContainedObjectsEntry TTSCardObjectEntry `json:"ContainedObjectsEntry"`
 }
@@ -244,8 +244,7 @@ func NewFWCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
 		SetCode:               c.Set,
 		OracleID:              c.OracleID,
 		ScryfallID:            c.ID,
-		DeckIDEntry:           i * 100,
-		CustomDeckID:          fmt.Sprintf("%d", i),
+		FlamewaveID:           c.ID,
 		CustomDeckEntry:       TTSImageEntry{},
 		ContainedObjectsEntry: TTSCardObjectEntry{},
 	}
