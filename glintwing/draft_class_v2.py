@@ -1,5 +1,6 @@
 import datetime
 import json
+import random
 from typing import Union
 
 
@@ -85,9 +86,8 @@ class SwissEvent:
             clutched = self.match_one(player).game_three == player
             game_tied = self.match_one(player).game_one == player and self.match_one(player).game_two != player or self.match_one(player).game_two == player and self.match_one(player).game_one != player
             to_time = self.match_one(player).game_one == None
-            flubbed = self.match_one(player).game_three != player and self.match_one(player).game_three is not None
             blown = self.match_one(player).game_one != player and self.match_one(player).game_two != player
-            return (not bye, not flawless, not clutched, not game_tied, not to_time, not flubbed, not blown, player.seat)
+            return (not bye, not flawless, not clutched, not game_tied, not to_time, not blown, player.seat)
 
         non_dropped_players.sort(key=sort_func)
         pairings: list[SwissPairing] = []
