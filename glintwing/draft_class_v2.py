@@ -478,6 +478,7 @@ if __name__ == "__main__":
         #     print(json.dumps(drft.json), "IMPERFECT")
         # print("----------")
         # print("----------")
+        return drft
         
 
     def drop_seat(seat):
@@ -589,19 +590,20 @@ if __name__ == "__main__":
     # test(7)
     # test(6)
     # test(6, after_round_one=drop_ids(["1"]))
-    # test(8, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"]))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"])).json))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"])).json))
 
-    for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-        for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-            for g3 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                for g4 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                    for g5 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                        for h1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                            for h2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                                for h3 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                                    for h4 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                                        for h5 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                                            # print("------------------")
-                                            # print([g1, g2, g3, g4, g5, h1, h2, h3, h4, h5])
-                                            test(10, score_round_one=lambda x: results(x, [g1, g2, g3, g4, g5]), score_round_two=lambda x: results(x, [h1, h2, h3, h4, h5]))
+    # for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #     for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #         for g3 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #             for g4 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                 for g5 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                     for h1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                         for h2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                             for h3 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                                 for h4 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                                     for h5 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
+    #                                         # print("------------------")
+    #                                         # print([g1, g2, g3, g4, g5, h1, h2, h3, h4, h5])
+    #                                         test(10, score_round_one=lambda x: results(x, [g1, g2, g3, g4, g5]), score_round_two=lambda x: results(x, [h1, h2, h3, h4, h5]))
     sys.stdout.close()
