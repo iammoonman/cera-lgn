@@ -81,13 +81,11 @@ class SwissEvent:
         non_dropped_players = [p for p in self.players if not p.dropped]
 
         def sort_func(player):
-            bye = self.match_one(player).is_bye()
-            flawless = self.match_one(player).game_one == player and self.match_one(player).game_two == player
-            game_tied = self.match_one(player).game_one == player and self.match_one(player).game_two != player or self.match_one(player).game_two == player and self.match_one(player).game_one != player
-            to_time = self.match_one(player).game_one == None
-            return (not bye, not flawless, not to_time, not game_tied)
+            first_score, first_priority, _, _ = self.match_one(player).score(player)
+            return (-1 * first_score, -1 * first_priority)
 
         non_dropped_players.sort(key=sort_func)
+        # print(non_dropped_players)
         pairings: list[SwissPairing] = []
         double_bye = 0
         while non_dropped_players:
@@ -103,7 +101,9 @@ class SwissEvent:
             else:
                 pairings.append(SwissPairing(pl, None))
                 double_bye += 1
+        was_imperfect = double_bye > 1
         if double_bye > 1:
+            # print('REVERSE 2')
             double_bye = 0
             pairings = []
             non_dropped_players = [p for p in self.players if not p.dropped]
@@ -121,11 +121,12 @@ class SwissEvent:
                 else:
                     pairings.append(SwissPairing(pl, None))
                     double_bye += 1
-        was_imperfect = double_bye > 1
         catch_infinite = 0
         while double_bye > 1:
             catch_infinite += 1
             if catch_infinite > 100:
+                print('FAILED TO PAIR')
+                print(self.round_one, pairings)
                 return pairings, was_imperfect
             double_bye = 0
             non_dropped_players = [p for p in self.players if not p.dropped]
@@ -154,13 +155,10 @@ class SwissEvent:
         def sort_func(player: SwissPlayer):
             first_score, first_priority, _, _ = self.match_one(player).score(player)
             second_score, second_priority, _, _ = self.match_two(player).score(player)
-            bye = self.match_two(player).is_bye()
-            flawless = self.match_two(player).game_one == player and self.match_two(player).game_two == player
-            game_tied = self.match_two(player).game_one == player and self.match_two(player).game_two != player or self.match_two(player).game_two == player and self.match_two(player).game_one != player
-            to_time = self.match_two(player).game_one == None
-            return (-1 * (first_score + second_score), -1 * (first_priority + second_priority), not bye, not flawless, not game_tied, not to_time)
+            return (-1 * (first_score + second_score), -1 * (first_priority + second_priority))
 
         non_dropped_players.sort(key=sort_func)
+        # print(non_dropped_players)
         pairings: list[SwissPairing] = []
         double_bye = 0
         while non_dropped_players:
@@ -174,7 +172,9 @@ class SwissEvent:
             else:
                 pairings.append(SwissPairing(pl, None))
                 double_bye += 1
+        was_imperfect = double_bye > 1
         if double_bye > 1:
+            # print('REVERSE 3')
             double_bye = 0
             non_dropped_players = [p for p in self.players if not p.dropped]
             non_dropped_players.sort(key=sort_func, reverse=True)
@@ -190,11 +190,11 @@ class SwissEvent:
                 else:
                     pairings.append(SwissPairing(pl, None))
                     double_bye += 1
-        was_imperfect = double_bye > 1
         catch_infinite = 0
         while double_bye > 1:
             catch_infinite += 1
             if catch_infinite > 100:
+                print('FAILED TO PAIR')
                 return pairings, was_imperfect
             double_bye = 0
             non_dropped_players = [p for p in self.players if not p.dropped]
@@ -425,7 +425,7 @@ if __name__ == "__main__":
             if pairing.is_bye():
                 byes.append(pairing)
         # for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
-        #     print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+            # print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         after_round_one(drft)
         # print("----------")
         drft.round_two, was_imperfect = drft.pair_round_two()
@@ -435,11 +435,12 @@ if __name__ == "__main__":
             for pairing in drft.round_two:
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
+        # print(drft.round_two)
         for pairing in drft.round_two:
             if pairing.is_bye():
                 byes.append(pairing)
         # for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
-        #     print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+            # print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         c = 0
         for pairing in drft.round_two:
             if pairing.player_two is None:
@@ -455,11 +456,12 @@ if __name__ == "__main__":
             for pairing in drft.round_three:
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
+        # print(drft.round_three)
         for pairing in drft.round_three:
             if pairing.is_bye():
                 byes.append(pairing)
         # for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
-        #     print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
+            # print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         c = 0
         for pairing in drft.round_three:
             if pairing.player_two is None:
@@ -472,8 +474,11 @@ if __name__ == "__main__":
             if p.player_one not in players_with_byes:
                 players_with_byes.append(p)
         # print("----------")
-        if was_imperfect:
-            print(json.dumps(drft.json))
+        # if was_imperfect:
+        #     print(json.dumps(drft.json), "IMPERFECT")
+        # print("----------")
+        # print("----------")
+        
 
     def drop_seat(seat):
         def drp(draft):
@@ -584,6 +589,8 @@ if __name__ == "__main__":
     # test(7)
     # test(6)
     # test(6, after_round_one=drop_ids(["1"]))
+    # test(8, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"]))
+
     for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
         for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
             for g3 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
