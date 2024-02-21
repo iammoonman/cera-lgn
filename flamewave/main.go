@@ -37,10 +37,10 @@ func main() {
 		}
 	}()
 	router := gin.Default()
-	router.GET("/", postCollection)
+	// router.GET("/", postCollection)
 	// router.GET("/playground", getStuff) // There's also a JSON representation for stuff here.
 	// router.GET("/simulator", getStuff)  // Returns full JSON string for spawning an object. Pass directly into spawnObjectData.
-	router.POST("/simulator/collection", postCollection)
+	router.POST("/simulator/collection", postCollection(context.TODO(), client, mongoclient))
 	router.GET("/update", updateBulk(ctx, client, mongoclient))
 	router.POST("/update/custom", postCustom(mongoclient))
 	router.Run("localhost:8080")
@@ -74,66 +74,75 @@ func postCustom(mng *mongo.Client) gin.HandlerFunc {
 }
 
 type IntermediateCardStruct struct {
-	Card     FlamewaveTTSCard
+	Card     *FlamewaveTTSCard
 	Priority bool
 }
 
-func postCollection(c *gin.Context) {
-	// var stuff []Identifier
-	// stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
-	// stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
-	// stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
-	bdydec := json.NewDecoder(c.Request.Body)
-	var stuff []FlamewaveIdentifier
-	err := bdydec.Decode(&stuff)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, nil)
-		return
-	}
-	f, err := os.Open("default-cards.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(stuff) == 0 {
-		return
-	}
-	dec := json.NewDecoder(f)
-	var l []FlamewaveTTSCard
-	err = dec.Decode(&l)
-	if err != nil {
-		log.Fatal(err)
-	}
-	outputMap := make(map[string]IntermediateCardStruct)
-	var deck = tabletopsimulator.NewDeckObject()
-	for _, c := range l {
-		for x, identity := range stuff {
-			if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
-				if o, err := outputMap[c.OracleID]; !err {
-					if !o.Priority {
-						outputMap[c.OracleID] = IntermediateCardStruct{Card: c, Priority: false}
+func postCollection(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// var stuff []Identifier
+		// stuff = append(stuff, Identifier{ScryfallId: "4d3f41dc-72f6-4346-b95f-4813addb5af0"})
+		// stuff = append(stuff, Identifier{CollectorNumber: "1", SetCode: "lea", Quantity: 4})
+		// stuff = append(stuff, Identifier{OracleId: "ca00eb17-e5c3-42c8-a665-431f5f95b67f"})
+		bdydec := json.NewDecoder(c.Request.Body)
+		var stuff []FlamewaveIdentifier
+		err := bdydec.Decode(&stuff)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, nil)
+			return
+		}
+		if len(stuff) == 0 || len(stuff) > 1000 {
+			c.JSON(http.StatusBadRequest, nil)
+			return
+		}
+		coll := mg.Database("flamewave").Collection("cards")
+		var l []FlamewaveTTSCard
+		// If flamewave_id in the list of flamewave ids from the identifiers
+		// If scryfall_id in the list of scryfall ids...
+		// etc
+		lstRequests := make(bson.D, len(stuff))
+		for i, thing := range stuff {
+			lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+				{Key: "flamewave_id", Value: thing.FlamewaveId},
+				{Key: "oracle_id", Value: thing.OracleId},
+				{Key: "cn", Value: thing.CollectorNumber},
+				{Key: "set", Value: thing.SetCode},
+			}}
+		}
+		filter := bson.D{{Key: "$or", Value: lstRequests}}
+		x, err := coll.Find(cx, filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+		x.All(context.TODO(), l)
+		outputMap := make(map[string]IntermediateCardStruct)
+		var deck = tabletopsimulator.NewDeckObject()
+		for _, c := range l {
+			for x, identity := range stuff {
+				if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
+					if o, err := outputMap[c.OracleID]; !err {
+						if !o.Priority {
+							outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: false}
+						}
 					}
 				}
-			}
-			if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
-				outputMap[c.OracleID] = IntermediateCardStruct{Card: c, Priority: true}
-				stuff[x].OracleId = c.OracleID
+				if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
+					outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: true}
+					stuff[x].OracleId = c.OracleID
+				}
 			}
 		}
-	}
-	for n, i := range stuff {
-		for q := 0; q <= int(i.Quantity); q++ {
-			var c = outputMap[i.OracleId]
-			deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
-			deck.DeckIDs = append(deck.DeckIDs, int(n*100))
-			deck.CustomDeck[fmt.Sprintf("%d", n)] = c.Card.CustomDeckEntry
+		for n, i := range stuff {
+			for q := 0; q <= int(i.Quantity); q++ {
+				var c = outputMap[i.OracleId]
+				deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
+				deck.DeckIDs = append(deck.DeckIDs, int(n*100))
+				deck.CustomDeck[fmt.Sprintf("%d", n)] = c.Card.CustomDeckEntry
+			}
 		}
+		// outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
+		c.JSON(http.StatusOK, deck)
 	}
-	// outputSave := TTSSave{ObjectStates: []TTSDeckObject{deck}}
-	c.JSON(http.StatusOK, deck)
 }
 
 func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.HandlerFunc {
