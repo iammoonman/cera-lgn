@@ -37,13 +37,71 @@ func main() {
 		}
 	}()
 	router := gin.Default()
+	v1 := router.Group("/api/v1")
 	// router.GET("/", postCollection)
 	// router.GET("/playground", getStuff) // There's also a JSON representation for stuff here.
 	// router.GET("/simulator", getStuff)  // Returns full JSON string for spawning an object. Pass directly into spawnObjectData.
-	router.POST("/simulator/collection", postCollection(context.TODO(), client, mongoclient))
-	router.GET("/update", updateBulk(ctx, client, mongoclient))
-	router.POST("/update/custom", postCustom(mongoclient))
+	v1.POST("/simulator/collection", postCollection(context.TODO(), client, mongoclient))
+	v1.GET("/update", updateBulk(context.TODO(), client, mongoclient))
+	v1.POST("/update/custom", postCustom(mongoclient))
+	v1.GET("/simulator/oracle/:oracle_id", getSingleOracle(context.TODO(), mongoclient))
+	v1.GET("/simulator/scryfall/:scryfall_id", getSingleScryfall(context.TODO(), mongoclient))
+	v1.GET("/simulator/flamewave/:flamewave_id", getSingleFlamewave(context.TODO(), mongoclient))
 	router.Run("localhost:8080")
+}
+
+func getSingleFlamewave(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		flamewave_id := c.Param("flamewave_id")
+		if len(flamewave_id) == 0 {
+			return
+		}
+		coll := mg.Database("flamewave").Collection("cards")
+		x := coll.FindOne(cx, bson.E{Key: "flamewave_id", Value: flamewave_id})
+		var l FlamewaveTTSCard
+		x.Decode(l)
+		var deck = tabletopsimulator.NewDeckObject()
+		deck.ContainedObjects = append(deck.ContainedObjects, l.ContainedObjectsEntry)
+		deck.CustomDeck[fmt.Sprintf("%d", 1)] = l.CustomDeckEntry
+		deck.DeckIDs = append(deck.DeckIDs, 1)
+		c.JSON(http.StatusOK, deck)
+	}
+}
+
+func getSingleScryfall(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		scryfall_id := c.Param("scryfall_id")
+		if len(scryfall_id) == 0 {
+			return
+		}
+		coll := mg.Database("flamewave").Collection("cards")
+		x := coll.FindOne(cx, bson.E{Key: "scryfall_id", Value: scryfall_id})
+		var l FlamewaveTTSCard
+		x.Decode(l)
+		var deck = tabletopsimulator.NewDeckObject()
+		deck.ContainedObjects = append(deck.ContainedObjects, l.ContainedObjectsEntry)
+		deck.CustomDeck[fmt.Sprintf("%d", 1)] = l.CustomDeckEntry
+		deck.DeckIDs = append(deck.DeckIDs, 1)
+		c.JSON(http.StatusOK, deck)
+	}
+}
+
+func getSingleOracle(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		oracle_id := c.Param("oracle_id")
+		if len(oracle_id) == 0 {
+			return
+		}
+		coll := mg.Database("flamewave").Collection("cards")
+		x := coll.FindOne(cx, bson.E{Key: "oracle_id", Value: oracle_id})
+		var l FlamewaveTTSCard
+		x.Decode(l)
+		var deck = tabletopsimulator.NewDeckObject()
+		deck.ContainedObjects = append(deck.ContainedObjects, l.ContainedObjectsEntry)
+		deck.CustomDeck[fmt.Sprintf("%d", 1)] = l.CustomDeckEntry
+		deck.DeckIDs = append(deck.DeckIDs, 1)
+		c.JSON(http.StatusOK, deck)
+	}
 }
 
 func postCustom(mng *mongo.Client) gin.HandlerFunc {
@@ -102,12 +160,26 @@ func postCollection(cx context.Context, ct *scryfall.Client, mg *mongo.Client) g
 		// etc
 		lstRequests := make(bson.D, len(stuff))
 		for i, thing := range stuff {
-			lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
-				{Key: "flamewave_id", Value: thing.FlamewaveId},
-				{Key: "oracle_id", Value: thing.OracleId},
-				{Key: "cn", Value: thing.CollectorNumber},
-				{Key: "set", Value: thing.SetCode},
-			}}
+			if thing.FlamewaveId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "flamewave_id", Value: thing.FlamewaveId},
+				}}
+			} else if thing.ScryfallId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "scryfall_id", Value: thing.ScryfallId},
+				}}
+			} else if thing.CollectorNumber != "" && thing.SetCode != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "cn", Value: thing.CollectorNumber},
+					{Key: "set", Value: thing.SetCode},
+				}}
+			} else if thing.OracleId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "oracle_id", Value: thing.OracleId},
+				}}
+			} else {
+				return
+			}
 		}
 		filter := bson.D{{Key: "$or", Value: lstRequests}}
 		x, err := coll.Find(cx, filter)
