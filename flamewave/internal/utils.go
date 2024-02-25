@@ -2,11 +2,11 @@ package main
 
 import (
 	"bytes"
-	tabletopsimulator "flamewave/tabletopsimulator"
 	"fmt"
 	"strings"
 
 	scryfall "github.com/BlueMonday/go-scryfall"
+	tabletopsimulator "github.com/iammoonman/go-tabletop-simulator"
 )
 
 const RotatedViewAngleScript = "function onLoad()self.alt_view_angle=Vector(180,0,90)end"
