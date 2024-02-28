@@ -18,8 +18,7 @@ export const handler = async (event) => {
 	const objentries = [];
 	const imgrecord = new Map();
 	const ids = [];
-	let count = 0;
-	let scount = 0;
+	const quants = [];
 	for (let { flamewave_id, scryfall_id, set, cn, oracle_id, quantity } of postData) {
 		let command = null;
 		if (flamewave_id) {
@@ -34,9 +33,14 @@ export const handler = async (event) => {
 		}
 		try {
 			const resp = await doc.send(command);
-			// return resp
 			if (resp.Item !== undefined) {
-				ids.push(resp.Item["flamewave_id"]);
+				const i = ids.findIndex(v => v === resp.Item["flamewave_id"])
+				if (i > -1) {
+					quants[i] += quantity
+				} else {
+					ids.push(resp.Item["flamewave_id"]);
+					quants.push(quantity ?? 1);
+				}
 			} else {
 				return "{}"
 			}
@@ -44,24 +48,35 @@ export const handler = async (event) => {
 			return "{}"
 		}
 	}
-	for (let i of ids) {
+	const transformPool = []
+	const qpool = []
+	for (let i = 0; i < ids.length; i++) {
 		try {
-			const getObjectCommand = new GetObjectCommand({ Bucket: "flamewave", Key: `${i}.json` });
+			const getObjectCommand = new GetObjectCommand({ Bucket: "flamewave", Key: `${ids[i]}.json` });
 			const resp = await s3.send(getObjectCommand);
-			const st = await resp.Body?.transformToString("utf-8")
-			if (!st) {
-				return "{}"
+			if (resp.Body) {
+				transformPool.push(resp.Body?.transformToString('utf-8'))
+				qpool.push(quants[i])
 			}
-			const out = JSON.parse(st);
-			count += 1;
-			imgrecord.set(count, out.img);
-			deckids.push(count);
-			objentries.push(out.obj);
 		} catch (e) {
 			return "{}"
 		}
 	}
-	// console.log(deckids, Object.fromEntries(imgrecord.entries()), objentries)
+	await Promise.allSettled(transformPool).then(vs => {
+		let count = 0
+		for (let { value: st, status } of vs) {
+			if (!st || status === "rejected") {
+				return
+			}
+			const out = JSON.parse(st);
+			count += 1;
+			imgrecord.set(count, out.img);
+			for (let e = 0; e < qpool[count]; e++) {
+				deckids.push(count);
+				objentries.push(out.obj);
+			}
+		}
+	})
 	return JSON.stringify({
 		Name: "Deck",
 		Transform: {
