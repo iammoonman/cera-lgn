@@ -14,9 +14,6 @@ export const handler = async (event) => {
 	if (!Array.isArray(postData)) {
 		return "{}"
 	}
-	const deckids = [];
-	const objentries = [];
-	const imgrecord = new Map();
 	const ids = [];
 	const quants = [];
 	for (let { flamewave_id, scryfall_id, set, cn, oracle_id, quantity } of postData) {
@@ -30,6 +27,9 @@ export const handler = async (event) => {
 			command = new GetCommand({ TableName: "flamewave", Key: { set, cn }, AttributesToGet: ["flamewave_id"] });
 		} else if (oracle_id) {
 			command = new GetCommand({ TableName: "flamewave", Key: { oracle_id }, AttributesToGet: ["flamewave_id"] });
+		}
+		if (command === null) {
+			return "{}"
 		}
 		try {
 			const resp = await doc.send(command);
@@ -62,6 +62,9 @@ export const handler = async (event) => {
 			return "{}"
 		}
 	}
+	const deckids = [];
+	const objentries = [];
+	const imgrecord = new Map();
 	await Promise.allSettled(transformPool).then(vs => {
 		let count = 0
 		for (let { value: st, status } of vs) {
