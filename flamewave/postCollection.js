@@ -14,6 +14,7 @@ export const handler = async (event) => {
 	if (!Array.isArray(postData)) {
 		return "{}"
 	}
+	if (postData.length < 2) return "{}"
 	const ids = [];
 	const quants = [];
 	for (let { flamewave_id, scryfall_id, set, cn, oracle_id, quantity } of postData) {
