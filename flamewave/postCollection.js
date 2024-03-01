@@ -73,7 +73,7 @@ export const handler = async (event) => {
 			const out = JSON.parse(st);
 			count += 1;
 			imgrecord.set(count, out.img);
-			for (let e = 0; e < qpool[count]; e++) {
+			for (let e = 0; e < qpool[count - 1]; e++) {
 				deckids.push(count);
 				objentries.push(out.obj);
 			}
