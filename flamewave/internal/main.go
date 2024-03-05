@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 
 	uuid "github.com/google/uuid"
+	tabletopsimulator "github.com/iammoonman/go-tabletop-simulator"
 
 	scryfall "github.com/BlueMonday/go-scryfall"
 	"github.com/gin-gonic/gin"
@@ -38,6 +40,10 @@ func main() {
 	v1 := router.Group("/api/v1")
 	v1.GET("/update", updateBulk(context.TODO(), client, mongoclient))
 	v1.POST("/update/custom", postCustom(mongoclient))
+	v1.GET("/scryfall_id/:id", getSingle(context.TODO(), mongoclient, "scryfall_id"))
+	v1.GET("/flamewave_id/:id", getSingle(context.TODO(), mongoclient, "flamewave_id"))
+	v1.GET("/oracle_id/:id", getSingle(context.TODO(), mongoclient, "oracle_id"))
+	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
 	router.Run("localhost:8080")
 }
 
@@ -106,5 +112,96 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 				coll.BulkWrite(context.TODO(), submissions)
 			}
 		}
+	}
+}
+
+func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		y := c.Param(id)
+		mongourl := os.Getenv("mongo")
+		mongoclient, err := mongo.Connect(cx, options.Client().ApplyURI(mongourl))
+		if err != nil {
+			log.Fatal(err)
+		}
+		coll := mongoclient.Database("flamewave").Collection("cards")
+		x := coll.FindOne(cx, bson.E{Key: id, Value: y})
+		var l FlamewaveTTSCard
+		x.Decode(l)
+		var card = tabletopsimulator.NewSingleCardObject(l.ContainedObjectsEntry.Nickname, l.ContainedObjectsEntry.Description, l.ContainedObjectsEntry.Memo, l.CustomDeckEntry)
+		card.States = l.ContainedObjectsEntry.States
+		card.LuaScript = l.ContainedObjectsEntry.LuaScript
+		c.JSON(200, &card)
+	}
+}
+
+func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var t []FlamewaveIdentifier
+		c.BindJSON(&t)
+		mongourl := os.Getenv("mongo")
+		mongoclient, err := mongo.Connect(cx, options.Client().ApplyURI(mongourl))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(t) == 0 || len(t) > 1000 {
+			return
+		}
+		coll := mongoclient.Database("flamewave").Collection("cards")
+		var l []FlamewaveTTSCard
+		lstRequests := make(bson.D, len(t))
+		for i, thing := range t {
+			if thing.FlamewaveId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "flamewave_id", Value: thing.FlamewaveId},
+				}}
+			} else if thing.ScryfallId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "scryfall_id", Value: thing.ScryfallId},
+				}}
+			} else if thing.CollectorNumber != "" && thing.SetCode != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "cn", Value: thing.CollectorNumber},
+					{Key: "set", Value: thing.SetCode},
+				}}
+			} else if thing.OracleId != "" {
+				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
+					{Key: "oracle_id", Value: thing.OracleId},
+				}}
+			} else {
+				return
+			}
+		}
+		filter := bson.D{{Key: "$or", Value: lstRequests}}
+		x, err := coll.Find(cx, filter, options.Find().SetProjection(bson.D{{Key: "CustomDeckEntry", Value: 0}, {Key: "ContainedObjectsEntry", Value: 0}}))
+		if err != nil {
+			log.Fatal(err)
+		}
+		x.All(context.TODO(), l)
+		outputMap := make(map[string]IntermediateCardStruct)
+		var deck = tabletopsimulator.NewDeckObject()
+		for _, c := range l {
+			for x, identity := range t {
+				if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
+					if o, err := outputMap[c.OracleID]; !err {
+						if !o.Priority {
+							outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: false}
+						}
+					}
+				}
+				if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
+					outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: true}
+					t[x].OracleId = c.OracleID
+				}
+			}
+		}
+		for n, i := range t {
+			for q := 0; q <= int(i.Quantity); q++ {
+				var c = outputMap[i.OracleId]
+				deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
+				deck.DeckIDs = append(deck.DeckIDs, int(n*100))
+				deck.CustomDeck[fmt.Sprintf("%d", n)] = c.Card.CustomDeckEntry
+			}
+		}
+		c.JSON(http.StatusOK, &deck)
 	}
 }
