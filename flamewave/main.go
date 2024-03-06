@@ -43,8 +43,11 @@ func main() {
 	v1.GET("/scryfall_id/:id", getSingle(context.TODO(), mongoclient, "scryfall_id"))
 	v1.GET("/flamewave_id/:id", getSingle(context.TODO(), mongoclient, "flamewave_id"))
 	v1.GET("/oracle_id/:id", getSingle(context.TODO(), mongoclient, "oracle_id"))
+	v1.GET("/set/:id", getSet(context.TODO(), mongoclient))
+	v1.GET("/sets", getSets())
 	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
-	router.Run("localhost:8080")
+	router.Static("/index", "./static")
+	router.Run(":8080")
 }
 
 func postCustom(mng *mongo.Client) gin.HandlerFunc {
@@ -85,6 +88,9 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 		if err != nil {
 			log.Fatal(err)
 		}
+		coll := mg.Database("flamewave").Collection("cards")
+		coll.DeleteMany(context.TODO(), bson.D{{Key: "oracle_id", Value: bson.D{{Key: "$gte", Value: " "}}}})
+		var submissions = []mongo.WriteModel{}
 		for _, entry := range bulkList {
 			if entry.Type == "default_cards" {
 				resp, err := http.Get(entry.DownloadURI)
@@ -92,9 +98,7 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 					log.Fatal(err)
 				}
 				defer resp.Body.Close()
-				coll := mg.Database("flamewave").Collection("cards")
 				var counter uint32 = 0
-				var submissions = []mongo.WriteModel{}
 				dec := json.NewDecoder(resp.Body)
 				dec.Token()
 				for dec.More() {
@@ -106,25 +110,40 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 					}
 					counter++
 					crd := NewFlamewaveTTSCard(m, counter)
-					submissions = append(submissions, mongo.NewReplaceOneModel().SetFilter(bson.D{{Key: "flamewave_id", Value: m.ID}}).SetReplacement(crd).SetUpsert(true))
+					// submissions = append(submissions, mongo.NewReplaceOneModel().SetFilter(bson.D{{Key: "flamewave_id", Value: m.ID}}).SetReplacement(crd).SetUpsert(true))
+					submissions = append(submissions, mongo.NewInsertOneModel().SetDocument(crd))
 				}
 				dec.Token()
-				coll.BulkWrite(context.TODO(), submissions)
 			}
 		}
+		var f = false
+		var t = true
+		var n = 0
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		n = n + 10000
+		coll.BulkWrite(context.TODO(), submissions[n:], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
 	}
 }
 
 func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		y := c.Param(id)
-		mongourl := os.Getenv("mongo")
-		mongoclient, err := mongo.Connect(cx, options.Client().ApplyURI(mongourl))
-		if err != nil {
-			log.Fatal(err)
-		}
-		coll := mongoclient.Database("flamewave").Collection("cards")
-		x := coll.FindOne(cx, bson.E{Key: id, Value: y})
+		coll := mg.Database("flamewave").Collection("cards")
+		x := coll.FindOne(cx, bson.D{{Key: id, Value: y}})
 		var l FlamewaveTTSCard
 		x.Decode(l)
 		var card = tabletopsimulator.NewSingleCardObject(l.ContainedObjectsEntry.Nickname, l.ContainedObjectsEntry.Description, l.ContainedObjectsEntry.Memo, l.CustomDeckEntry)
@@ -134,19 +153,35 @@ func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc 
 	}
 }
 
+func getSet(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		y := c.Param("id")
+		coll := mg.Database("flamewave").Collection("cards")
+		x, e := coll.Find(cx, bson.D{{Key: "set", Value: y}})
+		if e != nil {
+			return
+		}
+		var l []FlamewaveTTSCard
+		x.All(cx, &l)
+		var deck = tabletopsimulator.NewDeckObject()
+		for q := 0; q < len(l); q++ {
+			var c = l[q]
+			deck.ContainedObjects = append(deck.ContainedObjects, c.ContainedObjectsEntry)
+			deck.DeckIDs = append(deck.DeckIDs, int((q+1)*100))
+			deck.CustomDeck[fmt.Sprintf("%d", q+1)] = c.CustomDeckEntry
+		}
+		c.JSON(200, &deck)
+	}
+}
+
 func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var t []FlamewaveIdentifier
 		c.BindJSON(&t)
-		mongourl := os.Getenv("mongo")
-		mongoclient, err := mongo.Connect(cx, options.Client().ApplyURI(mongourl))
-		if err != nil {
-			log.Fatal(err)
-		}
 		if len(t) == 0 || len(t) > 1000 {
 			return
 		}
-		coll := mongoclient.Database("flamewave").Collection("cards")
+		coll := mg.Database("flamewave").Collection("cards")
 		var l []FlamewaveTTSCard
 		lstRequests := make(bson.D, len(t))
 		for i, thing := range t {
@@ -176,7 +211,7 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
-		x.All(context.TODO(), l)
+		x.All(context.TODO(), &l)
 		outputMap := make(map[string]IntermediateCardStruct)
 		var deck = tabletopsimulator.NewDeckObject()
 		for _, c := range l {
@@ -195,7 +230,9 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 			}
 		}
 		for n, i := range t {
-			for q := 0; q <= int(i.Quantity); q++ {
+			for q := 0; q <
+
+				int(i.Quantity); q++ {
 				var c = outputMap[i.OracleId]
 				deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
 				deck.DeckIDs = append(deck.DeckIDs, int(n*100))
@@ -203,5 +240,11 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 			}
 		}
 		c.JSON(http.StatusOK, &deck)
+	}
+}
+
+func getSets() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, SetCodes)
 	}
 }

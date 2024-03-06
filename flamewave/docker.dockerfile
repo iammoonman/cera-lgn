@@ -3,7 +3,5 @@ WORKDIR /fw
 COPY . .
 RUN go mod download
 RUN go build -o /fw/dist
-FROM alpine:latest
-WORKDIR /fw
-COPY --from=build /fw/dist .
+EXPOSE 8080
 CMD ["./dist"]

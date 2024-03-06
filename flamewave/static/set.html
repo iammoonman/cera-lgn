@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			ul {
+				margin: 0;
+				padding: 0;
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(150px, auto));
+				list-style: none;
+				gap: 4px;
+			}
+			li {
+				margin: 0;
+				padding: 0;
+				aspect-ratio: 1 / 1;
+				border-radius: 5%;
+				background-color: #ffffff;
+				box-shadow: 1px 1px 2px 0 #00000055;
+				display: grid;
+				place-items: center;
+			}
+			img {
+				max-height: 100%;
+				max-width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<ul id="crds"></ul>
+		<script>
+			let c = document.getElementById("crds");
+			let set = new URLSearchParams(window.location.search).get("set");
+			fetch(`/api/v1/set/${set}`).then(async (v) => {
+				let j = await v.json();
+				console.log(j);
+				for (let i = 0; i < j.ContainedObjects.length; i++) {
+					let newChild = document.createElement("li");
+					let o = j.DeckIDs[i];
+                    newChild.setAttribute("data-name", j.ContainedObjects[i].Nickname)
+					newChild.innerHTML = `<img src="${j.CustomDeck[(o / 100).toFixed(0)].FaceURL}" />`;
+					c.appendChild(newChild);
+				}
+				[...c.children].sort((a, b) => (a.getAttribute("data-name") > b.getAttribute("data-name") ? 1 : -1)).forEach((node) => c.appendChild(node));
+			});
+		</script>
+	</body>
+</html>

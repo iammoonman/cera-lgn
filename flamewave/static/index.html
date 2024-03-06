@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Flamewave</title>
+		<style>
+			ul {
+                margin: 0;
+                padding: 0;
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(50px, auto));
+                list-style: none;
+                gap: 4px;
+			}
+            li {
+                margin: 0;
+                padding: 0;
+                height: 50px;
+                aspect-ratio: 1 / 1;
+                border-radius: 5%;
+                background-color: #ffffff;
+                box-shadow: 1px 1px 2px 0 #00000055;
+                display: grid;
+                place-items: center;
+            }
+		</style>
+	</head>
+	<body>
+		<ul id="sets"></ul>
+		<script>
+			let s = document.getElementById("sets");
+			fetch("/api/v1/sets").then(async (v) => {
+				let j = await v.json();
+				for (let i = 0; i < j.length; i++) {
+					let newChild = document.createElement("li");
+					newChild.innerHTML = `<a href="/index/set.html?set=${j[i]}">${j[i]}</a>`;
+					s.appendChild(newChild);
+				}
+			});
+		</script>
+	</body>
+</html>

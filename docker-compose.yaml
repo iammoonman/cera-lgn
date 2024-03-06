@@ -1,13 +1,16 @@
 services:
-  bot:
-    build: .
-    networks:
-      - net
-    env_file:
-      - path: ./.env
-        required: true
+  # bot:
+  #   build:
+  #     dockerfile: docker.dockerfile
+  #   networks:
+  #     - net
+  #   env_file:
+  #     - path: ./.env
+  #       required: true
   fw:
-    build: ./flamewave
+    build:
+      context: ./flamewave
+      dockerfile: docker.dockerfile
     networks:
       - net
     env_file:
@@ -27,6 +30,8 @@ services:
       - ./flamewave/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   mong-exp:
     image: mongo-express
+    ports:
+      - "8081:8081"
     networks:
       - net
     environment:

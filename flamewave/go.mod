@@ -7,6 +7,8 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 )
 
+require github.com/a-h/templ v0.2.598 // indirect
+
 require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/iammoonman/go-tabletop-simulator v0.2.0
