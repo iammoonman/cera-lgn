@@ -90,6 +90,11 @@ type IntermediateCardStruct struct {
 
 func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		user, pass, ok := c.Request.BasicAuth()
+		if !ok || user != os.Getenv("user") || pass != os.Getenv("pass") {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
 		bulkList, err := ct.ListBulkData(cx)
 		if err != nil {
 			log.Fatal(err)
