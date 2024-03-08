@@ -44,6 +44,7 @@ func main() {
 	v1.GET("/flamewave_id/:id", getSingle(context.TODO(), mongoclient, "flamewave_id"))
 	v1.GET("/oracle_id/:id", getSingle(context.TODO(), mongoclient, "oracle_id"))
 	v1.GET("/set/:id", getSet(context.TODO(), mongoclient))
+	v1.GET("/site/set/:id", getSetWebsite(context.TODO(), mongoclient))
 	v1.GET("/sets", getSets())
 	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
 	router.Static("/index", "./static")
@@ -53,6 +54,11 @@ func main() {
 func postCustom(mng *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var stuff []FlamewaveTTSCard
+		user, pass, ok := c.Request.BasicAuth()
+		if !ok || user != os.Getenv("user") || pass != os.Getenv("pass") {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
 		bdydec := json.NewDecoder(c.Request.Body)
 		err := bdydec.Decode(&stuff)
 		if err != nil {
@@ -118,24 +124,7 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 		}
 		var f = false
 		var t = true
-		var n = 0
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:n+10000], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
-		n = n + 10000
-		coll.BulkWrite(context.TODO(), submissions[n:], &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
+		coll.BulkWrite(context.TODO(), submissions, &options.BulkWriteOptions{Ordered: &f, BypassDocumentValidation: &t})
 	}
 }
 
@@ -171,6 +160,20 @@ func getSet(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 			deck.CustomDeck[fmt.Sprintf("%d", q+1)] = c.CustomDeckEntry
 		}
 		c.JSON(200, &deck)
+	}
+}
+
+func getSetWebsite(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		y := c.Param("id")
+		coll := mg.Database("flamewave").Collection("cards")
+		x, e := coll.Find(cx, bson.D{{Key: "set", Value: y}})
+		if e != nil {
+			return
+		}
+		var l []FlamewaveTTSCard
+		x.All(cx, &l)
+		c.JSON(200, &l)
 	}
 }
 

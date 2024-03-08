@@ -3,6 +3,9 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src=" https://cdn.jsdelivr.net/npm/jsoneditor@10.0.1/dist/jsoneditor.min.js "></script>
+		<link href=" https://cdn.jsdelivr.net/npm/jsoneditor@10.0.1/dist/jsoneditor.min.css " rel="stylesheet" />
+		<title>Flamewave</title>
 		<style>
 			ul {
 				margin: 0;
@@ -29,22 +32,42 @@
 		</style>
 	</head>
 	<body>
+		<script>
+			function sendUpdatedThing() {
+				fetch("/api/v1/update/custom", { body: editor.get(), method: "POST" });
+				dialog.close();
+			}
+		</script>
 		<ul id="crds"></ul>
+		<dialog id="di">
+			<div id="jsoneditor"></div>
+			<button onclick="sendUpdatedThing()">CLOSE</button>
+		</dialog>
 		<script>
 			let c = document.getElementById("crds");
 			let set = new URLSearchParams(window.location.search).get("set");
-			fetch(`/api/v1/set/${set}`).then(async (v) => {
+			fetch(`/api/v1/site/set/${set}`).then(async (v) => {
 				let j = await v.json();
 				console.log(j);
-				for (let i = 0; i < j.ContainedObjects.length; i++) {
+				for (let i = 0; i < j.length; i++) {
 					let newChild = document.createElement("li");
-					let o = j.DeckIDs[i];
-                    newChild.setAttribute("data-name", j.ContainedObjects[i].Nickname)
-					newChild.innerHTML = `<img src="${j.CustomDeck[(o / 100).toFixed(0)].FaceURL}" />`;
+					newChild.setAttribute("data-name", j[i].cotd_objs.Nickname);
+					newChild.innerHTML = `<img src="${j[i].custom_deck.FaceURL}" />`;
+					newChild.onclick = () => {
+						console.log(j[i]);
+						editor.set(j[i]);
+						dialog.showModal();
+					};
 					c.appendChild(newChild);
 				}
 				[...c.children].sort((a, b) => (a.getAttribute("data-name") > b.getAttribute("data-name") ? 1 : -1)).forEach((node) => c.appendChild(node));
 			});
+		</script>
+		<script>
+			const container = document.getElementById("jsoneditor");
+			const options = {};
+			var editor = new JSONEditor(container, options);
+			var dialog = document.getElementById("di");
 		</script>
 	</body>
 </html>
