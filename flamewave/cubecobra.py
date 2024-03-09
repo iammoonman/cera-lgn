@@ -1,9 +1,6 @@
 import flamewave
 import requests
 import random
-import csv
-import copy
-import json
 
 
 def get_cube(cc_id, p_len):

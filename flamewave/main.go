@@ -46,6 +46,7 @@ func main() {
 	v1.GET("/set/:id", getSet(context.TODO(), mongoclient))
 	v1.GET("/site/set/:id", getSetWebsite(context.TODO(), mongoclient))
 	v1.GET("/sets", getSets())
+	v1.GET("/cube/:id", getCubeCobra(context.TODO(), mongoclient))
 	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
 	router.Static("/index", "./static")
 	router.Run(":8080")
@@ -190,7 +191,6 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 			return
 		}
 		coll := mg.Database("flamewave").Collection("cards")
-		var l []FlamewaveTTSCard
 		lstRequests := make(bson.D, len(t))
 		for i, thing := range t {
 			if thing.FlamewaveId != "" {
@@ -219,6 +219,7 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
+		var l []FlamewaveTTSCard
 		x.All(context.TODO(), &l)
 		outputMap := make(map[string]IntermediateCardStruct)
 		var deck = tabletopsimulator.NewDeckObject()
@@ -238,13 +239,11 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 			}
 		}
 		for n, i := range t {
-			for q := 0; q <
-
-				int(i.Quantity); q++ {
+			for q := 0; q < int(i.Quantity); q++ {
 				var c = outputMap[i.OracleId]
 				deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
-				deck.DeckIDs = append(deck.DeckIDs, int(n*100))
-				deck.CustomDeck[fmt.Sprintf("%d", n)] = c.Card.CustomDeckEntry
+				deck.DeckIDs = append(deck.DeckIDs, int((n+1)*100))
+				deck.CustomDeck[fmt.Sprintf("%d", n+1)] = c.Card.CustomDeckEntry
 			}
 		}
 		c.JSON(http.StatusOK, &deck)
@@ -254,5 +253,52 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 func getSets() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, SetCodes)
+	}
+}
+
+func getCubeCobra(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		y := c.Param("id")
+		coll := mg.Database("flamewave").Collection("cards")
+		client := http.Client{}
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://cubecobra.com/cube/api/cubeJSON/%v", y), nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		req.Header.Set("User-Agent", "CERA Golang-1.22")
+		res, geter := client.Do(req)
+		if geter != nil {
+			log.Fatal(geter)
+		}
+		if res.Body != nil {
+			defer res.Body.Close()
+		}
+		var cobra_data CubeCobraResponse
+		dec := json.NewDecoder(res.Body)
+		dec.Decode(&cobra_data)
+		lstSFID := make(bson.A, len(cobra_data.Cards.Mainboard))
+		for mainboardindex, mainboardCard := range cobra_data.Cards.Mainboard {
+			lstSFID[mainboardindex] = mainboardCard.Details.Scryfall_id
+		}
+		mongoresponse, err := coll.Find(cx, bson.M{"scryfall_id": bson.M{"$in": lstSFID}}, options.Find())
+		if err != nil {
+			log.Fatal(err)
+		}
+		var mongocards []FlamewaveTTSCard
+		err = mongoresponse.All(cx, &mongocards)
+		if err != nil {
+			panic(err)
+		}
+		outputMap := make(map[string]FlamewaveTTSCard)
+		for _, mongocard := range mongocards {
+			outputMap[mongocard.ScryfallID] = mongocard
+		}
+		var deck = tabletopsimulator.NewDeckObject()
+		for cobracard_index, cobracard := range cobra_data.Cards.Mainboard {
+			deck.ContainedObjects = append(deck.ContainedObjects, outputMap[cobracard.Details.Scryfall_id].ContainedObjectsEntry)
+			deck.DeckIDs = append(deck.DeckIDs, int((cobracard_index+1)*100))
+			deck.CustomDeck[fmt.Sprintf("%d", cobracard_index+1)] = outputMap[cobracard.Details.Scryfall_id].CustomDeckEntry
+		}
+		c.JSON(http.StatusOK, &deck)
 	}
 }
