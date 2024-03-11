@@ -85,7 +85,7 @@ func postCustom(mng *mongo.Client) gin.HandlerFunc {
 }
 
 type IntermediateCardStruct struct {
-	Card     *FlamewaveTTSCard
+	Card     FlamewaveTTSCard
 	Priority bool
 }
 
@@ -185,66 +185,61 @@ func getSetWebsite(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 
 func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var t []FlamewaveIdentifier
-		c.BindJSON(&t)
-		if len(t) == 0 || len(t) > 1000 {
+		var identifiers []FlamewaveIdentifier
+		c.BindJSON(&identifiers)
+		if len(identifiers) == 0 || len(identifiers) > 1000 {
 			return
 		}
 		coll := mg.Database("flamewave").Collection("cards")
-		lstRequests := make(bson.D, len(t))
-		for i, thing := range t {
+		lstRequests := make(bson.A, len(identifiers))
+		for i, thing := range identifiers {
 			if thing.FlamewaveId != "" {
-				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
-					{Key: "flamewave_id", Value: thing.FlamewaveId},
-				}}
+				lstRequests[i] = bson.M{"flamewave_id": thing.FlamewaveId}
 			} else if thing.ScryfallId != "" {
-				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
-					{Key: "scryfall_id", Value: thing.ScryfallId},
-				}}
+				lstRequests[i] = bson.M{"scryfall_id": thing.ScryfallId}
 			} else if thing.CollectorNumber != "" && thing.SetCode != "" {
-				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
-					{Key: "cn", Value: thing.CollectorNumber},
-					{Key: "set", Value: thing.SetCode},
-				}}
+				lstRequests[i] = bson.M{
+					"cn":  thing.CollectorNumber,
+					"set": thing.SetCode,
+				}
 			} else if thing.OracleId != "" {
-				lstRequests[i] = bson.E{Key: "$and", Value: bson.D{
-					{Key: "oracle_id", Value: thing.OracleId},
-				}}
+				lstRequests[i] = bson.M{"oracle_id": thing.OracleId}
 			} else {
+				c.JSON(http.StatusBadRequest, "One or more identifiers failed.")
 				return
 			}
 		}
-		filter := bson.D{{Key: "$or", Value: lstRequests}}
-		x, err := coll.Find(cx, filter, options.Find().SetProjection(bson.D{{Key: "CustomDeckEntry", Value: 0}, {Key: "ContainedObjectsEntry", Value: 0}}))
+		x, err := coll.Find(cx, bson.M{"$or": lstRequests}, options.Find())
 		if err != nil {
 			log.Fatal(err)
 		}
 		var l []FlamewaveTTSCard
-		x.All(context.TODO(), &l)
+		err = x.All(context.TODO(), &l)
+		if err != nil {
+			log.Fatal(err)
+		}
 		outputMap := make(map[string]IntermediateCardStruct)
-		var deck = tabletopsimulator.NewDeckObject()
 		for _, c := range l {
-			for x, identity := range t {
+			for x, identity := range identifiers {
 				if len(identity.OracleId) > 0 && identity.OracleId == c.OracleID {
 					if o, err := outputMap[c.OracleID]; !err {
 						if !o.Priority {
-							outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: false}
+							outputMap[c.OracleID] = IntermediateCardStruct{Card: c, Priority: false}
 						}
+					} else {
+						outputMap[c.OracleID] = IntermediateCardStruct{Card: c, Priority: false}
 					}
-				}
-				if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID {
-					outputMap[c.OracleID] = IntermediateCardStruct{Card: &c, Priority: true}
-					t[x].OracleId = c.OracleID
+				} else if (identity.CollectorNumber == c.CollectorNumber && identity.SetCode == c.SetCode) || identity.ScryfallId == c.ScryfallID || identity.FlamewaveId == c.FlamewaveID {
+					outputMap[c.OracleID] = IntermediateCardStruct{Card: c, Priority: true}
+					identifiers[x].OracleId = c.OracleID
 				}
 			}
 		}
-		for n, i := range t {
-			for q := 0; q < int(i.Quantity); q++ {
-				var c = outputMap[i.OracleId]
-				deck.ContainedObjects = append(deck.ContainedObjects, c.Card.ContainedObjectsEntry)
-				deck.DeckIDs = append(deck.DeckIDs, int((n+1)*100))
-				deck.CustomDeck[fmt.Sprintf("%d", n+1)] = c.Card.CustomDeckEntry
-			}
+		var deck = tabletopsimulator.NewDeckObject()
+		for n, i := range identifiers {
+			deck.ContainedObjects = append(deck.ContainedObjects, outputMap[i.OracleId].Card.ContainedObjectsEntry)
+			deck.DeckIDs = append(deck.DeckIDs, int((n+1)*100))
+			deck.CustomDeck[fmt.Sprintf("%d", n+1)] = outputMap[i.OracleId].Card.CustomDeckEntry
 		}
 		c.JSON(http.StatusOK, &deck)
 	}
