@@ -4,30 +4,40 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script src=" https://cdn.jsdelivr.net/npm/jsoneditor@10.0.1/dist/jsoneditor.min.js "></script>
+		<link rel="stylesheet" href="/index/pico.classless.jade.css" />
 		<link href=" https://cdn.jsdelivr.net/npm/jsoneditor@10.0.1/dist/jsoneditor.min.css " rel="stylesheet" />
 		<title>Flamewave</title>
 		<style>
-			ul {
+			#crds {
 				margin: 0;
 				padding: 0;
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(150px, auto));
-				list-style: none;
+				grid-template-columns: repeat(auto-fit, clamp(150px, 10vw, 300px));
+				justify-content: space-evenly;
 				gap: 4px;
+				overflow: auto;
+				padding-inline: clamp(20px, 10%, 3vw);
 			}
-			li {
+			#container {
+				display: flex;
+				flex-direction: column;
 				margin: 0;
 				padding: 0;
-				aspect-ratio: 1 / 1;
+				max-height: 100vh;
+			}
+			img {
+				margin: 0;
+				padding: 0;
 				border-radius: 5%;
-				background-color: #ffffff;
 				box-shadow: 1px 1px 2px 0 #00000055;
 				display: grid;
 				place-items: center;
+				width: clamp(150px, 10vw, 300px);
 			}
-			img {
-				max-height: 100%;
-				max-width: 100%;
+			#header {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
 			}
 		</style>
 	</head>
@@ -38,7 +48,13 @@
 				dialog.close();
 			}
 		</script>
-		<ul id="crds"></ul>
+		<div id="container">
+			<div id="header">
+				<input type="search" />
+			</div>
+			<div id="crds"></div>
+			<div id="footer">Copyright information.</div>
+		</div>
 		<dialog id="di">
 			<div id="jsoneditor"></div>
 			<button onclick="sendUpdatedThing()">CLOSE</button>
@@ -48,13 +64,11 @@
 			let set = new URLSearchParams(window.location.search).get("set");
 			fetch(`/api/v1/site/set/${set}`).then(async (v) => {
 				let j = await v.json();
-				console.log(j);
 				for (let i = 0; i < j.length; i++) {
-					let newChild = document.createElement("li");
+					let newChild = document.createElement("img");
 					newChild.setAttribute("data-name", j[i].cotd_objs.Nickname);
-					newChild.innerHTML = `<img src="${j[i].custom_deck.FaceURL}" />`;
+					newChild.src = j[i].custom_deck.FaceURL;
 					newChild.onclick = () => {
-						console.log(j[i]);
 						editor.set(j[i]);
 						dialog.showModal();
 					};

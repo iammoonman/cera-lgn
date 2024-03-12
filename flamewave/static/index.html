@@ -3,38 +3,61 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="/index/pico.classless.jade.css" />
 		<title>Flamewave</title>
 		<style>
-			ul {
-                margin: 0;
-                padding: 0;
+			#sets {
+				margin: 0;
+				padding: 0;
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(50px, auto));
-                list-style: none;
-                gap: 4px;
+				grid-template-columns: repeat(auto-fit, clamp(6ch, 10vw, 80px));
+				list-style: none;
+				gap: 4px;
+				overflow: auto;
+				padding-inline: clamp(20px, 10%, 3vw);
+				justify-content: space-evenly;
 			}
-            li {
-                margin: 0;
-                padding: 0;
-                height: 50px;
-                aspect-ratio: 1 / 1;
-                border-radius: 5%;
-                background-color: #ffffff;
-                box-shadow: 1px 1px 2px 0 #00000055;
-                display: grid;
-                place-items: center;
-            }
+			#sets > a {
+				margin: 0;
+				padding: 0;
+				aspect-ratio: 1 / 1;
+				border-radius: 15%;
+				box-shadow: 1px 1px 2px 0 #00000055;
+				display: grid;
+				place-items: center;
+				background-color: var(--pico-background-color);
+			}
+			#container {
+				display: flex;
+				flex-direction: column;
+				margin: 0;
+				padding: 0;
+				max-height: 100vh;
+			}
+			#header {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+			}
 		</style>
 	</head>
 	<body>
-		<ul id="sets"></ul>
+		<main id="container">
+			<div id="header">
+				Flamewave
+			</div>
+			<div id="sets"></div>
+			<div id="footer">Copyright information.</div>
+		</main>
 		<script>
 			let s = document.getElementById("sets");
 			fetch("/api/v1/sets").then(async (v) => {
 				let j = await v.json();
 				for (let i = 0; i < j.length; i++) {
-					let newChild = document.createElement("li");
-					newChild.innerHTML = `<a href="/index/set.html?set=${j[i]}">${j[i]}</a>`;
+					let newChild = document.createElement("a");
+					newChild.href = `/index/set.html?set=${j[i]}`;
+					newChild.innerHTML = j[i];
+					newChild.setAttribute("data-set", j[i]);
 					s.appendChild(newChild);
 				}
 			});
