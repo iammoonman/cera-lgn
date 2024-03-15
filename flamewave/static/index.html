@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/index/pico.classless.jade.css" />
+		<link rel="stylesheet" href="/pico.classless.jade.css" />
 		<title>Flamewave</title>
 		<style>
 			#sets {
@@ -30,7 +30,7 @@
 			#container {
 				display: flex;
 				flex-direction: column;
-				margin: 0;
+				margin-inline: auto;
 				padding: 0;
 				max-height: 100vh;
 			}
@@ -55,7 +55,7 @@
 				let j = await v.json();
 				for (let i = 0; i < j.length; i++) {
 					let newChild = document.createElement("a");
-					newChild.href = `/index/set.html?set=${j[i]}`;
+					newChild.href = `/set.html?set=${j[i]}`;
 					newChild.innerHTML = j[i];
 					newChild.setAttribute("data-set", j[i]);
 					s.appendChild(newChild);
