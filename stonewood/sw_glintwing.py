@@ -291,7 +291,7 @@ class IG_View(discord.ui.View):
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-                requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
+                # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
@@ -307,7 +307,7 @@ class IG_View(discord.ui.View):
             if round_num == 2:
                 this_draft.round_three = []
                 round_num = 1
-            await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)])
+            await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
@@ -330,7 +330,7 @@ class IG_View(discord.ui.View):
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-            requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
+            # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
