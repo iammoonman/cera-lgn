@@ -143,7 +143,7 @@ func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc 
 		x := coll.FindOne(cx, bson.D{{Key: id, Value: y}})
 		var l FlamewaveTTSCard
 		x.Decode(l)
-		var card = tabletopsimulator.NewSingleCardObject(l.ContainedObjectsEntry.Nickname, l.ContainedObjectsEntry.Description, l.ContainedObjectsEntry.Memo, l.CustomDeckEntry)
+		var card = tabletopsimulator.NewSingleCardObject(l.ContainedObjectsEntry.Nickname, l.ContainedObjectsEntry.Description, l.ContainedObjectsEntry.Memo, l.CustomDeckEntry, false)
 		card.States = l.ContainedObjectsEntry.States
 		card.LuaScript = l.ContainedObjectsEntry.LuaScript
 		c.JSON(200, &card)
@@ -239,7 +239,28 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 		}
 		var deck = tabletopsimulator.NewDeckObject()
 		for n, i := range identifiers {
-			deck.ContainedObjects = append(deck.ContainedObjects, outputMap[i.OracleId].Card.ContainedObjectsEntry)
+			var c = outputMap[i.OracleId].Card.ContainedObjectsEntry
+			if i.Foil {
+				c.Decals = []tabletopsimulator.Decal{
+					{
+						CustomDecal: struct {
+							Name     string  "json:\"Name\""
+							ImageURL string  "json:\"ImageURL\""
+							Size     float32 "json:\"Size\""
+						}{Name: "StarFoil", ImageURL: "https://i.imgur.com/QnxyMMK.png", Size: 1.0}, Transform: tabletopsimulator.ExhaustiveTransform{
+							PosX:   0.0,
+							PosY:   0.25,
+							PosZ:   0.0,
+							RotX:   90.0,
+							RotY:   180.0,
+							RotZ:   0.0,
+							ScaleX: 0.7006438 * 3.1,
+							ScaleY: 0.9999966 * 3.1,
+							ScaleZ: 15.3846169 * 3.1,
+						}},
+				}
+			}
+			deck.ContainedObjects = append(deck.ContainedObjects, c)
 			deck.DeckIDs = append(deck.DeckIDs, int((n+1)*100))
 			deck.CustomDeck[fmt.Sprintf("%d", n+1)] = outputMap[i.OracleId].Card.CustomDeckEntry
 		}

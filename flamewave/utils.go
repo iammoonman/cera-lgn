@@ -44,6 +44,7 @@ type FlamewaveIdentifier struct {
 	SetCode         string `json:"set" bson:"set"`
 	Quantity        uint8  `json:"quantity" bson:"quantity"`
 	FlamewaveId     string `json:"flamewave_id" bson:"flamewave_id"`
+	Foil            bool   `json:"foil,omitempty"`
 }
 
 type FlamewaveTTSCard struct {
@@ -208,7 +209,7 @@ func NewFlamewaveTTSCard(c scryfall.Card, i uint32) FlamewaveTTSCard {
 		CustomDeckEntry:       tabletopsimulator.NewImageEntry(faceURL, "https://i.imgur.com/TyC0LWj.jpg"),
 		ContainedObjectsEntry: tabletopsimulator.Card{},
 	}
-	var ContainedObjectsEntry tabletopsimulator.Card = tabletopsimulator.NewCardEntry(nickName, description, memo)
+	var ContainedObjectsEntry tabletopsimulator.Card = tabletopsimulator.NewCardEntry(nickName, description, memo, false)
 	ContainedObjectsEntry.LuaScript = luaScript
 	if extraState {
 		ContainedObjectsEntry.States["2"] = additionalState
