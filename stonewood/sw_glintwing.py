@@ -1,9 +1,11 @@
 import asyncio
 import json
+import os
 import discord
 import requests
 import glintwing
 import datetime
+import pymongo
 
 from glintwing.draft_class_v2 import SwissPlayer
 
@@ -291,6 +293,12 @@ class IG_View(discord.ui.View):
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
+                client = pymongo.MongoClient(os.env['mongostring'])
+                db = client.get_database()
+                coll = db['events']
+                ev = self.bot.drafts[ctx.message.id].json
+                ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
+                coll.insert_one(ev)
                 # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -318,7 +326,10 @@ class IG_View(discord.ui.View):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
             myplayer = this_draft.get_player_by_id(str(select.values[0]))
-            myplayer.dropped = True
+            if myplayer is not None:
+                myplayer.dropped = True
+            else:
+                print('Tried to drop a None player: ', str(select.values[0]))
             await ctx.message.edit(embeds=[intermediate_em(self.bot.drafts[ctx.message.id], self.bot.timekeep[ctx.message.id], self.bot.bot, round_num, this_round, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -330,6 +341,12 @@ class IG_View(discord.ui.View):
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
+            client = pymongo.MongoClient(os.env['mongostring'])
+            db = client.get_database()
+            coll = db['events']
+            ev = self.bot.drafts[ctx.message.id].json
+            ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
+            coll.insert_one(ev)
             # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
