@@ -1,3 +1,3 @@
-db = db.getSiblingDB('flamewave');
+db = db.getSiblingDB('Flamewave');
 
 db.createCollection('cards');

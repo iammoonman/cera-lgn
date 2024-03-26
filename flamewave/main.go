@@ -45,7 +45,7 @@ func main() {
 	v1.GET("/oracle_id/:id", getSingle(context.TODO(), mongoclient, "oracle_id"))
 	v1.GET("/set/:id", getSet(context.TODO(), mongoclient))
 	v1.GET("/site/set/:id", getSetWebsite(context.TODO(), mongoclient))
-	v1.GET("/sets", getSets())
+	v1.GET("/sets", getSets(context.TODO(), mongoclient))
 	v1.GET("/cube/:id", getCubeCobra(context.TODO(), mongoclient))
 	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
 	router.StaticFile("/", "./static/index.html")
@@ -69,18 +69,13 @@ func postCustom(mng *mongo.Client) gin.HandlerFunc {
 			return
 		}
 		// Ensure that set codes don't conflict.
-		coll := mng.Database("flamewave").Collection("cards")
+		coll := mng.Database("Flamewave").Collection("cards")
 		var submissions []mongo.WriteModel = make([]mongo.WriteModel, len(stuff))
 		for i, m := range stuff {
 			if len(m.FlamewaveID) == 0 {
 				stuff[i].FlamewaveID = uuid.New().String()
 			}
-			if contains(SetCodes, m.SetCode) {
-				c.JSON(http.StatusBadRequest, "One or more submitted cards use an illegal set code.")
-				return
-			} else {
-				submissions[i] = mongo.NewReplaceOneModel().SetFilter(bson.D{{Key: "flamewave_id", Value: m.FlamewaveID}}).SetReplacement(m).SetUpsert(true)
-			}
+			submissions[i] = mongo.NewReplaceOneModel().SetFilter(bson.D{{Key: "flamewave_id", Value: m.FlamewaveID}}).SetReplacement(m).SetUpsert(true)
 		}
 		coll.BulkWrite(context.TODO(), submissions)
 	}
@@ -102,7 +97,7 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 		if err != nil {
 			log.Fatal(err)
 		}
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		coll.DeleteMany(context.TODO(), bson.D{{Key: "oracle_id", Value: bson.D{{Key: "$gte", Value: " "}}}})
 		var submissions = []mongo.WriteModel{}
 		for _, entry := range bulkList {
@@ -139,7 +134,7 @@ func updateBulk(cx context.Context, ct *scryfall.Client, mg *mongo.Client) gin.H
 func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		y := c.Param(id)
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		x := coll.FindOne(cx, bson.D{{Key: id, Value: y}})
 		var l FlamewaveTTSCard
 		x.Decode(l)
@@ -153,7 +148,7 @@ func getSingle(cx context.Context, mg *mongo.Client, id string) gin.HandlerFunc 
 func getSet(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		y := c.Param("id")
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		x, e := coll.Find(cx, bson.D{{Key: "set", Value: y}})
 		if e != nil {
 			return
@@ -174,7 +169,7 @@ func getSet(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 func getSetWebsite(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		y := c.Param("id")
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		x, e := coll.Find(cx, bson.D{{Key: "set", Value: y}})
 		if e != nil {
 			return
@@ -192,7 +187,7 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 		if len(identifiers) == 0 || len(identifiers) > 1000 {
 			return
 		}
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		lstRequests := make(bson.A, len(identifiers))
 		for i, thing := range identifiers {
 			if thing.FlamewaveId != "" {
@@ -268,16 +263,20 @@ func getCollection(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func getSets() gin.HandlerFunc {
+func getSets(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, SetCodes)
+		results, err := mg.Database("Flamewave").Collection("cards").Distinct(cx, "set", nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, "")
+		}
+		c.JSON(http.StatusOK, results)
 	}
 }
 
 func getCubeCobra(cx context.Context, mg *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		y := c.Param("id")
-		coll := mg.Database("flamewave").Collection("cards")
+		coll := mg.Database("Flamewave").Collection("cards")
 		client := http.Client{}
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://cubecobra.com/cube/api/cubeJSON/%v", y), nil)
 		if err != nil {
