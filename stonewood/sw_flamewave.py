@@ -71,6 +71,12 @@ class Flamewave(commands.Cog):
         await paginator.respond(ctx.interaction)
         return
 
+    @commands.slash_command(description="Generate a Flamewave custom set from an MSE export.")
+    @discord.option(name="file", description="Use the Cockatrice export option in MSE and upload that file here.", type=discord.Attachment)
+    async def fw_mse(self, ctx: discord.ApplicationContext, file: discord.Attachment):
+        new_file = discord.File(io.StringIO(flamewave.fromMSE(file)), filename="mse.json")
+        return await ctx.respond(content="Edit the file to include image links for your cards, and link other faces using the States entry. Contact Moon for assistance.", file=new_file, ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(Flamewave(bot))
