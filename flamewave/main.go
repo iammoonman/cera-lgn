@@ -49,7 +49,6 @@ func main() {
 	v1.GET("/cube/:id", getCubeCobra(context.TODO(), mongoclient))
 	v1.POST("/collection", getCollection(context.TODO(), mongoclient))
 	router.StaticFile("/", "./static/index.html")
-	router.StaticFile("/pico.classless.jade.css", "./static/pico.classless.jade.css")
 	router.StaticFile("/set.html", "./static/set.html")
 	router.Run(":8080")
 }
