@@ -1,7 +1,5 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
-const s3 = new S3Client({ region: "us-east-1" });
 const dbc = new DynamoDBClient({ region: "us-east-1" });
 const doc = DynamoDBDocumentClient.from(dbc);
 /**
@@ -31,54 +29,33 @@ export const handler = async (event) => {
 	const quants = [];
 	const ids = [];
 	for (let ind = 0; ind < requests.length; ind += 25) {
-		let command = new BatchGetCommand({ RequestItems: { flamewave: { Keys: requests.slice(ind, ind + 25), AttributesToGet: ["flamewave_id"] } } })
+		let command = new BatchGetCommand({ RequestItems: { flamewave: { Keys: requests.slice(ind, ind + 25) } } })
 		let resp = await doc.send(command);
 		if (resp.Responses !== undefined) {
 			resp.Responses.flamewave.forEach((e) => {
-				let i = ids.findIndex(v => v === e["flamewave_id"])
+				let i = ids.findIndex(v => v["flamewave_id"] === e["flamewave_id"])
 				if (i > -1) {
 					quants[i] += 1
 				} else {
-					ids.push(e["flamewave_id"]);
-					quants.push(1);
+					ids.push(e);
+					quants.push(requests[ind].quantity ?? 1);
 				}
 			})
 		} else {
 			return "{}"
 		}
 	}
-	const transformPool = []
-	const qpool = []
-	for (let i = 0; i < ids.length; i++) {
-		try {
-			const getObjectCommand = new GetObjectCommand({ Bucket: "flamewave", Key: `${ids[i]}.json` });
-			const resp = await s3.send(getObjectCommand);
-			if (resp.Body) {
-				transformPool.push(resp.Body?.transformToString('utf-8'))
-				qpool.push(quants[i])
-			}
-		} catch (e) {
-			return "{}"
-		}
-	}
 	const deckids = [];
 	const objentries = [];
 	const imgrecord = new Map();
-	await Promise.allSettled(transformPool).then(vs => {
-		let count = 0
-		for (let { value: st, status } of vs) {
-			if (!st || status === "rejected") {
-				return
-			}
-			const out = JSON.parse(st);
-			count += 1;
-			imgrecord.set(count, out.img);
-			for (let e = 0; e < qpool[count - 1]; e++) {
-				deckids.push(count);
-				objentries.push(out.obj);
-			}
+	for (let entry of ids) {
+		count += 1;
+		imgrecord.set(count, entry.img);
+		for (let e = 0; e < qpool[count - 1]; e++) {
+			deckids.push(count);
+			objentries.push(entry.obj);
 		}
-	})
+	}
 	if (deckids.length < 2) {
 		console.log(objentries)
 		return "{}"
