@@ -164,4 +164,4 @@ drafthandler/t_testing.py
 default-cards*.json
 pagessite/package-lock.json
 
-flamewave/node_modules
+node_modules
