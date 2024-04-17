@@ -293,7 +293,7 @@ class IG_View(discord.ui.View):
                 await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-                client = pymongo.MongoClient(os.env['mongostring'])
+                client = pymongo.MongoClient(os.environ['mongostring'])
                 db = client.get_database()
                 coll = db['events']
                 ev = self.bot.drafts[ctx.message.id].json
@@ -341,7 +341,7 @@ class IG_View(discord.ui.View):
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
-            client = pymongo.MongoClient(os.env['mongostring'])
+            client = pymongo.MongoClient(os.environ['mongostring'])
             db = client.get_database()
             coll = db['events']
             ev = self.bot.drafts[ctx.message.id].json

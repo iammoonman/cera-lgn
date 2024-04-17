@@ -11,7 +11,7 @@ description = ""
 authors = []
 [tool.poetry.dependencies]
 python = "3.11.7"
-py-cord = { git = "https://github.com/Pycord-Development/pycord.git", rev="8a7ea476ac4c51bce80bfedb5c77739e51eeec6b" }
+py-cord = "2.5.0"
 pillow = "10.2.0"
 ijson = "3.2.3"
 requests = "2.31.0"
