@@ -294,7 +294,7 @@ class IG_View(discord.ui.View):
                 with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
                 client = pymongo.MongoClient(os.environ['mongostring'])
-                db = client.get_database()
+                db = client.get_database('LimitedPerspective')
                 coll = db['events']
                 ev = self.bot.drafts[ctx.message.id].json
                 ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -342,7 +342,7 @@ class IG_View(discord.ui.View):
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
             client = pymongo.MongoClient(os.environ['mongostring'])
-            db = client.get_database()
+            db = client.get_database('LimitedPerspective')
             coll = db['events']
             ev = self.bot.drafts[ctx.message.id].json
             ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
