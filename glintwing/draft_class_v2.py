@@ -303,7 +303,7 @@ class SwissPlayer:
         if isinstance(other, str):
             return self.id == other
         if isinstance(other, int):
-            return self.id == other
+            return self.id == f"{other}"
         return False
 
     def __repr__(self):
