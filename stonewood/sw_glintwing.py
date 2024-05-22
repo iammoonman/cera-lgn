@@ -295,7 +295,7 @@ class IG_View(discord.ui.View):
                     json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
                 client = pymongo.MongoClient(os.environ['mongostring'])
                 db = client.get_database('LimitedPerspective')
-                coll = db['events']
+                coll = db['Event']
                 ev = self.bot.drafts[ctx.message.id].json
                 ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
                 coll.insert_one(ev)
@@ -343,7 +343,7 @@ class IG_View(discord.ui.View):
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
             client = pymongo.MongoClient(os.environ['mongostring'])
             db = client.get_database('LimitedPerspective')
-            coll = db['events']
+            coll = db['Event']
             ev = self.bot.drafts[ctx.message.id].json
             ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
             coll.insert_one(ev)
