@@ -300,9 +300,9 @@ class SwissPlayer:
             return False
         if isinstance(other, SwissPlayer):
             return self.id == other.id
-        if isinstance(other, str):
+        if type(other) == str:
             return self.id == other
-        if isinstance(other, int):
+        if type(other) == int:
             return self.id == f"{other}"
         return False
 

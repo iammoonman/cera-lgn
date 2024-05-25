@@ -2,12 +2,10 @@ import asyncio
 import json
 import os
 import discord
-import requests
 import glintwing
 import datetime
 import pymongo
 
-from glintwing.draft_class_v2 import SwissPlayer
 
 taglist = {
     "ptm": "Prime Time With Moon",
@@ -88,7 +86,7 @@ class Glintwing(discord.ext.commands.Cog):
             return
         this_draft = self.drafts[reaction.message.id]
         if len(this_draft.round_one) == 0:
-            if type(reaction.emoji) != "str":
+            if type(reaction.emoji) is not str:
                 if reaction.emoji.name not in seat_order:
                     return
                 this_player = this_draft.get_player_by_id(user.id)
@@ -104,6 +102,8 @@ class Glintwing(discord.ext.commands.Cog):
                 new_view = StartingView(self)
                 await reaction.message.edit(embeds=[starting_em(self.drafts[reaction.message.id], self.bot, reaction.message.guild.id)], view=new_view)
                 await reaction.message.remove_reaction(reaction.emoji, user)
+            else:
+                reaction.remove()
         return
 
     @discord.ext.commands.slash_command()
@@ -148,7 +148,7 @@ class StartingView(discord.ui.View):
         this_draft = self.bot.drafts[ctx.message.id]
         if ctx.user.id in this_draft.players:
             return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
-        this_draft.players.append(glintwing.SwissPlayer(ctx.user.id, len(this_draft.players)))
+        this_draft.players.append(glintwing.SwissPlayer(id=str(ctx.user.id), seat=len(this_draft.players)))
         for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
             player.seat = i
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=self)
