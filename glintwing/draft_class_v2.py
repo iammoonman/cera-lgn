@@ -290,7 +290,7 @@ class SwissEvent:
 
 
 class SwissPlayer:
-    def __init__(self, id: str, seat=0):
+    def __init__(self, id: int, seat=0):
         self.id = id
         self.seat = seat
         self.dropped = False
@@ -300,10 +300,10 @@ class SwissPlayer:
             return False
         if isinstance(other, SwissPlayer):
             return self.id == other.id
-        if type(other) == str:
-            return self.id == other
         if type(other) == int:
-            return self.id == f"{other}"
+            return self.id == other
+        if type(other) == str:
+            return f"{self.id}" == other
         return False
 
     def __repr__(self):

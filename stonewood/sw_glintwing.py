@@ -116,7 +116,7 @@ class Glintwing(discord.ext.commands.Cog):
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self)
         msg = await ctx.interaction.original_response()
-        self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, host=str(ctx.author.id), tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
+        self.drafts[msg.id] = glintwing.SwissEvent(id=msg.id, host=ctx.author.id, tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         self.timekeep[msg.id] = datetime.datetime.now()
         await ctx.interaction.edit_original_response(embeds=[starting_em(self.drafts[msg.id], self.bot, ctx.guild_id)], content="", view=new_view)
         await asyncio.gather(
@@ -148,7 +148,7 @@ class StartingView(discord.ui.View):
         this_draft = self.bot.drafts[ctx.message.id]
         if ctx.user.id in this_draft.players:
             return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
-        this_draft.players.append(glintwing.SwissPlayer(id=str(ctx.user.id), seat=len(this_draft.players)))
+        this_draft.players.append(glintwing.SwissPlayer(id=ctx.user.id, seat=len(this_draft.players)))
         for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
             player.seat = i
         await ctx.message.edit(embeds=[starting_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=self)
@@ -166,7 +166,7 @@ class StartingView(discord.ui.View):
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+        if self.bot.drafts[ctx.message.id].host == ctx.user.id:
             if not all(x.seat > -1 for x in self.bot.drafts[ctx.message.id].players):
                 return await ctx.response.send_message(content="Interaction received. Players are not seated.", ephemeral=True)
             if len(self.bot.drafts[ctx.message.id].players) < 4 or len(self.bot.drafts[ctx.message.id].players) > 10:
@@ -274,7 +274,7 @@ class IG_View(discord.ui.View):
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+        if self.bot.drafts[ctx.message.id].host == ctx.user.id:
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
             if round_num == 0:
@@ -299,14 +299,13 @@ class IG_View(discord.ui.View):
                 ev = self.bot.drafts[ctx.message.id].json
                 ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
                 coll.insert_one(ev)
-                # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
     async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+        if self.bot.drafts[ctx.message.id].host == ctx.user.id:
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
             if round_num == 1:
@@ -325,7 +324,7 @@ class IG_View(discord.ui.View):
         if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(str(select.values[0]))
+            myplayer = this_draft.get_player_by_id(int(select.values[0]))
             if myplayer is not None:
                 myplayer.dropped = True
             else:
@@ -337,7 +336,7 @@ class IG_View(discord.ui.View):
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if self.bot.drafts[ctx.message.id].host == str(ctx.user.id):
+        if self.bot.drafts[ctx.message.id].host == ctx.user.id:
             await ctx.message.edit(embeds=[end_em(self.bot.drafts[ctx.message.id], self.bot.bot, ctx.guild_id)], view=None)
             with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 json.dump(self.bot.drafts[ctx.message.id].json, f, ensure_ascii=False, indent=4)
@@ -347,7 +346,6 @@ class IG_View(discord.ui.View):
             ev = self.bot.drafts[ctx.message.id].json
             ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
             coll.insert_one(ev)
-            # requests.post(url="https://cera-roe.vercel.app/events", json=json.dumps(self.bot.drafts[ctx.message.id].json))
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
