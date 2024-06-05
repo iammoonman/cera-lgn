@@ -321,7 +321,7 @@ class IG_View(discord.ui.View):
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
         if ctx.message.id not in self.bot.drafts.keys():
             return
-        if str(ctx.user.id) == self.bot.drafts[ctx.message.id].host or str(select.values[0]) == str(ctx.user.id):
+        if ctx.user.id == self.bot.drafts[ctx.message.id].host or select.values[0] == str(ctx.user.id):
             this_draft = self.bot.drafts[ctx.message.id]
             round_num, this_round = this_draft.current_round
             myplayer = this_draft.get_player_by_id(int(select.values[0]))
