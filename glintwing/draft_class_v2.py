@@ -25,6 +25,15 @@ class SwissEvent:
         self.round_two: list[SwissPairing] = []
         self.round_three: list[SwissPairing] = []
         self.players: list[SwissPlayer] = []
+    
+    def player_had_bye(self, player) -> bool:
+        for match in self.round_one:
+            if match.is_bye() and match.has_player(player):
+                return True
+        for match in self.round_two:
+            if match.is_bye() and match.has_player(player):
+                return True
+        return False
 
     @property
     def current_round(self):
@@ -82,7 +91,8 @@ class SwissEvent:
 
         def sort_func(player):
             first_score, first_priority, _, _ = self.match_one(player).score(player) if self.match_one(player) is not None else (3, 3, 0, 0)
-            return (-1 * first_score, -1 * first_priority)
+            had_bye = self.player_had_bye(player)
+            return (-1 * first_score, -1 * (first_priority + (1 if had_bye else 0)))
 
         non_dropped_players.sort(key=sort_func)
         pairings: list[SwissPairing] = []
@@ -151,7 +161,8 @@ class SwissEvent:
         def sort_func(player: SwissPlayer):
             first_score, first_priority, _, _ = self.match_one(player).score(player) if self.match_one(player) is not None else (3, 3, 0, 0)
             second_score, second_priority, _, _ = self.match_two(player).score(player) if self.match_two(player) is not None else (3, 3, 0, 0)
-            return (-1 * (first_score + second_score), -1 * (first_priority + second_priority))
+            had_bye = self.player_had_bye(player)
+            return (-1 * (first_score + second_score), -1 * (first_priority + second_priority + (2 if had_bye else 0)))
 
         non_dropped_players.sort(key=sort_func)
         pairings: list[SwissPairing] = []
@@ -594,6 +605,7 @@ if __name__ == "__main__":
     print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"])).json))
     print(json.dumps(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"])).json))
     print(json.dumps(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x)).json))
+    print(json.dumps(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""])).json))
 
     # for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
     #     for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
