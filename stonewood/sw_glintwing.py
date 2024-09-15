@@ -299,6 +299,7 @@ class IG_View(discord.ui.View):
                 ev = self.bot.drafts[ctx.message.id].json
                 ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
                 coll.insert_one(ev)
+                del self.bot.drafts[ctx.message.id]
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
@@ -346,6 +347,7 @@ class IG_View(discord.ui.View):
             ev = self.bot.drafts[ctx.message.id].json
             ev['meta']['date'] = datetime.datetime.now(tz=datetime.timezone.utc)
             coll.insert_one(ev)
+        del self.bot.drafts[ctx.message.id]
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
