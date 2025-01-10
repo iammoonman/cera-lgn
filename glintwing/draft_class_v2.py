@@ -10,7 +10,7 @@ def distance(pA, pB, players):
 
 
 class SwissEvent:
-    def __init__(self, id, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = ""):
+    def __init__(self, id, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", rounds: list = [], seats={}, round_times = []):
         self.id = id
         self.host = host
         """Discord User ID"""
@@ -21,11 +21,24 @@ class SwissEvent:
         self.set_code = set_code
         """Three-character set code from Scryfall"""
         self.tag = tag
-        self.round_one: list[SwissPairing] = []
-        self.round_two: list[SwissPairing] = []
-        self.round_three: list[SwissPairing] = []
-        self.players: list[SwissPlayer] = []
-    
+        swissplayers = {x: SwissPlayer(x, v["seat"], v["dropped"]) for x, v in seats.items()}
+        self.round_one: list[SwissPairing] = [] if len(rounds) == 0 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[0]])
+        self.round_two: list[SwissPairing] = [] if len(rounds) < 2 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[1]])
+        self.round_three: list[SwissPairing] = [] if len(rounds) < 3 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[2]])
+        self.players: list[SwissPlayer] = [] if len(seats) == 0 else swissplayers
+        self.round_times: list[datetime.datetime] = [] if len(round_times) == 0 else [datetime.datetime.fromisoformat(x) for x in round_times]
+
+    def __iter__(self):
+        yield ("id", self.id)
+        yield (
+            "meta",
+            {"date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}", "round_times": [x.isoformat() for x in self.round_times], "title": self.title, **({"tag": self.tag} if self.tag != "anti" and self.tag else {}), **({"description": self.description} if self.description else {}), **({"host": str(self.host)} if self.host else {}), **({"cube_id": self.cube_id} if self.cube_id else {}), **({"set_code": self.set_code} if self.set_code else {})},
+        )
+        yield ("players", {x.id: {"seat": x.seat, "dropped": x.dropped} for x in self.players})
+        yield ("R_0", [dict(u) for u in self.round_one])
+        yield ("R_1", [dict(u) for u in self.round_two])
+        yield ("R_2", [dict(u) for u in self.round_three])
+
     def player_had_bye(self, player) -> bool:
         for match in self.round_one:
             if match.is_bye() and match.has_player(player):
@@ -52,16 +65,18 @@ class SwissEvent:
 
     @property
     def json(self):
+        """LEGACY"""
         return {
             "id": f"{self.id}",
             "meta": {
-                "date": f"{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}",
+                "date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}",
                 "title": self.title,
                 **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
                 **({"description": self.description} if self.description else {}),
                 **({"host": str(self.host)} if self.host else {}),
                 **({"cube_id": self.cube_id} if self.cube_id else {}),
                 **({"set_code": self.set_code} if self.set_code else {}),
+                **({"round_times": self.round_times} if len(self.round_times) > 0 else {}),
             },
             "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_one],
             "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_two],
@@ -69,6 +84,7 @@ class SwissEvent:
         }
 
     def pair_round_one(self):
+        self.round_times = [datetime.datetime.now(tz=datetime.timezone.utc)]
         # The first round is always paired by seat.
         # 1-5, 2-6, 3-7, 4-8
         self.players.sort(key=lambda p: p.seat)
@@ -77,6 +93,7 @@ class SwissEvent:
 
     def pair_round_two(self):
         """Returns pairs for a round two. Depends on round one having been played."""
+        self.round_times = self.round_times[0:1] + [datetime.datetime.now()]
         # The second round is paired by seat at best.
         # The winners and losers of 1-5 and 3-7 play against each other, and same for 2-6 and 4-8.
         #
@@ -153,6 +170,7 @@ class SwissEvent:
 
     def pair_round_three(self):
         """Returns pairs for a round three. Depends on round two having been played."""
+        self.round_times = self.round_times[0:2] + [datetime.datetime.now(tz=datetime.timezone.utc)]
         # Sort by score, then game-win-percentage
         # Choose top non-prior opponent
         # Pair
@@ -301,10 +319,10 @@ class SwissEvent:
 
 
 class SwissPlayer:
-    def __init__(self, id: int, seat=0):
+    def __init__(self, id: str, seat=0, dropped=False):
         self.id = id
         self.seat = seat
-        self.dropped = False
+        self.dropped = dropped
 
     def __eq__(self, other):
         if other is None:
@@ -312,9 +330,9 @@ class SwissPlayer:
         if isinstance(other, SwissPlayer):
             return self.id == other.id
         if type(other) == int:
-            return self.id == other
+            return int(self.id) == other
         if type(other) == str:
-            return f"{self.id}" == other
+            return self.id == other
         return False
 
     def __repr__(self):
@@ -322,15 +340,22 @@ class SwissPlayer:
 
 
 class SwissPairing:
-    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer):
+    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer, games=[]):
         self.player_one = player_one
         self.player_two = player_two
-        self.game_one: Union[SwissPlayer, None] = None
+        self.game_one: Union[SwissPlayer, None] = None if len(games) == 0 else games[0]
         """The winner of game one. If None, then there isn't a winner."""
-        self.game_two: Union[SwissPlayer, None] = None
+        self.game_two: Union[SwissPlayer, None] = None if len(games) < 2 else games[1]
         """The winner of game one. If None, then there isn't a winner."""
-        self.game_three: Union[SwissPlayer, None] = None
+        self.game_three: Union[SwissPlayer, None] = None if len(games) < 3 else games[2]
         """The winner of game one. If None, then there isn't a winner."""
+
+    def __iter__(self):
+        yield ("players", [self.player_one.id, self.player_two.id if self.player_two is not None else None])
+        g1 = (0 if self.game_one == self.player_one else 1) if self.game_one is not None else None
+        g2 = (0 if self.game_two == self.player_one else 1) if self.game_two is not None else None
+        g3 = (0 if self.game_three == self.player_one else 1) if self.game_three is not None else None
+        yield ("games", [g1, g2, g3])
 
     def __repr__(self):
         p1_score, _, _, _ = self.score(self.player_one)
@@ -407,7 +432,7 @@ class SwissPairing:
 if __name__ == "__main__":
     import sys
 
-    sys.stdout = open("error.log", "w")
+    # sys.stdout = open("error.log", "w")
 
     # Do tests
     def test(num_players, score_round_one=None, after_round_one=lambda x: x, score_round_two=None, after_round_two=lambda x: x, score_round_three=None, full_print=False):
@@ -596,16 +621,27 @@ if __name__ == "__main__":
     # test(8, score_round_one=lambda x: ties(x), after_round_one=drop_seat(0))
     # test(8, after_round_two=drop_ids(["1", "2"]))
     # test(8, after_round_two=drop_ids(["1", "2", "3"]))
-    # test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))
+    def ff(x):
+        f = json.dumps(dict(x))
+        d = json.loads(f)
+        g = SwissEvent(id=d["id"], host=d["meta"]["host"] if "host" in d["meta"] else "", tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"])
+        return g
+
+    print(dict(test(8, after_round_one=lambda x: ff(x), after_round_two=drop_ids(["1", "2", "3", "4"]))))
+    print(dict(test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))))
     # test(8, after_round_one=drop_ids(["1", "4"]), after_round_two=drop_ids(["2", "7"]))
     # test(7)
     # test(6)
     # test(6, after_round_one=drop_ids(["1"]))
-    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"])).json))
-    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"])).json))
-    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"])).json))
-    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x)).json))
-    print(json.dumps(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""])).json))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"])), default=lambda x: dict(x)))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"])), default=lambda x: dict(x)))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"])), default=lambda x: dict(x)))
+    print(json.dumps(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x)), default=lambda x: dict(x)))
+    print(json.dumps(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""])), default=lambda x: dict(x)))
+    d = dict(SwissEvent("abc", "1", "dps", "d", "test"))
+    print(d)
+    e = SwissEvent(id=d["id"], host=d["meta"]["host"], tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"])
+    print(dict(e))
 
     # for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
     #     for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
