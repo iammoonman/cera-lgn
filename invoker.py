@@ -1,5 +1,6 @@
 import os
 import discord
+import stonewood.sw_glintwing
 
 intents = discord.Intents.default()
 intents.members = True
@@ -18,6 +19,7 @@ async def on_ready():
         bot.load_extension("stonewood.sw_starlight")
         print("Starlight invoked")
     if bot.extensions['sw_glintwing'] is None:
+        stonewood.sw_glintwing.get_tags()
         bot.load_extension("stonewood.sw_glintwing")
         print("Glintwing invoked")
     if bot.extensions['sw_stonewood'] is None:

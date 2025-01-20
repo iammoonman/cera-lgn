@@ -8,13 +8,6 @@ import pymongo
 
 from glintwing.draft_class_v2 import SwissEvent
 
-
-taglist = {
-    "ptm": "Prime Time With Moon",
-    "ths": "Thursday Night Draft",
-    "deb": "Draft Every Block",
-    "anti": "No Tag",
-}
 bslash = "\n"
 seat_order = ["chair_white", "chair_brown", "chair_red", "chair_orange", "chair_yellow", "chair_green", "chair_teal", "chair_blue", "chair_purple", "chair_pink"]
 """Names of the seat emojis in order."""
@@ -35,6 +28,21 @@ def put_draft(draft: SwissEvent):
     coll = db["Event"]
     coll.update_one({"id": draft.id}, dict(draft))
 
+taglist = {}
+def get_tags():
+    global taglist
+    r = {}
+    client = pymongo.MongoClient(os.environ["external_mongo"])
+    db = client.get_database("LimitedPerspective")
+    coll = db["Tags"]
+    d = coll.find()
+    if d is None:
+        return {}
+    for entry in d.to_list():
+        r[entry["id"]] = entry["label"]
+    taglist = r
+    return r
+
 def get_name(bot: discord.Bot, id, guild_id=None) -> str:
     g = None
     u = bot.get_user(id)
@@ -48,6 +56,7 @@ def get_name(bot: discord.Bot, id, guild_id=None) -> str:
 
 
 def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
+    taglist = get_tags()
     return discord.Embed(
         title=f"{draft.title} | ENTRY",
         fields=[
@@ -56,11 +65,12 @@ def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
                 value=f"{bslash.join([f'{get_name(bot, p.id, guild_id)} | Seat: {p.seat + 1}' for p in sorted(draft.players, key=lambda x: x.seat)])}",
             ),
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag]}*{bslash}Don't share seats!",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*{bslash}Don't share seats!",
     )
 
 
 def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
+    taglist = get_tags()
     r, n = draft.current_round
     return discord.Embed(
         title=f"{draft.title} | Round {r + 1}",
@@ -73,11 +83,12 @@ def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             for match in n
         ]
         + [discord.EmbedField(name="ROUND TIMER", value=f"The round ends <t:{int((draft.round_times[r] + datetime.timedelta(minutes=50)).timestamp())}:R>.")],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*",
     )
 
 
 def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
+    taglist = get_tags()
     return discord.Embed(
         title=f"{draft.title} | FINAL",
         fields=[
@@ -88,7 +99,7 @@ def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             )
             for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag]}*",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*",
     )
 
 
@@ -127,7 +138,7 @@ class Glintwing(discord.ext.commands.Cog):
 
     @discord.ext.commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
-    @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")
+    @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti") # This isn't going to work.
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
