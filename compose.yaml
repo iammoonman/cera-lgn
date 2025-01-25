@@ -1,6 +1,7 @@
 services:
   invoker:
     build: .
+    env_file: ".env"
     environment:
       token: ${token}
       external_mongo: ${external_mongo}

@@ -4,6 +4,7 @@ import os
 import discord
 import glintwing
 import datetime
+from discord.ext import commands
 import pymongo
 
 from glintwing.draft_class_v2 import SwissEvent
@@ -35,10 +36,10 @@ def get_tags():
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Tags"]
-    d = coll.find()
+    d = coll.find({})
     if d is None:
         return {}
-    for entry in d.to_list():
+    for entry in d:
         r[entry["id"]] = entry["label"]
     taglist = r
     return r
@@ -65,7 +66,7 @@ def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
                 value=f"{bslash.join([f'{get_name(bot, p.id, guild_id)} | Seat: {p.seat + 1}' for p in sorted(draft.players, key=lambda x: x.seat)])}",
             ),
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*{bslash}Don't share seats!",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*{bslash}Don't share seats!",
     )
 
 
@@ -83,7 +84,7 @@ def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             for match in n
         ]
         + [discord.EmbedField(name="ROUND TIMER", value=f"The round ends <t:{int((draft.round_times[r] + datetime.timedelta(minutes=50)).timestamp())}:R>.")],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*",
     )
 
 
@@ -99,15 +100,15 @@ def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             )
             for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else "unknown tag"}*",
+        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*",
     )
 
 
-class Glintwing(discord.ext.commands.Cog):
+class Glintwing(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
 
-    @discord.ext.commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if user.id == self.bot.user.id:
             return
@@ -136,7 +137,7 @@ class Glintwing(discord.ext.commands.Cog):
                 reaction.remove()
         return
 
-    @discord.ext.commands.slash_command()
+    @commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
     @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti") # This isn't going to work.
     @discord.option(name="desc", description="Describe the event.", default="")
