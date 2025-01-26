@@ -27,7 +27,7 @@ def put_draft(draft: SwissEvent):
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
-    coll.update_one({"id": draft.id}, dict(draft))
+    coll.replace_one({"id": draft.id}, dict(draft), upsert=True)
 
 taglist = {}
 def get_tags():
