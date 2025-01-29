@@ -10,7 +10,7 @@ def distance(pA, pB, players):
 
 
 class SwissEvent:
-    def __init__(self, id, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", rounds: list = [], seats={}, round_times = []):
+    def __init__(self, id, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", rounds: list = [], seats={}, round_times=[]):
         self.id = id
         self.host = host
         """Discord User ID"""
@@ -30,10 +30,7 @@ class SwissEvent:
 
     def __iter__(self):
         yield ("id", self.id)
-        yield (
-            "meta",
-            {"date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}", "round_times": [x.isoformat() for x in self.round_times], "title": self.title, **({"tag": self.tag} if self.tag != "anti" and self.tag else {}), **({"description": self.description} if self.description else {}), **({"host": str(self.host)} if self.host else {}), **({"cube_id": self.cube_id} if self.cube_id else {}), **({"set_code": self.set_code} if self.set_code else {})},
-        )
+        yield ("meta", {"date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}", "round_times": [x.isoformat() for x in self.round_times], "title": self.title, **({"tag": self.tag} if self.tag != "anti" and self.tag else {}), **({"description": self.description} if self.description else {}), **({"host": str(self.host)} if self.host else {}), **({"cube_id": self.cube_id} if self.cube_id else {}), **({"set_code": self.set_code} if self.set_code else {})})
         yield ("players", {x.id: {"seat": x.seat, "dropped": x.dropped} for x in self.players})
         yield ("R_0", [dict(u) for u in self.round_one])
         yield ("R_1", [dict(u) for u in self.round_two])
@@ -432,7 +429,7 @@ class SwissPairing:
 if __name__ == "__main__":
     import sys
 
-    # sys.stdout = open("error.log", "w")
+    sys.stdout = open("error.log", "w")
 
     # Do tests
     def test(num_players, score_round_one=None, after_round_one=lambda x: x, score_round_two=None, after_round_two=lambda x: x, score_round_three=None, full_print=False):
