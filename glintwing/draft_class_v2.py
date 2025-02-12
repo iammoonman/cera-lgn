@@ -21,7 +21,7 @@ class SwissEvent:
         self.set_code = set_code
         """Three-character set code from Scryfall"""
         self.tag = tag
-        swissplayers = {x: SwissPlayer(x, v["seat"], v["dropped"]) for x, v in seats.items()}
+        swissplayers = {f"{x}": SwissPlayer(x, v["seat"], v["dropped"]) for x, v in seats.items()}
         self.round_one: list[SwissPairing] = [] if len(rounds) == 0 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[0]])
         self.round_two: list[SwissPairing] = [] if len(rounds) < 2 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[1]])
         self.round_three: list[SwissPairing] = [] if len(rounds) < 3 else ([] if len(rounds[0]) == 0 else [SwissPairing(swissplayers[pair["players"][0]], swissplayers[pair["players"][1]], [(swissplayers[pair["players"][pair["games"][0]]] if len(pair["games"]) > 0 else None), (swissplayers[pair["players"][pair["games"][1]]] if len(pair["games"]) > 1 and pair["games"][1] is not None else None), (swissplayers[pair["players"][pair["games"][2]]] if len(pair["games"]) == 3 and pair["games"][2] is not None else None)]) for pair in rounds[2]])
@@ -29,9 +29,9 @@ class SwissEvent:
         self.round_times: list[datetime.datetime] = [] if len(round_times) == 0 else [datetime.datetime.fromisoformat(x) for x in round_times]
 
     def __iter__(self):
-        yield ("id", self.id)
-        yield ("meta", {"date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}", "round_times": [x.isoformat() for x in self.round_times], "title": self.title, **({"tag": self.tag} if self.tag != "anti" and self.tag else {}), **({"description": self.description} if self.description else {}), **({"host": str(self.host)} if self.host else {}), **({"cube_id": self.cube_id} if self.cube_id else {}), **({"set_code": self.set_code} if self.set_code else {})})
-        yield ("players", {x.id: {"seat": x.seat, "dropped": x.dropped} for x in self.players})
+        yield ("id", f"{self.id}")
+        yield ("meta", {"date": self.round_times[0].replace(microsecond=0) if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0), "round_times": [x.replace(microsecond=0) for x in self.round_times], "title": self.title, **({"tag": self.tag} if self.tag != "anti" and self.tag else {}), **({"description": self.description} if self.description else {}), **({"host": str(self.host)} if self.host else {}), **({"cube_id": self.cube_id} if self.cube_id else {}), **({"set_code": self.set_code} if self.set_code else {})})
+        yield ("players", {f"{x.id}": {"seat": x.seat, "dropped": x.dropped} for x in self.players})
         yield ("R_0", [dict(u) for u in self.round_one])
         yield ("R_1", [dict(u) for u in self.round_two])
         yield ("R_2", [dict(u) for u in self.round_three])
@@ -317,7 +317,7 @@ class SwissEvent:
 
 class SwissPlayer:
     def __init__(self, id: str, seat=0, dropped=False):
-        self.id = id
+        self.id = f"{id}"
         self.seat = seat
         self.dropped = dropped
 

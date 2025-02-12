@@ -17,17 +17,17 @@ def grab_draft(id: str):
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
-    d = coll.find_one({"id": id})
+    d = coll.find_one({"id": f"{id}"})
     if d is None:
         return None
-    e = glintwing.SwissEvent(id=id, host=d["meta"]["host"], tag=d["meta"]["tag"], description=d["meta"]["description"], title=d["meta"]["title"], cube_id=d["meta"]["cube_id"], rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"], seats=d["meta"]["players"])
+    e = glintwing.SwissEvent(id=f"{id}", host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"].get("set_code"), seats=d.get("players"))
     return e
 
 def put_draft(draft: SwissEvent):
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
-    coll.replace_one({"id": draft.id}, dict(draft), upsert=True)
+    coll.replace_one({"id": f"{draft.id}"}, dict(draft), upsert=True)
 
 taglist = {}
 def get_tags():
@@ -46,7 +46,7 @@ def get_tags():
 
 def get_name(bot: discord.Bot, id, guild_id=None) -> str:
     g = None
-    u = bot.get_user(id)
+    u = bot.get_user(int(id))
     if guild_id is not None:
         g = bot.get_guild(guild_id)
         if g is not None:
@@ -119,7 +119,7 @@ class Glintwing(commands.Cog):
             if type(reaction.emoji) is not str:
                 if reaction.emoji.name not in seat_order:
                     return
-                this_player = this_draft.get_player_by_id(user.id)
+                this_player = this_draft.get_player_by_id(f"{user.id}")
                 if this_player is None:
                     return
                 for idx, color in enumerate(seat_order):
@@ -177,9 +177,9 @@ class StartingView(discord.ui.View):
             return
         if len(this_draft.players) == 10:
             return
-        if ctx.user.id in this_draft.players:
+        if f"{ctx.user.id}" in this_draft.players:
             return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
-        this_draft.players.append(glintwing.SwissPlayer(id=ctx.user.id, seat=len(this_draft.players)))
+        this_draft.players.append(glintwing.SwissPlayer(id=f"{ctx.user.id}", seat=len(this_draft.players)))
         for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
             player.seat = i
         put_draft(this_draft)
@@ -191,7 +191,7 @@ class StartingView(discord.ui.View):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        this_draft.players = [y for y in filter(lambda x: x.id != ctx.user.id, this_draft.players)]
+        this_draft.players = [y for y in filter(lambda x: x.id != f"{ctx.user.id}", this_draft.players)]
         put_draft(this_draft)
         await ctx.message.edit(embeds=[starting_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
@@ -254,7 +254,7 @@ class IG_View(discord.ui.View):
         for pairing in this_round:
             if pairing.player_one is None or pairing.player_two is None:
                 continue
-            if pairing.player_one.id == ctx.user.id:
+            if pairing.player_one.id == f"{ctx.user.id}":
                 if selection[0:1] == "a":
                     pairing.game_one = pairing.player_one
                 elif selection[0:1] == "b":
@@ -273,7 +273,7 @@ class IG_View(discord.ui.View):
                     pairing.game_three = pairing.player_two
                 elif selection[2:3] == "0":
                     pairing.game_three = None
-            elif pairing.player_two.id == ctx.user.id:
+            elif pairing.player_two.id == f"{ctx.user.id}":
                 if selection[0:1] == "a":
                     pairing.game_one = pairing.player_two
                 elif selection[0:1] == "b":
@@ -302,7 +302,7 @@ class IG_View(discord.ui.View):
         if this_draft is None:
             return
         round_num, this_round = this_draft.current_round
-        this_player = this_draft.get_player_by_id(ctx.user.id)
+        this_player = this_draft.get_player_by_id(f"{ctx.user.id}")
         this_player.dropped = True
         put_draft(this_draft)
         await ctx.message.edit(embeds=[intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
@@ -356,7 +356,7 @@ class IG_View(discord.ui.View):
             return
         if ctx.user.id == this_draft.host or select.values[0] == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(int(select.values[0]))
+            myplayer = this_draft.get_player_by_id(str(select.values[0]))
             if myplayer is not None:
                 myplayer.dropped = True
             else:

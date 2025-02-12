@@ -3,3 +3,4 @@ default-cards.json
 starlight/boxtesting.py
 */__pycache__*
 */*/__pycache__*
+error.log
