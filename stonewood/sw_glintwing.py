@@ -8,29 +8,39 @@ from discord.ext import commands
 import pymongo
 
 from glintwing.draft_class_v2 import SwissEvent
+from stonewood import logger
 
 bslash = "\n"
 seat_order = ["chair_white", "chair_brown", "chair_red", "chair_orange", "chair_yellow", "chair_green", "chair_teal", "chair_blue", "chair_purple", "chair_pink"]
 """Names of the seat emojis in order."""
 
+
 def grab_draft(id: str):
+    logger.info(f"Getting draft with id: {id}")
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
     d = coll.find_one({"id": f"{id}"})
     if d is None:
+        logger.warning(f"Failed to get draft with id: {id}")
         return None
-    e = glintwing.SwissEvent(id=f"{id}", host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"].get("set_code"), seats=d.get("players"))
+    e = glintwing.SwissEvent(id=f"{id}", channel_id=str(d["meta"].get("channel_id")), host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"].get("set_code"), seats=d.get("players"), round_times=d["meta"].get("round_times"))
     return e
 
+
 def put_draft(draft: SwissEvent):
+    logger.info(f"Updating draft with id: {draft.id}")
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
     coll.replace_one({"id": f"{draft.id}"}, dict(draft), upsert=True)
 
+
 taglist = {}
+
+
 def get_tags():
+    logger.info("Getting tags...")
     global taglist
     r = {}
     client = pymongo.MongoClient(os.environ["external_mongo"])
@@ -38,11 +48,14 @@ def get_tags():
     coll = db["Tags"]
     d = coll.find({})
     if d is None:
+        logger.warning("Failed to find tags.")
         return {}
     for entry in d:
         r[entry["id"]] = entry["label"]
     taglist = r
+    logger.info("Registered tags.")
     return r
+
 
 async def get_name(bot: discord.Bot, id, guild_id=None) -> str:
     # g = None
@@ -107,6 +120,8 @@ async def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
 class Glintwing(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
+        self.bot.add_view(StartingView(bot))
+        self.bot.add_view(IG_View(bot))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
@@ -127,9 +142,11 @@ class Glintwing(commands.Cog):
                         for player in this_draft.players:
                             if player.seat == idx:
                                 player.seat = len(this_draft.players)
+                                logger.info(f"Moving player {this_player} to seat {len(this_draft.players)}")
                                 break
                         this_player.seat = idx
-                new_view = StartingView(self)
+                        logger.info(f"Moving player {this_player} to seat {idx}")
+                new_view = StartingView(self.bot)
                 await reaction.message.edit(embeds=[await starting_em(this_draft, self.bot, reaction.message.guild.id)], view=new_view)
                 await reaction.message.remove_reaction(reaction.emoji, user)
                 put_draft(this_draft)
@@ -139,15 +156,16 @@ class Glintwing(commands.Cog):
 
     @commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
-    @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti") # This isn't going to work.
+    # @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")  # This isn't going to work.
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
-    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", cube_id: str = "", set_code: str = ""):
+    async def draft(self, ctx: discord.ApplicationContext, title: str, desc: str = "", cube_id: str = "", set_code: str = ""):
+        # tag: str = ""
         await ctx.respond(content="Setting up your draft...")
-        new_view = StartingView(self)
+        new_view = StartingView(self.bot)
         msg = await ctx.interaction.original_response()
-        this_draft = glintwing.SwissEvent(id=msg.id, host=ctx.author.id, tag=tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
+        this_draft = glintwing.SwissEvent(id=str(msg.id), channel_id=str(msg.channel.id), host=str(ctx.author.id), tag="", description=desc, title=title, set_code=set_code, cube_id=cube_id)
         put_draft(this_draft)
         await ctx.interaction.edit_original_response(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], content="", view=new_view)
         await asyncio.gather(
@@ -170,48 +188,51 @@ class StartingView(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0)
+    @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0, custom_id="JOIN_BUTTON")
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
         if len(this_draft.players) == 10:
             return
-        if f"{ctx.user.id}" in this_draft.players:
+        if str(ctx.user.id) in this_draft.players:
             return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
         this_draft.players.append(glintwing.SwissPlayer(id=f"{ctx.user.id}", seat=len(this_draft.players)))
         for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
             player.seat = i
+        logger.info(f"Adding player {ctx.user.id} to draft {ctx.message.id}")
         put_draft(this_draft)
-        await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
+    @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
         this_draft.players = [y for y in filter(lambda x: x.id != f"{ctx.user.id}", this_draft.players)]
         put_draft(this_draft)
-        await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0)
+    @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0, custom_id="BEGIN_BUTTON")
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if this_draft.host == ctx.user.id:
+        if this_draft.host == str(ctx.user.id):
             if not all(x.seat > -1 for x in this_draft.players):
+                logger.warning(f"Host attempted to run a draft with some players at negative seats. {ctx.message.id}")
                 return await ctx.response.send_message(content="Interaction received. Players are not seated.", ephemeral=True)
             if len(this_draft.players) < 4 or len(this_draft.players) > 10:
+                logger.warning(f"Host attempted to run a draft with too many or too few players. {ctx.message.id}")
                 return await ctx.response.send_message(content="Interaction received. Not enough players or too many players.", ephemeral=True)
+            logger.info(f"Starting draft {ctx.message.id} with host {ctx.user.id}")
             new_view = IG_View(self.bot)
             this_draft = this_draft
             this_draft.round_one = this_draft.pair_round_one()
-            await new_view.after_load(ctx.message.id, ctx.guild_id)
             put_draft(this_draft)
-            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=new_view)
+            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=new_view)
             await ctx.message.clear_reactions()
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
@@ -220,11 +241,6 @@ class IG_View(discord.ui.View):
     def __init__(self, bot: Glintwing):
         self.bot = bot
         super().__init__(timeout=None)
-
-    async def after_load(self, id, guild_id):
-        this_draft = grab_draft(id)
-        for p in this_draft.players:
-            self.children[4].append_option(discord.SelectOption(label=f"{await get_name(self.bot.bot, p.id, guild_id)}", value=f"{p.id}"))
 
     @discord.ui.select(
         placeholder="Report the games you won.",
@@ -244,6 +260,7 @@ class IG_View(discord.ui.View):
             discord.SelectOption(label="you", value="a00", description="You won game 1 and the match went to time."),
             discord.SelectOption(label="UNSET", value="000", description="Removes previously entered result."),
         ],
+        custom_id="REPORT_SELECT",
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
@@ -254,7 +271,7 @@ class IG_View(discord.ui.View):
         for pairing in this_round:
             if pairing.player_one is None or pairing.player_two is None:
                 continue
-            if pairing.player_one.id == f"{ctx.user.id}":
+            if pairing.player_one.id == str(ctx.user.id):
                 if selection[0:1] == "a":
                     pairing.game_one = pairing.player_one
                 elif selection[0:1] == "b":
@@ -273,7 +290,7 @@ class IG_View(discord.ui.View):
                     pairing.game_three = pairing.player_two
                 elif selection[2:3] == "0":
                     pairing.game_three = None
-            elif pairing.player_two.id == f"{ctx.user.id}":
+            elif pairing.player_two.id == str(ctx.user.id):
                 if selection[0:1] == "a":
                     pairing.game_one = pairing.player_two
                 elif selection[0:1] == "b":
@@ -293,90 +310,104 @@ class IG_View(discord.ui.View):
                 elif selection[2:3] == "0":
                     pairing.game_three = None
         put_draft(this_draft)
-        await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0)
+    @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON_INGAME")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
         round_num, this_round = this_draft.current_round
-        this_player = this_draft.get_player_by_id(f"{ctx.user.id}")
+        this_player = this_draft.get_player_by_id(str(ctx.user.id))
         this_player.dropped = True
         put_draft(this_draft)
-        await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+        await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0)
+    @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0, custom_id="NEXT_BUTTON")
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if this_draft.host == ctx.user.id:
+        if this_draft.host == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
+            logger.info(f"Advancing draft {ctx.message.id} from round {round_num}")
             if round_num == 0:
                 this_draft.round_two, was_imperfect = this_draft.pair_round_two()
                 if was_imperfect:
+                    logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
                     await ctx.response.send_message(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
-                await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+                await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 1:
-                this_draft.round_three, was_imperfect = this_draft.pair_round_three()
+                this_draft.round_thr, was_imperfect = this_draft.pair_round_three()
                 if was_imperfect:
+                    logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
                     await ctx.response.send_message(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
-                await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+                await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 2:
-                e = await end_em(this_draft, self.bot.bot, ctx.guild_id)
+                e = await end_em(this_draft, self.bot, ctx.guild_id)
                 await ctx.message.edit(embeds=[e], view=None)
-                with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                    json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
+                # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
+                #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0)
+    @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0, custom_id="BACK_BUTTON")
     async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if this_draft.host == ctx.user.id:
+        if this_draft.host == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
+            logger.info(f"Retreating draft {ctx.message.id} from round {round_num}")
             if round_num == 1:
                 this_draft.round_two = []
-                round_num = 0
+                logger.info(f"Deleting round two of draft: {ctx.message.id}")
             if round_num == 2:
-                this_draft.round_three = []
-                round_num = 1
+                this_draft.round_thr = []
+                logger.info(f"Deleting round three of draft: {ctx.message.id}")
             put_draft(this_draft)
-            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", min_values=1, max_values=1, row=2)
+    @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", select_type=discord.ComponentType.user_select, row=2, custom_id="TOGGLE_SELECT")
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if ctx.user.id == this_draft.host or select.values[0] == str(ctx.user.id):
+        if str(ctx.user.id) == this_draft.host or str(select.values[0].id) == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
             myplayer = this_draft.get_player_by_id(str(select.values[0]))
             if myplayer is not None:
                 myplayer.dropped = True
             else:
-                print("Tried to drop a None player: ", str(select.values[0]))
+                logger.warning(f"The host of draft {ctx.message.id} tried to drop a player not in the draft: {str(select.values[0].id)}")
+            logger.info(f"Host dropped player {select.values[0].id} from draft {ctx.message.id}")
             put_draft(this_draft)
-            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot.bot, ctx.guild_id)], view=self)
+            await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
-    @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0)
+    @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0, custom_id="END_BUTTON")
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if this_draft.host == ctx.user.id:
-            e = await end_em(this_draft, self.bot.bot, ctx.guild_id)
+        if this_draft.host == str(ctx.user.id):
+            logger.info(f"Ending draft {ctx.message.id} early")
+            e = await end_em(this_draft, self.bot, ctx.guild_id)
             await ctx.message.edit(embeds=[e], view=None)
-            with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
+            # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
+            #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
+        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+
+    @discord.ui.button(label="REFRESH", style=discord.ButtonStyle.gray, row=0, custom_id="REFRESH")
+    async def refresh_draft(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        this_draft = grab_draft(ctx.message.id)
+        if this_draft is None:
+            return
+        await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
 
 
