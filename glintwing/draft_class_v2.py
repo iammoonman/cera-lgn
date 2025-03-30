@@ -40,11 +40,11 @@ class SwissEvent:
         self.round_one: list[SwissPairing] = []
         self.round_two: list[SwissPairing] = []
         self.round_thr: list[SwissPairing] = []
-        if rounds[0] is not None:
+        if len(rounds) > 0 and rounds[0] is not None:
             self.round_one = q_round(rounds[0], swissplayers)
-        if rounds[1] is not None:
+        if len(rounds) >= 1 and rounds[1] is not None:
             self.round_two = q_round(rounds[1], swissplayers)
-        if rounds[2] is not None:
+        if len(rounds) >= 2 and rounds[2] is not None:
             self.round_thr = q_round(rounds[2], swissplayers)
         self.players: list[SwissPlayer] = [] if len(seats) == 0 else [k for _, k in swissplayers.items()]
         self.round_times: list[datetime.datetime] = [datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)]
