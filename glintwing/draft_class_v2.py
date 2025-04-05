@@ -83,26 +83,6 @@ class SwissEvent:
                 return p
         return None
 
-    @property
-    def json(self):
-        """LEGACY"""
-        return {
-            "id": f"{self.id}",
-            "meta": {
-                "date": f"{self.round_times[0].isoformat() if len(self.round_times) > 0 else datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}",
-                "title": self.title,
-                **({"tag": self.tag} if self.tag != "anti" and self.tag else {}),
-                **({"description": self.description} if self.description else {}),
-                **({"host": str(self.host)} if self.host else {}),
-                **({"cube_id": self.cube_id} if self.cube_id else {}),
-                **({"set_code": self.set_code} if self.set_code else {}),
-                **({"round_times": self.round_times} if len(self.round_times) > 0 else {}),
-            },
-            "R_0": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_one],
-            "R_1": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_two],
-            "R_2": [{"players": [str(p.player_one.id), str(p.player_two.id) if p.player_two is not None else None][: 2 if p.player_two is not None else 1], "games": [(0 if p.game_one.id == p.player_one.id else 1) if p.game_one is not None else None, (0 if p.game_two.id == p.player_one.id else 1) if p.game_two is not None else None, (0 if p.game_three.id == p.player_one.id else 1) if p.game_three is not None else None][: 3 if p.game_three is not None else 2 if p.game_two is not None else 1 if p.game_one is not None else 0]} for p in self.round_thr],
-        }
-
     def pair_round_one(self):
         self.round_times = [datetime.datetime.now(tz=datetime.timezone.utc)]
         # The first round is always paired by seat.

@@ -15,17 +15,16 @@ async def on_ready():
     print(bot.user.id)
     print("-------")
     print("Loading cogs:")
-    if 'sw_starlight' not in bot.extensions:
+    if 'stonewood.sw_starlight' not in bot.extensions:
         bot.load_extension("stonewood.sw_starlight")
         print("Starlight invoked")
-    if 'sw_glintwing' not in bot.extensions:
-        stonewood.sw_glintwing.get_tags()
+    if 'stonewood.sw_glintwing' not in bot.extensions:
         bot.load_extension("stonewood.sw_glintwing")
         print("Glintwing invoked")
-    if 'sw_stonewood' not in bot.extensions:
+    if 'stonewood.sw_stonewood' not in bot.extensions:
         bot.load_extension("stonewood.sw_stonewood")
         print("Stonewood invoked")
-    if 'sw_flamewave' not in bot.extensions:
+    if 'stonewood.sw_flamewave' not in bot.extensions:
         bot.load_extension("stonewood.sw_flamewave")
         print("Flamewave invoked")
     print("Syncing commands...")

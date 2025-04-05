@@ -6,6 +6,7 @@ import glintwing
 import datetime
 from discord.ext import commands
 import pymongo
+from discord.utils import get_or_fetch
 
 from glintwing.draft_class_v2 import SwissEvent
 from stonewood import logger
@@ -36,41 +37,41 @@ def put_draft(draft: SwissEvent):
     coll.replace_one({"id": f"{draft.id}"}, dict(draft), upsert=True)
 
 
-taglist = {}
-
-
-def get_tags():
+async def get_tags(ctx: discord.AutocompleteContext = None) -> list[discord.OptionChoice]:
     logger.info("Getting tags...")
-    global taglist
-    r = {}
+    r: list[discord.OptionChoice] = []
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Tags"]
     d = coll.find({})
     if d is None:
         logger.warning("Failed to find tags.")
-        return {}
+        return r
     for entry in d:
-        r[entry["id"]] = entry["label"]
-    taglist = r
-    logger.info("Registered tags.")
+        r.append(discord.OptionChoice(entry["label"], entry["id"]))
     return r
 
 
 async def get_name(bot: discord.Bot, id, guild_id=None) -> str:
     # g = None
+    if guild_id is not None:
+        g = await bot.fetch_guild(guild_id)
+        if g is not None:
+            u = await g.fetch_member(int(id))
+            if u is not None:
+                return u.display_name
     u = await bot.get_or_fetch_user(int(id))
-    # if guild_id is not None:
-    #     g = bot.fetch_guild(guild_id)
-    #     if g is not None:
-    #         u = bot.get
     if u is not None:
         return u.display_name
     return "Unknown User"
 
 
 async def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist = get_tags()
+    taglist: list[discord.OptionChoice] = await get_tags()
+    tagL = [t for t in taglist if t.value == draft.tag]
+    tag = "unknown tag"
+    if len(tagL) > 0:
+        tag = tagL[0].name
     return discord.Embed(
         title=f"{draft.title} | ENTRY",
         fields=[
@@ -79,12 +80,16 @@ async def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
                 value=f"{bslash.join([f'{await get_name(bot, p.id, guild_id)} | Seat: {p.seat + 1}' for p in sorted(draft.players, key=lambda x: x.seat)])}",
             ),
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*{bslash}Don't share seats!",
+        description=f"{draft.description}{bslash}*{tag}*{bslash}Don't share seats!",
     )
 
 
 async def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist = get_tags()
+    taglist: list[discord.OptionChoice] = await get_tags()
+    tagL = [t for t in taglist if t.value == draft.tag]
+    tag = "unknown tag"
+    if len(tagL) > 0:
+        tag = tagL[0].name
     r, n = draft.current_round
     return discord.Embed(
         title=f"{draft.title} | Round {r + 1}",
@@ -97,12 +102,16 @@ async def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_i
             for match in n
         ]
         + [discord.EmbedField(name="ROUND TIMER", value=f"The round ends <t:{int((draft.round_times[r] + datetime.timedelta(minutes=50)).timestamp())}:R>.")],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*",
+        description=f"{draft.description}{bslash}*{tag}*",
     )
 
 
 async def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist = get_tags()
+    taglist: list[discord.OptionChoice] = await get_tags()
+    tagL = [t for t in taglist if t.value == draft.tag]
+    tag = "unknown tag"
+    if len(tagL) > 0:
+        tag = tagL[0].name
     return discord.Embed(
         title=f"{draft.title} | FINAL",
         fields=[
@@ -113,7 +122,7 @@ async def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
             )
             for player in sorted(draft.players, key=lambda pl: draft.secondary_stats(pl), reverse=True)
         ],
-        description=f"{draft.description}{bslash}*{taglist[draft.tag] if draft.tag in taglist else 'unknown tag'}*",
+        description=f"{draft.description}{bslash}*{tag}*",
     )
 
 
@@ -156,16 +165,20 @@ class Glintwing(commands.Cog):
 
     @commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
-    # @discord.option(name="tag", description="Choose a tag.", choices=[discord.OptionChoice(v, k) for k, v in taglist.items()], default="anti")  # This isn't going to work.
+    @discord.option(name="tag", description="Choose a tag.", autocomplete=get_tags, default="anti")
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
-    async def draft(self, ctx: discord.ApplicationContext, title: str, desc: str = "", cube_id: str = "", set_code: str = ""):
-        # tag: str = ""
+    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str, desc: str = "", cube_id: str = "", set_code: str = ""):
+        taglist: list[discord.OptionChoice] = await get_tags()
+        found_tag = "anti"
+        for f in taglist:
+            if f.value == tag:
+                found_tag = tag
         await ctx.respond(content="Setting up your draft...")
         new_view = StartingView(self.bot)
         msg = await ctx.interaction.original_response()
-        this_draft = glintwing.SwissEvent(id=str(msg.id), channel_id=str(msg.channel.id), host=str(ctx.author.id), tag="", description=desc, title=title, set_code=set_code, cube_id=cube_id)
+        this_draft = glintwing.SwissEvent(id=str(msg.id), channel_id=str(msg.channel.id), host=str(ctx.author.id), tag=found_tag, description=desc, title=title, set_code=set_code, cube_id=cube_id)
         put_draft(this_draft)
         await ctx.interaction.edit_original_response(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], content="", view=new_view)
         await asyncio.gather(
