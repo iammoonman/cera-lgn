@@ -136,6 +136,13 @@ class Glintwing(commands.Cog):
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if user.id == self.bot.user.id:
             return
+        cont = False
+        async for u in reaction.users():
+            if user.id == u.id:
+                cont = True
+                break
+        if not cont:
+            return
         this_draft = grab_draft(reaction.message.id)
         if this_draft is None:
             return
