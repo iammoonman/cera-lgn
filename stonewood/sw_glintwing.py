@@ -216,14 +216,14 @@ class StartingView(discord.ui.View):
         if len(this_draft.players) == 10:
             return
         if str(ctx.user.id) in this_draft.players:
-            return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+            return await ctx.respond(content="Interaction received.", ephemeral=True)
         this_draft.players.append(glintwing.SwissPlayer(id=f"{ctx.user.id}", seat=len(this_draft.players)))
         for i, player in enumerate(sorted(this_draft.players, key=lambda p: p.seat)):
             player.seat = i
         logger.info(f"Adding player {ctx.user.id} to draft {ctx.message.id}")
         put_draft(this_draft)
         await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -233,7 +233,7 @@ class StartingView(discord.ui.View):
         this_draft.players = [y for y in filter(lambda x: x.id != f"{ctx.user.id}", this_draft.players)]
         put_draft(this_draft)
         await ctx.message.edit(embeds=[await starting_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0, custom_id="BEGIN_BUTTON")
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -243,10 +243,10 @@ class StartingView(discord.ui.View):
         if this_draft.host == str(ctx.user.id):
             if not all(x.seat > -1 for x in this_draft.players):
                 logger.warning(f"Host attempted to run a draft with some players at negative seats. {ctx.message.id}")
-                return await ctx.response.send_message(content="Interaction received. Players are not seated.", ephemeral=True)
+                return await ctx.respond(content="Interaction received. Players are not seated.", ephemeral=True)
             if len(this_draft.players) < 4 or len(this_draft.players) > 10:
                 logger.warning(f"Host attempted to run a draft with too many or too few players. {ctx.message.id}")
-                return await ctx.response.send_message(content="Interaction received. Not enough players or too many players.", ephemeral=True)
+                return await ctx.respond(content="Interaction received. Not enough players or too many players.", ephemeral=True)
             logger.info(f"Starting draft {ctx.message.id} with host {ctx.user.id}")
             new_view = IG_View(self.bot)
             this_draft = this_draft
@@ -254,7 +254,7 @@ class StartingView(discord.ui.View):
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=new_view)
             await ctx.message.clear_reactions()
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
 
 class IG_View(discord.ui.View):
@@ -331,7 +331,7 @@ class IG_View(discord.ui.View):
                     pairing.game_three = None
         put_draft(this_draft)
         await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON_INGAME")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -343,7 +343,7 @@ class IG_View(discord.ui.View):
         this_player.dropped = True
         put_draft(this_draft)
         await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0, custom_id="NEXT_BUTTON")
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -357,13 +357,13 @@ class IG_View(discord.ui.View):
                 this_draft.round_two, was_imperfect = this_draft.pair_round_two()
                 if was_imperfect:
                     logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
-                    await ctx.response.send_message(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
+                    await ctx.respond(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
                 await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 1:
                 this_draft.round_thr, was_imperfect = this_draft.pair_round_three()
                 if was_imperfect:
                     logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
-                    await ctx.response.send_message(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
+                    await ctx.respond(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
                 await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 2:
                 e = await end_em(this_draft, self.bot, ctx.guild_id)
@@ -371,7 +371,7 @@ class IG_View(discord.ui.View):
                 # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
                 #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0, custom_id="BACK_BUTTON")
     async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -389,7 +389,7 @@ class IG_View(discord.ui.View):
                 logger.info(f"Deleting round three of draft: {ctx.message.id}")
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", select_type=discord.ComponentType.user_select, row=2, custom_id="TOGGLE_SELECT")
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
@@ -406,7 +406,7 @@ class IG_View(discord.ui.View):
             logger.info(f"Host dropped player {select.values[0].id} from draft {ctx.message.id}")
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0, custom_id="END_BUTTON")
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -420,7 +420,7 @@ class IG_View(discord.ui.View):
             # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
             #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
     @discord.ui.button(label="REFRESH", style=discord.ButtonStyle.gray, row=0, custom_id="REFRESH")
     async def refresh_draft(self, btn: discord.ui.Button, ctx: discord.Interaction):
@@ -428,7 +428,7 @@ class IG_View(discord.ui.View):
         if this_draft is None:
             return
         await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-        return await ctx.response.send_message(content="Interaction received.", ephemeral=True)
+        return await ctx.respond(content="Interaction received.", ephemeral=True)
 
 
 def setup(bot):
