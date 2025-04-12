@@ -31,8 +31,9 @@ def full_draftmancer_log(draft_file: io.FileIO):
         else:
             users[k] = {"name": v["userName"], "picks": v["decklist"]["main"], "pack": flamewave.tts_classes.Deck(f'maindeck cards for {v["userName"]}')}
             users[k]["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[k]["picks"]])
-            users[f'{k}_side'] = {"name": v["userName"], "picks": v["decklist"]["side"], "pack": flamewave.tts_classes.Deck(f'sideboard cards for {v["userName"]}')}
-            users[f'{k}_side']["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[f'{k}_side']["picks"]])
+            if len(v["decklist"]["side"]) > 0:
+                users[f'{k}_side'] = {"name": v["userName"], "picks": v["decklist"]["side"], "pack": flamewave.tts_classes.Deck(f'sideboard cards for {v["userName"]}')}
+                users[f'{k}_side']["pack"].import_cards([ij_cards[cards[s][0] + cards[s][1]] for s in users[f'{k}_side']["picks"]])
     s = flamewave.tts_classes.Save(f"Big Draft Bag")
     for k, v in users.items():
         s.addObject(v["pack"])
