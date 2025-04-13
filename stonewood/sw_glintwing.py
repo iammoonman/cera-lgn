@@ -37,7 +37,7 @@ def put_draft(draft: SwissEvent):
     coll.replace_one({"id": f"{draft.id}"}, dict(draft), upsert=True)
 
 
-async def get_tags(ctx: discord.AutocompleteContext = None) -> list[discord.OptionChoice]:
+def get_tags(ctx: discord.AutocompleteContext = None) -> list[discord.OptionChoice]:
     logger.info("Getting tags...")
     r: list[discord.OptionChoice] = []
     client = pymongo.MongoClient(os.environ["external_mongo"])
@@ -49,7 +49,7 @@ async def get_tags(ctx: discord.AutocompleteContext = None) -> list[discord.Opti
         return r
     for entry in d:
         r.append(discord.OptionChoice(entry["label"], entry["id"]))
-    return r
+    return r[:20]
 
 
 async def get_name(bot: discord.Bot, id, guild_id=None) -> str:
@@ -172,7 +172,7 @@ class Glintwing(commands.Cog):
 
     @commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
-    @discord.option(name="tag", description="Choose a tag.", autocomplete=get_tags, default="anti")
+    @discord.option(name="tag", description="Choose a tag.", autocomplete=get_tags)
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
