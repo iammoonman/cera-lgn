@@ -4,7 +4,7 @@ This monorepo contains various connected projects surrounding the operation and 
 Contributions, feature requests, and bug reports are welcome either via DM to an admin of MTG Limited on TTS on Discord or through the issues page on this repo.
 
 ## Docker
-Create a .env file with a Discord bot token defined within, then run ``docker build -f docker.dockerfile --env-file .env .``. You'll have to run ``/scryfall-update`` on the Discord bot to populate the card data file.
+Create a .env file with a Discord bot token defined within, then run ``docker compose --env-file .env up -d``. You'll have to run ``/scryfall-update`` on the Discord bot to populate the card data file.
 
 
 ## Credits

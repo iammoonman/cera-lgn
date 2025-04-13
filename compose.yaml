@@ -1,0 +1,18 @@
+services:
+  invoker:
+    build: .
+    env_file: ".env"
+    environment:
+      token: ${token}
+      external_mongo: ${external_mongo}
+      internal_mongo: "mongo"
+    ports:
+      - "8080:5000"
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /
+  mongo:
+    image: mongo
+    restart: always

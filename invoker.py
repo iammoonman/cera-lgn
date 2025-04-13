@@ -1,5 +1,6 @@
 import os
 import discord
+import stonewood.sw_glintwing
 
 intents = discord.Intents.default()
 intents.members = True
@@ -14,16 +15,16 @@ async def on_ready():
     print(bot.user.id)
     print("-------")
     print("Loading cogs:")
-    if bot.extensions['sw_starlight'] is None:
+    if 'stonewood.sw_starlight' not in bot.extensions:
         bot.load_extension("stonewood.sw_starlight")
         print("Starlight invoked")
-    if bot.extensions['sw_glintwing'] is None:
+    if 'stonewood.sw_glintwing' not in bot.extensions:
         bot.load_extension("stonewood.sw_glintwing")
         print("Glintwing invoked")
-    if bot.extensions['sw_stonewood'] is None:
+    if 'stonewood.sw_stonewood' not in bot.extensions:
         bot.load_extension("stonewood.sw_stonewood")
         print("Stonewood invoked")
-    if bot.extensions['sw_flamewave'] is None:
+    if 'stonewood.sw_flamewave' not in bot.extensions:
         bot.load_extension("stonewood.sw_flamewave")
         print("Flamewave invoked")
     print("Syncing commands...")

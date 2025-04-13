@@ -4,17 +4,3 @@ include = '\.pyi?$'
 [project]
 name = "cera-lgn"
 version = "0.0.1"
-[tool.poetry]
-name = "hello world"
-version = "0.0.1"
-description = ""
-authors = []
-[tool.poetry.dependencies]
-python = "3.11.7"
-py-cord = "2.5.0"
-pillow = "10.2.0"
-ijson = "3.2.3"
-requests = "2.31.0"
-urllib3 = "2.1.0"
-orjson = "3.9.10"
-pymongo = "4.6.2"
