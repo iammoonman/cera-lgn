@@ -67,7 +67,7 @@ async def get_name(bot: discord.Bot, id, guild_id=None) -> str:
 
 
 async def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist: list[discord.OptionChoice] = await get_tags()
+    taglist: list[discord.OptionChoice] = get_tags()
     tagL = [t for t in taglist if t.value == draft.tag]
     tag = "unknown tag"
     if len(tagL) > 0:
@@ -85,7 +85,7 @@ async def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
 
 
 async def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist: list[discord.OptionChoice] = await get_tags()
+    taglist: list[discord.OptionChoice] = get_tags()
     tagL = [t for t in taglist if t.value == draft.tag]
     tag = "unknown tag"
     if len(tagL) > 0:
@@ -107,7 +107,7 @@ async def intermediate_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_i
 
 
 async def end_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
-    taglist: list[discord.OptionChoice] = await get_tags()
+    taglist: list[discord.OptionChoice] = get_tags()
     tagL = [t for t in taglist if t.value == draft.tag]
     tag = "unknown tag"
     if len(tagL) > 0:
@@ -172,12 +172,12 @@ class Glintwing(commands.Cog):
 
     @commands.slash_command()
     @discord.option(name="title", description="The name of the draft event.")
-    @discord.option(name="tag", description="Choose a tag.", autocomplete=get_tags)
+    @discord.option(name="tag", description="Choose a tag.", autocomplete=get_tags, default="anti")
     @discord.option(name="desc", description="Describe the event.", default="")
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
-    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str, desc: str = "", cube_id: str = "", set_code: str = ""):
-        taglist: list[discord.OptionChoice] = await get_tags()
+    async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", cube_id: str = "", set_code: str = ""):
+        taglist: list[discord.OptionChoice] = get_tags()
         found_tag = "anti"
         for f in taglist:
             if f.value == tag:
