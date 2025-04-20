@@ -49,7 +49,10 @@ class Flamewave(commands.Cog):
     async def dm_log(self, ctx: discord.ApplicationContext, file: discord.Attachment):
         await ctx.defer(ephemeral=True)
         f = BytesIO(await file.read())
-        f2, n = flamewave.draftmancer.full_draftmancer_log(f)
+        try:
+            f2, n = flamewave.draftmancer.full_draftmancer_log(f)
+        except:
+            return await ctx.respond(content="Failed to load cards. Try running /scryfall-update, waiting 15 seconds, then run this command again.", ephemeral=True)
         new_file = discord.File(io.StringIO(json.dumps(f2)), filename=f"draft_{n}.json")
         await ctx.respond(file=new_file, ephemeral=True)
         return
