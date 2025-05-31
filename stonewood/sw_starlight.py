@@ -66,12 +66,15 @@ set_choices = [
 set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"], ["Pauper Masters", "ppm"], ["Urza's Saga", "usg"], ["Dominaria", "dom"], ["Exodus", "exo"], ["Urza's Legacy", "ulg"], ["Nemesis", "nem"], ["Prophecy", "pcy"], ["Mercadian Masques", "mmq"], ["Zendikar", "zen"], ["Scars of Mirrodin", "som"], ["Mirrodin Besieged", "mbs"], ["Blood Like Rivers", "c_blr"], ["Apocalypse", "apc"], ["Invasion", "inv"], ["Odyssey", "ody"], ["Planeshift", "pls"], ["Torment", "tor"], ["Judgment", "jud"], ["Worldwake", "wwk"], ["Rise of the Eldrazi", "roe"], ["Innistrad", "isd"], ["FUN 2022", "c_fun2"], ["Magic 2013", "m13"], ["Masters 25", "a25"], ["Avacyn Restored", "avr"], ["Dominaria Remastered", "dmr"], ["Splinters of Novanda", "c_son"], ["Conspiracy", "cns"], ["Battlebond", "bbd"], ["Commander Legends", "cmr"]]
 
 
+async def get_sets(ctx: discord.AutocompleteContext):
+    return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
+
+async def get_sets_v3(ctx: discord.AutocompleteContext):
+    return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
+
 class Starlight(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    async def get_sets(ctx: discord.AutocompleteContext):
-        return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(description="Create packs.")
     @discord.option(name="set", description="Choose the set.", options=[discord.OptionChoice(s[0], s[1]) for s in set_choices][:10], autocomplete=get_sets, type=str)
@@ -85,9 +88,6 @@ class Starlight(commands.Cog):
             return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.", ephemeral=True)
         packs = discord.File(io.StringIO(json.dumps(raw)), filename=f"{set}_{random.randint(0, 255)}.json")
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
-
-    async def get_sets_v3(ctx: discord.AutocompleteContext):
-        return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
 
     @commands.slash_command(description="Create packs.")
     @discord.option(name="set", description="Choose the set.", options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10], autocomplete=get_sets_v3, type=str)

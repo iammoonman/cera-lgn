@@ -6,7 +6,6 @@ import glintwing
 import datetime
 from discord.ext import commands
 import pymongo
-from discord.utils import get_or_fetch
 
 from glintwing.draft_class_v2 import SwissEvent
 from stonewood import logger
@@ -16,7 +15,7 @@ seat_order = ["chair_white", "chair_brown", "chair_red", "chair_orange", "chair_
 """Names of the seat emojis in order."""
 
 
-def grab_draft(id: str):
+def grab_draft(id: str | int):
     logger.info(f"Getting draft with id: {id}")
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
@@ -37,7 +36,7 @@ def put_draft(draft: SwissEvent):
     coll.replace_one({"id": f"{draft.id}"}, dict(draft), upsert=True)
 
 
-def get_tags(ctx: discord.AutocompleteContext = None) -> list[discord.OptionChoice]:
+def get_tags(ctx: discord.AutocompleteContext | None = None) -> list[discord.OptionChoice]:
     logger.info("Getting tags...")
     r: list[discord.OptionChoice] = []
     client = pymongo.MongoClient(os.environ["external_mongo"])
@@ -167,7 +166,7 @@ class Glintwing(commands.Cog):
                 await reaction.message.remove_reaction(reaction.emoji, user)
                 put_draft(this_draft)
             else:
-                reaction.remove(user)
+                await reaction.remove(user)
         return
 
     @commands.slash_command()
@@ -177,6 +176,7 @@ class Glintwing(commands.Cog):
     @discord.option(name="cube_id", description="The CubeCobra id for the cube you're playing.", default="")
     @discord.option(name="set_code", description="The set code of the set you're playing, for example `woe` for Wilds of Eldraine.", default="")
     async def draft(self, ctx: discord.ApplicationContext, title: str, tag: str = "anti", desc: str = "", cube_id: str = "", set_code: str = ""):
+        await ctx.defer()
         taglist: list[discord.OptionChoice] = get_tags()
         found_tag = "anti"
         for f in taglist:
@@ -210,6 +210,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="JOIN", style=discord.ButtonStyle.primary, row=0, custom_id="JOIN_BUTTON")
     async def join(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -227,6 +228,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -237,6 +239,7 @@ class StartingView(discord.ui.View):
 
     @discord.ui.button(label="BEGIN", style=discord.ButtonStyle.green, row=0, custom_id="BEGIN_BUTTON")
     async def begin(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -262,7 +265,7 @@ class IG_View(discord.ui.View):
         self.bot = bot
         super().__init__(timeout=None)
 
-    @discord.ui.select(
+    @discord.ui.string_select(
         placeholder="Report the games you won.",
         row=1,
         min_values=1,
@@ -283,6 +286,9 @@ class IG_View(discord.ui.View):
         custom_id="REPORT_SELECT",
     )
     async def report(self, select: discord.ui.Select, ctx: discord.Interaction):
+        if type(select.values[0]) is not str:
+            return
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -335,6 +341,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="DROP", style=discord.ButtonStyle.danger, row=0, custom_id="DROP_BUTTON_INGAME")
     async def drop(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -347,6 +354,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="NEXT", style=discord.ButtonStyle.primary, row=0, custom_id="NEXT_BUTTON")
     async def advance(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -375,6 +383,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="BACK", style=discord.ButtonStyle.danger, row=0, custom_id="BACK_BUTTON")
     async def reverse(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -393,6 +402,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.select(placeholder="Toggle a player's drop status. Host only.", select_type=discord.ComponentType.user_select, row=2, custom_id="TOGGLE_SELECT")
     async def toggle_drop(self, select: discord.ui.Select, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -410,6 +420,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="END", style=discord.ButtonStyle.red, row=0, custom_id="END_BUTTON")
     async def premature_end(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
@@ -424,6 +435,7 @@ class IG_View(discord.ui.View):
 
     @discord.ui.button(label="REFRESH", style=discord.ButtonStyle.gray, row=0, custom_id="REFRESH")
     async def refresh_draft(self, btn: discord.ui.Button, ctx: discord.Interaction):
+        await ctx.response.defer()
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return

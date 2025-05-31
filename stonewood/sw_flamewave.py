@@ -5,10 +5,12 @@ import time
 import discord
 from discord.ext import commands
 from discord.ext.pages import Paginator, Page
-from requests.utils import quote
+
+from requests.compat import quote
 
 import requests
 import flamewave
+from flamewave import get_cube_p1p1, draftmancer, get_cube
 from io import BytesIO
 
 
@@ -22,13 +24,15 @@ class Flamewave(commands.Cog):
     async def cc_cube(self, ctx: discord.ApplicationContext, cc_id: str, len_p: int):
         await ctx.defer(ephemeral=True)
         try:
-            raw = flamewave.cubecobra.get_cube(cc_id, len_p)
+            raw = get_cube(cc_id, len_p)
         except:
             return await ctx.respond(
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
                 ephemeral=True,
             )
-        cube = discord.File(io.StringIO(json.dumps(raw)), filename=f"{cc_id}_{random.randint(0, 255)}.json")
+        buff = io.StringIO()
+        buff.write(json.dumps(raw))
+        cube = discord.File(buff.buffer.read(), filename=f"{cc_id}_{random.randint(0, 255)}.json")
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
     @commands.slash_command(description="Query CubeCobra for a cube and get a P1P1.")
@@ -37,7 +41,7 @@ class Flamewave(commands.Cog):
     async def cc_p1p1(self, ctx: discord.ApplicationContext, cc_id: str, seed: str):
         await ctx.defer()
         try:
-            uri, new_seed = flamewave.cubecobra.get_cube_p1p1(cc_id, seed)
+            uri, new_seed = get_cube_p1p1(cc_id, seed)
         except:
             return await ctx.respond(
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
@@ -50,10 +54,12 @@ class Flamewave(commands.Cog):
         await ctx.defer(ephemeral=True)
         f = BytesIO(await file.read())
         try:
-            f2, n = flamewave.draftmancer.full_draftmancer_log(f)
+            f2, n = draftmancer.full_draftmancer_log(f)
         except:
             return await ctx.respond(content="Failed to load cards. Try running /scryfall-update, waiting 15 seconds, then run this command again.", ephemeral=True)
-        new_file = discord.File(io.StringIO(json.dumps(f2)), filename=f"draft_{n}.json")
+        buff = io.StringIO()
+        buff.write(json.dumps(f2))
+        new_file = discord.File(buff.buffer.read(), filename=f"draft_{n}.json")
         await ctx.respond(file=new_file, ephemeral=True)
         return
 
