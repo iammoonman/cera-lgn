@@ -30,9 +30,7 @@ class Flamewave(commands.Cog):
                 "Something went wrong. You may have entered an invalid CubeCobra ID. Otherwise, contact Moon.",
                 ephemeral=True,
             )
-        buff = io.StringIO()
-        buff.write(json.dumps(raw))
-        cube = discord.File(buff.buffer.read(), filename=f"{cc_id}_{random.randint(0, 255)}.json")
+        cube = discord.File(io.BytesIO(json.dumps(raw).encode()), filename=f"{cc_id}_{random.randint(0, 255)}.json")
         await ctx.respond(content=f"Here is your cube with id {cc_id}.", file=cube, ephemeral=True)
 
     @commands.slash_command(description="Query CubeCobra for a cube and get a P1P1.")
@@ -57,9 +55,7 @@ class Flamewave(commands.Cog):
             f2, n = draftmancer.full_draftmancer_log(f)
         except:
             return await ctx.respond(content="Failed to load cards. Try running /scryfall-update, waiting 15 seconds, then run this command again.", ephemeral=True)
-        buff = io.StringIO()
-        buff.write(json.dumps(f2))
-        new_file = discord.File(buff.buffer.read(), filename=f"draft_{n}.json")
+        new_file = discord.File(io.BytesIO(json.dumps(f2).encode()), filename=f"draft_{n}.json")
         await ctx.respond(file=new_file, ephemeral=True)
         return
 
