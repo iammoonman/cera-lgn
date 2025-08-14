@@ -406,7 +406,6 @@ class IG_View(discord.ui.View):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        print(select.values)
         if str(ctx.user.id) == this_draft.host or str(select.values[0].id) == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
             myplayer = this_draft.get_player_by_id(str(select.values[0].id))
