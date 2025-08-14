@@ -406,14 +406,15 @@ class IG_View(discord.ui.View):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
+        print(select.values)
         if str(ctx.user.id) == this_draft.host or str(select.values[0].id) == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
-            myplayer = this_draft.get_player_by_id(str(select.values[0]))
+            myplayer = this_draft.get_player_by_id(str(select.values[0].id))
             if myplayer is not None:
-                myplayer.dropped = True
+                myplayer.dropped = not myplayer.dropped
             else:
-                logger.warning(f"The host of draft {ctx.message.id} tried to drop a player not in the draft: {str(select.values[0].id)}")
-            logger.info(f"Host dropped player {select.values[0].id} from draft {ctx.message.id}")
+                logger.warning(f"The host of draft {ctx.message.id} tried to drop a player not in the draft: {str(select.values[0])}")
+            logger.info(f"Host toggled the drop status of player {select.values[0]} from draft {ctx.message.id}")
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.respond(content="Interaction received.", ephemeral=True)
