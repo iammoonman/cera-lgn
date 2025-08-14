@@ -235,9 +235,12 @@ class SwissEvent:
                     double_bye += 1
         return pairings, was_imperfect
 
-    def stats(self, player_id: str) -> tuple[float, int, float]:
+    def stats(self, player_id: "str | SwissPlayer") -> tuple[float, int, float]:
         """GWP, Match Points, MWP"""
         player = self.get_player_by_id(player_id)
+        if player is None:
+            # This should never happen.
+            return (0, 0, 0)
         game_count = 0
         score_total = 0
         game_wins_count = 0
@@ -269,9 +272,11 @@ class SwissEvent:
             match_wins_count += 1 if score == 3 else 0
         return game_wins_count / game_count if game_count > 0 else 0, score_total, match_wins_count / match_count if match_count > 0 else 0
 
-    def secondary_stats(self, player_id: str) -> tuple[int, float, float, float, float]:
+    def secondary_stats(self, player_id: "str | SwissPlayer") -> tuple[int, float, float, float, float]:
         """Match Points, GWP, MWP, OGP, OMP"""
         player = self.get_player_by_id(player_id)
+        if player is None:
+            return 0, 0, 0, 0, 0
         gwp, mp, mwp = self.stats(player_id)
         o_count = 0
         o_gwp_sum = 0
@@ -301,21 +306,21 @@ class SwissEvent:
         for m in self.round_one:
             if m.player_one == player or m.player_two == player:
                 return m
-        return None
+        return SwissPairing(player, None, [])
 
     def match_two(self, player):
         """Returns the second round match of the given player."""
         for m in self.round_two:
             if m.player_one == player or m.player_two == player:
                 return m
-        return None
+        return SwissPairing(player, None, [])
 
     def match_three(self, player):
         """Returns the third round match of the given player."""
         for m in self.round_thr:
             if m.player_one == player or m.player_two == player:
                 return m
-        return None
+        return SwissPairing(player, None, [])
 
 
 class SwissPlayer:
@@ -340,7 +345,7 @@ class SwissPlayer:
 
 
 class SwissPairing:
-    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer, games=[]):
+    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer | None, games=[]):
         self.player_one = player_one
         self.player_two = player_two
         self.game_one: Union[SwissPlayer, None] = None if len(games) == 0 else games[0]
@@ -380,6 +385,7 @@ class SwissPairing:
         else:
             # 0-0
             return True
+        return False
 
     def is_bye(self) -> bool:
         return self.player_two is None
@@ -394,7 +400,7 @@ class SwissPairing:
             return self.player_one
         return None
 
-    def score(self, player: SwissPlayer) -> tuple[int, int, int, int]:
+    def score(self, player: SwissPlayer | None) -> tuple[int, int, int, int]:
         """match points, priority, games played, games won"""
         me = None
         op = None
@@ -436,7 +442,7 @@ if __name__ == "__main__":
 
     # Do tests
     def test(num_players, score_round_one=None, after_round_one=lambda x: x, score_round_two=None, after_round_two=lambda x: x, score_round_three=None, full_print=False):
-        drft = SwissEvent("", "", "", "", "")
+        drft = SwissEvent("", "", "", "", "", "")
         drft.players = [SwissPlayer(f"{i + 1}", i) for i in range(0, num_players)]
         byes: list[SwissPairing] = []
         if full_print:
@@ -512,7 +518,7 @@ if __name__ == "__main__":
         if full_print:
             print("----------")
             if was_imperfect:
-                print(json.dumps(drft.json), "IMPERFECT")
+                print(json.dumps(dict(drft)), "IMPERFECT")
             print("----------")
             print("----------")
         return drft
@@ -624,7 +630,7 @@ if __name__ == "__main__":
     def ff(x):
         f = json.dumps(dict(x))
         d = json.loads(f)
-        g = SwissEvent(id=d["id"], host=d["meta"]["host"] if "host" in d["meta"] else "", tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"])
+        g = SwissEvent(id=d["id"], host=d["meta"]["host"] if "host" in d["meta"] else "", tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"], channel_id="")
         return g
 
     print(dict(test(8, after_round_one=lambda x: ff(x), after_round_two=drop_ids(["1", "2", "3", "4"]))))
@@ -638,10 +644,10 @@ if __name__ == "__main__":
     print(json.dumps(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"])), default=lambda x: dict(x)))
     print(json.dumps(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x)), default=lambda x: dict(x)))
     print(json.dumps(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""])), default=lambda x: dict(x)))
-    d = dict(SwissEvent("abc", "1", "dps", "d", "test"))
+    d = dict(SwissEvent("abc", "", "1", "dps", "d", "test"))
     print(d)
-    e = SwissEvent(id=d["id"], host=d["meta"]["host"], tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"])
-    print(dict(e))
+    # e = SwissEvent(id=d["id"], host=d["meta"]["host"], tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"], channel_id="")
+    # print(dict(e))
 
     # for g1 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
     #     for g2 in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:

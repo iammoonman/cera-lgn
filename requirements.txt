@@ -1,4 +1,4 @@
-py-cord==2.5.0
+py-cord==2.6.1
 pillow==10.2.0
 ijson==3.2.3
 requests==2.31.0

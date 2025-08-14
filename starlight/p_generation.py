@@ -11,6 +11,8 @@ def generatepack_c1c2_special(sheet_index=0, sheet_index_func=lambda a: random.r
 
     Returns indexes of the list which indicate foiled cards.
     """
+    if setJSON is None:
+        return ([], [])
     distribution = random.choices(
         [d[0] for d in setJSON["distributions_odds"]],
         [d[1] for d in setJSON["distributions_odds"]],
