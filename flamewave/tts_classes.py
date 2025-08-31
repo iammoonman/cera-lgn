@@ -145,7 +145,7 @@ class Deck:
             self.isPlanar = (cardData["planar"] if "planar" in cardData else False) or cardData["layout"] == "split"
             self.CustomDeck = self.frontImage
             self.AttachedDecals = decals if isFoil else []
-            self.States = {}
+            self.States = None
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
