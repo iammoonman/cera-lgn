@@ -9,6 +9,118 @@ def distance(pA, pB, players):
     return min(abs(pB.seat - pA.seat), len(players) - pB.seat + pA.seat, len(players) - pA.seat + pB.seat)
 
 
+class SwissPlayer:
+    def __init__(self, id: str, seat=0, dropped=False):
+        self.id = f"{id}"
+        self.seat = seat
+        self.dropped = dropped
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if isinstance(other, SwissPlayer):
+            return self.id == other.id
+        if type(other) == int:
+            return int(self.id) == other
+        if type(other) == str:
+            return self.id == other
+        return False
+
+    def __repr__(self):
+        return f"{self.id}"
+
+
+class SwissPairing:
+    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer | None, games=[]):
+        self.player_one = player_one
+        self.player_two = player_two
+        self.game_one: Union[SwissPlayer, None] = None if len(games) == 0 else games[0]
+        """The winner of game one. If None, then there isn't a winner."""
+        self.game_two: Union[SwissPlayer, None] = None if len(games) < 2 else games[1]
+        """The winner of game one. If None, then there isn't a winner."""
+        self.game_three: Union[SwissPlayer, None] = None if len(games) < 3 else games[2]
+        """The winner of game one. If None, then there isn't a winner."""
+
+    def __iter__(self):
+        yield ("players", [self.player_one.id, self.player_two.id if self.player_two is not None else None])
+        g1 = (0 if self.game_one == self.player_one else 1) if self.game_one is not None else None
+        g2 = (0 if self.game_two == self.player_one else 1) if self.game_two is not None else None
+        g3 = (0 if self.game_three == self.player_one else 1) if self.game_three is not None else None
+        yield ("games", [g1, g2, g3])
+
+    def __repr__(self):
+        p1_score, _, _, _ = self.score(self.player_one)
+        p2_score, _, _, _ = self.score(self.player_two)
+        return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else 'TIE'}"
+
+    def is_tie(self) -> bool:
+        if self.game_one is not None:
+            if self.game_two is None:
+                # 1-0
+                return False
+            else:
+                if self.game_two == self.game_one or self.game_three == self.game_one:
+                    # 2-0 or 2-1
+                    return False
+                if self.game_two != self.game_one and self.game_three is None:
+                    # 1-1
+                    return True
+                if self.game_two == self.game_three:
+                    # 1-2
+                    return False
+        else:
+            # 0-0
+            return True
+        return False
+
+    def is_bye(self) -> bool:
+        return self.player_two is None
+
+    def has_player(self, player: SwissPlayer):
+        return self.player_one == player or self.player_two == player
+
+    def opponent(self, player: SwissPlayer) -> Union[SwissPlayer, None]:
+        if player == self.player_one:
+            return self.player_two
+        if player == self.player_two:
+            return self.player_one
+        return None
+
+    def score(self, player: SwissPlayer | None) -> tuple[int, int, int, int]:
+        """match points, priority, games played, games won"""
+        me = None
+        op = None
+        if player == self.player_one:
+            me = self.player_one
+            op = self.player_two
+        if player == self.player_two:
+            me = self.player_two
+            op = self.player_one
+        if me is None:
+            return 0, 0, 0, 0
+        if self.is_bye():
+            return 3, 3, 0, 0
+        if self.is_tie():
+            return 1, 0, (1 if self.game_one is not None else 0) + (1 if self.game_two is not None else 0), (1 if self.game_one == me else 0) + (1 if self.game_two == me else 0)
+        if me == self.game_one and me == self.game_two:
+            return 3, 4, 2, 2
+        if me == self.game_two and me == self.game_three:
+            return 3, 2, 3, 2
+        if me == self.game_one and me == self.game_three:
+            return 3, 1, 3, 2
+        if op == self.game_one and op == self.game_two:
+            return 0, -2, 2, 0
+        if op == self.game_two and op == self.game_three:
+            return 0, -1, 3, 1
+        if op == self.game_one and op == self.game_three:
+            return 0, -1, 3, 1
+        if me == self.game_one and self.game_two is None:
+            return 3, 4, 1, 1
+        if op == self.game_one and self.game_two is None:
+            return 0, -2, 1, 0
+        return 0, 0, 0, 0
+
+
 class SwissEvent:
     def __init__(self, id, channel_id: str, host, tag: str, description: str, title: str, cube_id: str = "", set_code: str = "", rounds: list[dict] = [], seats={}, round_times=[]):
         self.id = id
@@ -301,138 +413,26 @@ class SwissEvent:
             o_count += 1
         return mp, gwp, mwp, o_gwp_sum / o_count if o_count > 0 else 0, o_mwp_sum / o_count if o_count > 0 else 0
 
-    def match_one(self, player):
+    def match_one(self, player) -> SwissPairing | None:
         """Returns the first round match of the given player."""
         for m in self.round_one:
             if m.player_one == player or m.player_two == player:
                 return m
-        return SwissPairing(player, None, [])
+        return None  # SwissPairing(player, None, [])
 
-    def match_two(self, player):
+    def match_two(self, player) -> SwissPairing | None:
         """Returns the second round match of the given player."""
         for m in self.round_two:
             if m.player_one == player or m.player_two == player:
                 return m
-        return SwissPairing(player, None, [])
+        return None  # SwissPairing(player, None, [])
 
-    def match_three(self, player):
+    def match_three(self, player) -> SwissPairing | None:
         """Returns the third round match of the given player."""
         for m in self.round_thr:
             if m.player_one == player or m.player_two == player:
                 return m
-        return SwissPairing(player, None, [])
-
-
-class SwissPlayer:
-    def __init__(self, id: str, seat=0, dropped=False):
-        self.id = f"{id}"
-        self.seat = seat
-        self.dropped = dropped
-
-    def __eq__(self, other):
-        if other is None:
-            return False
-        if isinstance(other, SwissPlayer):
-            return self.id == other.id
-        if type(other) == int:
-            return int(self.id) == other
-        if type(other) == str:
-            return self.id == other
-        return False
-
-    def __repr__(self):
-        return f"{self.id}"
-
-
-class SwissPairing:
-    def __init__(self, player_one: SwissPlayer, player_two: SwissPlayer | None, games=[]):
-        self.player_one = player_one
-        self.player_two = player_two
-        self.game_one: Union[SwissPlayer, None] = None if len(games) == 0 else games[0]
-        """The winner of game one. If None, then there isn't a winner."""
-        self.game_two: Union[SwissPlayer, None] = None if len(games) < 2 else games[1]
-        """The winner of game one. If None, then there isn't a winner."""
-        self.game_three: Union[SwissPlayer, None] = None if len(games) < 3 else games[2]
-        """The winner of game one. If None, then there isn't a winner."""
-
-    def __iter__(self):
-        yield ("players", [self.player_one.id, self.player_two.id if self.player_two is not None else None])
-        g1 = (0 if self.game_one == self.player_one else 1) if self.game_one is not None else None
-        g2 = (0 if self.game_two == self.player_one else 1) if self.game_two is not None else None
-        g3 = (0 if self.game_three == self.player_one else 1) if self.game_three is not None else None
-        yield ("games", [g1, g2, g3])
-
-    def __repr__(self):
-        p1_score, _, _, _ = self.score(self.player_one)
-        p2_score, _, _, _ = self.score(self.player_two)
-        return f"{self.player_one} vs {self.player_two} -> {self.player_one if p1_score > p2_score else self.player_two if not self.is_tie() else 'TIE'}"
-
-    def is_tie(self) -> bool:
-        if self.game_one is not None:
-            if self.game_two is None:
-                # 1-0
-                return False
-            else:
-                if self.game_two == self.game_one or self.game_three == self.game_one:
-                    # 2-0 or 2-1
-                    return False
-                if self.game_two != self.game_one and self.game_three is None:
-                    # 1-1
-                    return True
-                if self.game_two == self.game_three:
-                    # 1-2
-                    return False
-        else:
-            # 0-0
-            return True
-        return False
-
-    def is_bye(self) -> bool:
-        return self.player_two is None
-
-    def has_player(self, player: SwissPlayer):
-        return self.player_one == player or self.player_two == player
-
-    def opponent(self, player: SwissPlayer) -> Union[SwissPlayer, None]:
-        if player == self.player_one:
-            return self.player_two
-        if player == self.player_two:
-            return self.player_one
-        return None
-
-    def score(self, player: SwissPlayer | None) -> tuple[int, int, int, int]:
-        """match points, priority, games played, games won"""
-        me = None
-        op = None
-        if player == self.player_one:
-            me = self.player_one
-            op = self.player_two
-        if player == self.player_two:
-            me = self.player_two
-            op = self.player_one
-        if me is None:
-            return 0, 0, 0, 0
-        if self.is_bye():
-            return 3, 3, 0, 0
-        if self.is_tie():
-            return 1, 0, (1 if self.game_one is not None else 0) + (1 if self.game_two is not None else 0), (1 if self.game_one == me else 0) + (1 if self.game_two == me else 0)
-        if me == self.game_one and me == self.game_two:
-            return 3, 4, 2, 2
-        if me == self.game_two and me == self.game_three:
-            return 3, 2, 3, 2
-        if me == self.game_one and me == self.game_three:
-            return 3, 1, 3, 2
-        if op == self.game_one and op == self.game_two:
-            return 0, -2, 2, 0
-        if op == self.game_two and op == self.game_three:
-            return 0, -1, 3, 1
-        if op == self.game_one and op == self.game_three:
-            return 0, -1, 3, 1
-        if me == self.game_one and self.game_two is None:
-            return 3, 4, 1, 1
-        if op == self.game_one and self.game_two is None:
-            return 0, -2, 1, 0
-        return 0, 0, 0, 0
+        return None  # SwissPairing(player, None, [])
 
 
 if __name__ == "__main__":

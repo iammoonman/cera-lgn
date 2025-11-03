@@ -20,8 +20,11 @@ def make_p1p1(setcode):
     image_composite = Image.new("RGBA", (width, height))
     row = 0
     column = 0
-    resp = requests.get("https://i.imgur.com/1zBWUSU.png", stream=True)
-    foil_image = Image.open(io.BytesIO(resp.content))
+    resp = requests.get("https://i.imgur.com/1zBWUSU.png")
+    foil_image = None
+    if resp.ok:
+        im = io.BytesIO(resp.content)
+        foil_image = Image.open(im)
     # for each card in the pack,
     #  if column == 5:
     #   column = 0
@@ -37,9 +40,10 @@ def make_p1p1(setcode):
             "",
             card["card_faces"][0]["image_uris"]["small"] if "card_faces" in card.keys() and "adventure" != card["layout"] and "split" != card["layout"] else card["image_uris"]["small"],
         )
-        resp = requests.get(uri, stream=True)
-        new_im = Image.open(io.BytesIO(resp.content))
-        if i in foils:
+        resp = requests.get(uri)
+        f_im = io.BytesIO(resp.content)
+        new_im = Image.open(f_im)
+        if i in foils and foil_image is not None:
             new_im.paste(foil_image, (0, 0), foil_image)
         image_composite.paste(new_im, (column * im_width, row * im_height))
         new_im.close()

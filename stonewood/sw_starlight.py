@@ -103,13 +103,13 @@ class Starlight(commands.Cog):
         await ctx.respond(content=f"Here are your {num} packs of {set}", file=packs, ephemeral=True)
 
     @commands.slash_command(description="Load a pack image for a Pack 1, Pick 1.")
-    @discord.option(name="set", description="Choose the set.", options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10], autocomplete=get_sets_v3, type=str)
-    async def v3_p1p1(self, ctx: discord.ApplicationContext, set: str):
+    @discord.option(name="set_code", description="Choose the set.", options=[discord.OptionChoice(s[0], s[1]) for s in set_choices_v3][:10], autocomplete=get_sets_v3, type=str)
+    async def v3_p1p1(self, ctx: discord.ApplicationContext, set_code: str):
         await ctx.defer()
-        real_name = [s[0] for s in set_choices_v3 if s[1] == set][0]
+        real_name = [s[0] for s in set_choices_v3 if s[1] == set_code or s[0] == set_code][0]
         try:
-            raw = starlight.p1p1.make_p1p1(set)
-            f_o = discord.File(raw, f"p1p1_{set}.png")
+            raw = starlight.p1p1.make_p1p1(set_code)
+            f_o = discord.File(raw, f"p1p1_{set_code}.png")
             await ctx.respond(content=f"Pack 1, Pick 1 for {real_name}", file=f_o)
         except:
             return await ctx.respond("Something went wrong. Be sure to click the autocomplete options instead of typing out the name of the set. Otherwise, contact Moon.")
