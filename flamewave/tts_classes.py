@@ -200,12 +200,15 @@ class Deck:
 
     def toDict(self):
         """Returns a dictionary for the final JSON."""
-        return {
-            "Name": "Deck",
-            "Transform": transformAttrs,
-            "ColorDiffuse": colorAttrs,
-            "Nickname": self.Nickname,
-            "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
-            "CustomDeck": {str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)] for card in self.ContainedObjects},
-            "ContainedObjects": self.ContainedObjects,
-        }
+        if len(self.ContainedObjects) == 1:
+            return self.ContainedObjects[0]
+        else:
+            return {
+                "Name": "Deck",
+                "Transform": transformAttrs,
+                "ColorDiffuse": colorAttrs,
+                "Nickname": self.Nickname,
+                "DeckIDs": [int(card["CardID"]) for card in self.ContainedObjects],
+                "CustomDeck": {str(card["CardID"] // 100): card["CustomDeck"][str(card["CardID"] // 100)] for card in self.ContainedObjects},
+                "ContainedObjects": self.ContainedObjects,
+            }
