@@ -107,3 +107,22 @@ def mm_collection(cardlist, out_dict=False):
     if out_dict:
         return out
     return blob_json
+
+def ijson_collection_scryfallIDs(cardlist, out_dict=False):
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    str_l = {a: True for a in cardlist}
+    out = {}
+    f = open("default-cards.json", "rb")
+    objects = ijson.items(f, "item")
+    for o in objects:
+        if o["id"] in str_l:
+            card_obj = flamewave.tts_parse(o)
+            blob_json.append(card_obj)
+            out[o['id']] = card_obj
+        if len(blob_json) == len(cardlist):
+            break
+    f.close()
+    if out_dict:
+        return out
+    return blob_json

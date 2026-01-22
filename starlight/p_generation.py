@@ -190,6 +190,8 @@ def pack_gen_v3(
             # For x in range(value)
             # print(slot_key, sheet_key, sheet_take, drop_sheet)
             for c in range(sheet_take - drop_sheet):
+                if "scramble" in set["slots"][slot_key]["flags"]:
+                    random.shuffle(set["slots"][slot_key]["sheets"][sheet_key])
                 # Take a card from slot['sheets'][key] according to the number plus x
                 pack += [set["slots"][slot_key]["sheets"][sheet_key][(index + c) % len(set["slots"][slot_key]["sheets"][sheet_key])][:]]
                 # If "foil" in slot['flags'], add that index to the foil array

@@ -63,14 +63,52 @@ set_choices = [
     ["Zendikar Rising", "znr"],
 ]
 
-set_choices_v3 = [["Adventures in the Forgotten Realms", "afr"], ["Pauper Masters", "ppm"], ["Urza's Saga", "usg"], ["Dominaria", "dom"], ["Exodus", "exo"], ["Urza's Legacy", "ulg"], ["Nemesis", "nem"], ["Prophecy", "pcy"], ["Mercadian Masques", "mmq"], ["Zendikar", "zen"], ["Scars of Mirrodin", "som"], ["Mirrodin Besieged", "mbs"], ["Blood Like Rivers", "c_blr"], ["Apocalypse", "apc"], ["Invasion", "inv"], ["Odyssey", "ody"], ["Planeshift", "pls"], ["Torment", "tor"], ["Judgment", "jud"], ["Worldwake", "wwk"], ["Rise of the Eldrazi", "roe"], ["Innistrad", "isd"], ["FUN 2022", "c_fun2"], ["Magic 2013", "m13"], ["Masters 25", "a25"], ["Avacyn Restored", "avr"], ["Dominaria Remastered", "dmr"], ["Splinters of Novanda", "c_son"], ["Conspiracy", "cns"], ["Battlebond", "bbd"], ["Commander Legends", "cmr"]]
+set_choices_v3 = [
+    ["Adventures in the Forgotten Realms", "afr"],
+    ["Pauper Masters", "ppm"],
+    ["Urza's Saga", "usg"],
+    ["Dominaria", "dom"],
+    ["Exodus", "exo"],
+    ["Urza's Legacy", "ulg"],
+    ["Nemesis", "nem"],
+    ["Prophecy", "pcy"],
+    ["Mercadian Masques", "mmq"],
+    ["Zendikar", "zen"],
+    ["Scars of Mirrodin", "som"],
+    ["Mirrodin Besieged", "mbs"],
+    ["Blood Like Rivers", "c_blr"],
+    ["Apocalypse", "apc"],
+    ["Invasion", "inv"],
+    ["Odyssey", "ody"],
+    ["Planeshift", "pls"],
+    ["Torment", "tor"],
+    ["Judgment", "jud"],
+    ["Worldwake", "wwk"],
+    ["Rise of the Eldrazi", "roe"],
+    ["Innistrad", "isd"],
+    ["FUN 2022", "c_fun2"],
+    ["Magic 2013", "m13"],
+    ["Masters 25", "a25"],
+    ["Avacyn Restored", "avr"],
+    ["Dominaria Remastered", "dmr"],
+    ["Splinters of Novanda", "c_son"],
+    ["Conspiracy", "cns"],
+    ["Battlebond", "bbd"],
+    ["Commander Legends", "cmr"],
+    ["Murders at Karlov Manor", "mkm"],
+    ["Outlaws of Thunder Junction", "otj"],
+    ["Foundations", "fdn"],
+    ["Wilds of Eldraine", "woe"]
+]
 
 
 async def get_sets(ctx: discord.AutocompleteContext):
     return [discord.OptionChoice(s[0], s[1]) for s in set_choices if ctx.value.lower() in s[0].lower()][:20]
 
+
 async def get_sets_v3(ctx: discord.AutocompleteContext):
     return [discord.OptionChoice(s[0], s[1]) for s in set_choices_v3 if ctx.value.lower() in s[0].lower()][:20]
+
 
 class Starlight(commands.Cog):
     def __init__(self, bot):
@@ -130,6 +168,8 @@ class Starlight(commands.Cog):
             return await ctx.respond(f"The JSON file you submitted had a parsing error at line {err.lineno}.", ephemeral=True)
         except KeyError as err:
             return await ctx.respond(f"The file you submitted wasn't properly formed. It is missing the {err} key. If you don't understand what that means, contact Moon.", ephemeral=True)
+        except Exception as err:
+            return await ctx.respond(f"Something else went wrong. Contact Moon and give him this message. {err}")
         except:
             return await ctx.respond("Something went wrong with your file as it was processing.\nCheck to ensure that all required fields have good values and that the document is valid JSON.\nIf that all checks out, contact Moon.", ephemeral=True)
         # Return errors
