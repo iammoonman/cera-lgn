@@ -56,13 +56,18 @@ async def get_name(bot: discord.Bot, id, guild_id=None) -> str:
     if guild_id is not None:
         g = await bot.fetch_guild(guild_id)
         if g is not None:
-            u = await g.fetch_member(int(id))
-            if u is not None:
-                return u.display_name
-    u = await bot.get_or_fetch_user(int(id))
-    if u is not None:
-        return u.display_name
-    return "Unknown User"
+            try:
+                u = await g.fetch_member(int(id))
+                if u is not None:
+                    return u.display_name
+            except:
+                pass
+    try:
+        u = await bot.get_or_fetch_user(int(id))
+        if u is not None:
+            return u.display_name
+    except:
+        return "Unknown User"
 
 
 async def starting_em(draft: glintwing.SwissEvent, bot: discord.Bot, guild_id):
