@@ -77,12 +77,12 @@ class Flamewave(commands.Cog):
         return
 
     @commands.slash_command(description="Load lands for a set")
-    @discord.option(name="setcode", description="A trigraph set code to query.", type=str)
+    @discord.option(name="setcode", description="A trigraph set code to query. Lowercase.", type=str)
     async def set_lands(self, ctx: discord.ApplicationContext, setcode: str):
         await ctx.defer()
         ij_cards = collection_import.ijson_collection_basics(setcode)
         if len(ij_cards) == 0:
-            await ctx.respond(content="Set code not available.", ephemeral=True)
+            return await ctx.respond(content="Set code not available.", ephemeral=True)
         s = tts_classes.Save(f"Basics for {setcode}")
         d = tts_classes.Deck("Basics")
         d.import_cards(ij_cards)
