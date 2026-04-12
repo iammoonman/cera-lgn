@@ -108,7 +108,7 @@ def tts_parse(card):
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
-    elif card["layout"] in ["split"]:
+    elif card["layout"] in ["split", "adventure", "prepare"]:
         extra_obj = {
             "type_line": card["type_line"],
             "oracle_text": make_oracle_splitadventure(card),
@@ -133,15 +133,6 @@ def tts_parse(card):
                 }
                 for side, face in enumerate(card["card_faces"])
             ],
-        }
-    elif card["layout"] in ["adventure"]:
-        extra_obj = {
-            "oracle_text": make_oracle_splitadventure(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": 0,
-            "toughness": 0,
-            "mana_cost": card["mana_cost"],
-            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
     elif card["layout"] == "Vanguard" or card["layout"] == "vanguard":
         extra_obj = {
