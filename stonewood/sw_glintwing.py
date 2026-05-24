@@ -219,8 +219,6 @@ class StartingView(discord.ui.View):
         this_draft = grab_draft(ctx.message.id)
         if this_draft is None:
             return
-        if len(this_draft.players) == 10:
-            return
         if str(ctx.user.id) in this_draft.players:
             return await ctx.respond(content="Interaction received.", ephemeral=True)
         this_draft.players.append(glintwing.SwissPlayer(id=f"{ctx.user.id}", seat=len(this_draft.players)))
