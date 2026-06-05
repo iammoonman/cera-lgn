@@ -250,13 +250,9 @@ class StartingView(discord.ui.View):
             if not all(x.seat > -1 for x in this_draft.players):
                 logger.warning(f"Host attempted to run a draft with some players at negative seats. {ctx.message.id}")
                 return await ctx.respond(content="Interaction received. Players are not seated.", ephemeral=True)
-            if len(this_draft.players) < 4 or len(this_draft.players) > 10:
-                logger.warning(f"Host attempted to run a draft with too many or too few players. {ctx.message.id}")
-                return await ctx.respond(content="Interaction received. Not enough players or too many players.", ephemeral=True)
             logger.info(f"Starting draft {ctx.message.id} with host {ctx.user.id}")
             new_view = IG_View(self.bot)
-            this_draft = this_draft
-            this_draft.round_one = this_draft.pair_round_one()
+            this_draft.round_one = this_draft.pair()
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=new_view)
             await ctx.message.clear_reactions()
@@ -364,23 +360,12 @@ class IG_View(discord.ui.View):
         if this_draft.host == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
             logger.info(f"Advancing draft {ctx.message.id} from round {round_num}")
-            if round_num == 0:
-                this_draft.round_two, was_imperfect = this_draft.pair_round_two()
-                if was_imperfect:
-                    logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
-                    await ctx.respond(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
-                await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
-            if round_num == 1:
-                this_draft.round_thr, was_imperfect = this_draft.pair_round_three()
-                if was_imperfect:
-                    logger.warning(f"Pairing for draft {this_draft.id} was imperfect.")
-                    await ctx.respond(content="These pairings were randomized after the bot failed to pair the players according to typical pairings rules. Contact Moon if you believe this is incorrect.", ephemeral=True)
+            if round_num == 0 or round_num == 1:
+                this_draft.pair()
                 await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 2:
                 e = await end_em(this_draft, self.bot, ctx.guild_id)
                 await ctx.message.edit(embeds=[e], view=None)
-                # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-                #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
         return await ctx.respond(content="Interaction received.", ephemeral=True)
 
@@ -393,12 +378,8 @@ class IG_View(discord.ui.View):
         if this_draft.host == str(ctx.user.id):
             round_num, this_round = this_draft.current_round
             logger.info(f"Retreating draft {ctx.message.id} from round {round_num}")
-            if round_num == 1:
-                this_draft.round_two = []
-                logger.info(f"Deleting round two of draft: {ctx.message.id}")
-            if round_num == 2:
-                this_draft.round_thr = []
-                logger.info(f"Deleting round three of draft: {ctx.message.id}")
+            this_draft.rounds.pop()
+            this.draft.round_times.pop()
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.respond(content="Interaction received.", ephemeral=True)
@@ -431,8 +412,6 @@ class IG_View(discord.ui.View):
             logger.info(f"Ending draft {ctx.message.id} early")
             e = await end_em(this_draft, self.bot, ctx.guild_id)
             await ctx.message.edit(embeds=[e], view=None)
-            # with open(f"glintwing/{ctx.message.id}.json", "w") as f:
-            #     json.dump(dict(this_draft), f, ensure_ascii=False, indent=4)
             put_draft(this_draft)
         return await ctx.respond(content="Interaction received.", ephemeral=True)
 
