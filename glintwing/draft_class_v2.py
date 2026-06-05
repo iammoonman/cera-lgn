@@ -2,7 +2,10 @@ import datetime
 import json
 import random
 from typing import Union
-from .blossom import do_matching
+if __name__ == "__main__":
+    from blossom import do_matching
+else:
+    from glintwing.blossom import do_matching
 
 
 def distance(pA, pB, players):
