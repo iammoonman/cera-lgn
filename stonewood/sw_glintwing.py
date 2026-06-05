@@ -150,7 +150,7 @@ class Glintwing(commands.Cog):
         this_draft = grab_draft(reaction.message.id)
         if this_draft is None:
             return
-        if len(this_draft.round_one) == 0:
+        if len(this_draft.rounds) == 0:
             if type(reaction.emoji) is not str:
                 if reaction.emoji.name not in seat_order:
                     return

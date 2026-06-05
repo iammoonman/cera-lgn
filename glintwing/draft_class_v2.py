@@ -175,36 +175,6 @@ class SwissEvent:
     def current_round(self) -> tuple[int, list[SwissPairing]]:
         """Returns the round index and round object for the currently played round."""
         return len(self.rounds) - 1, self.rounds[-1]
-    
-    @property
-    def round_one(self) -> tuple[int, list[SwissPairing]]:
-        return self.rounds[0] if len(self.rounds) > 0 else []
-    
-    @round_one.setter
-    def round_one(self, rnd: list[SwissPairing]):
-        if len(self.rounds) > 0:
-            self.rounds[0] = rnd
-        self.rounds.append(rnd)
-    
-    @property
-    def round_two(self) -> tuple[int, list[SwissPairing]]:
-        return self.rounds[1] if len(self.rounds) > 1 else []
-    
-    @round_two.setter
-    def round_two(self, rnd: list[SwissPairing]):
-        if len(self.rounds) > 1:
-            self.rounds[1] = rnd
-        self.rounds.append(rnd)
-    
-    @property
-    def round_thr(self) -> tuple[int, list[SwissPairing]]:
-        return self.rounds[2] if len(self.rounds) > 2 else []
-
-    @round_thr.setter
-    def round_thr(self, rnd: list[SwissPairing]):
-        if len(self.rounds) > 2:
-            self.rounds[2] = rnd
-        self.rounds.append(rnd)
 
     def get_player_by_id(self, id) -> SwissPlayer | None:
         for p in self.players:
