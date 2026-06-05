@@ -2,7 +2,7 @@ import datetime
 import json
 import random
 from typing import Union
-from blossom import do_matching
+from .blossom import do_matching
 
 
 def distance(pA, pB, players):
