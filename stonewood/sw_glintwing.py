@@ -252,7 +252,9 @@ class StartingView(discord.ui.View):
                 return await ctx.respond(content="Interaction received. Players are not seated.", ephemeral=True)
             logger.info(f"Starting draft {ctx.message.id} with host {ctx.user.id}")
             new_view = IG_View(self.bot)
-            this_draft.round_one = this_draft.pair()
+            new_pairing, tim = this_draft.pair()
+            this_draft.rounds.append(new_pairing)
+            this_draft.round_times.append(tim)
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=new_view)
             await ctx.message.clear_reactions()
@@ -361,7 +363,9 @@ class IG_View(discord.ui.View):
             round_num, this_round = this_draft.current_round
             logger.info(f"Advancing draft {ctx.message.id} from round {round_num}")
             if round_num == 0 or round_num == 1:
-                this_draft.pair()
+                new_pairing, tim = this_draft.pair()
+                this_draft.rounds.append(new_pairing)
+                this_draft.round_times.append(tim)
                 await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
             if round_num == 2:
                 e = await end_em(this_draft, self.bot, ctx.guild_id)

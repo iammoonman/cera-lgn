@@ -212,8 +212,7 @@ class SwissEvent:
                 return p
         return None
     
-    def pair(self) -> list[SwissPairing]:
-        self.round_times = self.round_times + [datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)]
+    def pair(self) -> tuple[list[SwissPairing], datetime.datetime]:
         non_dropped_players = [p for p in self.players if not p.dropped]
         possible_pairs: list[tuple[T, T, int]] = []
         for player in non_dropped_players:
@@ -255,7 +254,7 @@ class SwissEvent:
                 if p2 is not None:
                     used_players.append(p2)
                 output.append(SwissPairing(self.get_player_by_id(p1), self.get_player_by_id(p2)))
-        return output
+        return output, datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
 
     def stats(self, player_id: str | SwissPlayer) -> tuple[float, int, float]:
         """GWP, Match Points, MWP"""
@@ -323,16 +322,18 @@ if __name__ == "__main__":
         byes: list[SwissPairing] = []
         if full_print:
             print(drft.players)
-        drft.round_one = drft.pair()
+        new_pairing, tim = drft.pair()
+        drft.round_times.append(tim)
+        drft.rounds.append(new_pairing)
         if score_round_one is not None:
-            score_round_one(drft.round_one)
+            score_round_one(drft.rounds[0])
         else:
-            for pairing in drft.round_one:
+            for pairing in drft.rounds[0]:
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         if full_print:
-            print(drft.round_one)
-        for pairing in drft.round_one:
+            print(drft.rounds[0])
+        for pairing in drft.rounds[0]:
             if pairing.is_bye():
                 byes.append(pairing)
         if full_print:
@@ -341,23 +342,25 @@ if __name__ == "__main__":
         after_round_one(drft)
         if full_print:
             print("----------")
-        drft.round_two = drft.pair()
+        new_pairing, tim = drft.pair()
+        drft.round_times.append(tim)
+        drft.rounds.append(new_pairing)
         if score_round_two is not None:
-            score_round_two(drft.round_two)
+            score_round_two(drft.rounds[1])
         else:
-            for pairing in drft.round_two:
+            for pairing in drft.rounds[1]:
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         if full_print:
-            print(drft.round_two)
-        for pairing in drft.round_two:
+            print(drft.rounds[1])
+        for pairing in drft.rounds[1]:
             if pairing.is_bye():
                 byes.append(pairing)
         if full_print:
             for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
                 print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         c = 0
-        for pairing in drft.round_two:
+        for pairing in drft.rounds[1]:
             if pairing.player_two is None:
                 c += 1
             if len(drft.players) > 4:
@@ -365,23 +368,25 @@ if __name__ == "__main__":
         after_round_two(drft)
         if full_print:
             print("----------")
-        drft.round_thr = drft.pair()
+        new_pairing, tim = drft.pair()
+        drft.round_times.append(tim)
+        drft.rounds.append(new_pairing)
         if score_round_three is not None:
-            score_round_three(drft.round_thr)
+            score_round_three(drft.rounds[2])
         else:
-            for pairing in drft.round_thr:
+            for pairing in drft.rounds[2]:
                 pairing.game_one = pairing.player_one
                 pairing.game_two = pairing.player_one
         if full_print:
-            print(drft.round_thr)
-        for pairing in drft.round_thr:
+            print(drft.rounds[2])
+        for pairing in drft.rounds[2]:
             if pairing.is_bye():
                 byes.append(pairing)
         if full_print:
             for player in sorted(drft.players, key=lambda x: drft.secondary_stats(x.id), reverse=True):
                 print(player, f"PTS:{(sts:=drft.secondary_stats(player.id))[0]}|GWP:{sts[1]:.2f}|MWP:{sts[2]:.2f}|OGP:{sts[3]:.2f}|OMP:{sts[4]:.2f}")
         c = 0
-        for pairing in drft.round_thr:
+        for pairing in drft.rounds[2]:
             if pairing.player_two is None:
                 c += 1
             if len(drft.players) > 4:
@@ -466,20 +471,22 @@ if __name__ == "__main__":
         raise TypeError("Type not serializable")
     def ff(x):
         f = json.dumps(dict(x), default=serialize_datetime)
+        print(f)
         d = json.loads(f)
-        g = SwissEvent(id=d["id"], host=d["meta"]["host"] if "host" in d["meta"] else "", tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"], channel_id="")
+        rr = [r for r in ([d["R_0"]] if "R_0" in d else []) + ([d["R_1"]] if "R_1" in d else []) + ([d["R_2"]] if "R_2" in d else [])]
+        g = SwissEvent(id=d["id"], host=d["meta"]["host"] if "host" in d["meta"] else "", tag=d["meta"]["tag"] if "tag" in d["meta"] else "", description=d["meta"]["description"] if "description" in d["meta"] else "", title=d["meta"]["title"], cube_id=d["meta"]["cube_id"] if "cube_id" in d["meta"] else "", rounds=rr, set_code=d["meta"]["set_code"] if "set_code" in d["meta"] else "", seats=d["players"], channel_id="")
         return g
 
-    # print(dict(test(8, after_round_one=lambda x: ff(x), after_round_two=drop_ids(["1", "2", "3", "4"]))))
-    # print(dict(test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))))
+    print(dict(test(8, after_round_one=lambda x: ff(x), after_round_two=drop_ids(["1", "2", "3", "4"]))))
+    print(dict(test(8, after_round_two=drop_ids(["1", "2", "3", "4"]))))
     # test(8, after_round_one=drop_ids(["1", "4"]), after_round_two=drop_ids(["2", "7"]))
     # test(7)
     # test(6)
     # test(6, after_round_one=drop_ids(["1"]))
     print(json.dumps(dict(test(8, full_print=True, score_round_one=lambda x: results(x, ["c", "c", "c", "d"]), score_round_two=lambda x: results(x, ["f", "a", "d", "e", "h"]))), default=serialize_datetime))
-    # print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"]))), default=serialize_datetime))
-    # print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"]))), default=serialize_datetime))
-    # print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x))), default=serialize_datetime))
-    # print(json.dumps(dict(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""]))), default=serialize_datetime))
+    print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["c", "d", "c", "b"]))), default=serialize_datetime))
+    print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["e", "a", "a", "a"]))), default=serialize_datetime))
+    print(json.dumps(dict(test(8, score_round_one=lambda x: results(x, ["i", "d", "h", "b"]), after_round_one=lambda x: drop_seat(4)(x))), default=serialize_datetime))
+    print(json.dumps(dict(test(5, score_round_one=lambda x: results(x, ["h", "b", ""]), score_round_two=lambda x: results(x, ["b", "e", ""]))), default=serialize_datetime))
 
     sys.stdout.close()
