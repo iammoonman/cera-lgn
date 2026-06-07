@@ -6,6 +6,7 @@ services:
       token: ${token}
       external_mongo: ${external_mongo}
       internal_mongo: "mongo"
+      PYTHONUNBUFFERED: 1
     ports:
       - "8080:5000"
     develop:
@@ -13,6 +14,6 @@ services:
         - action: sync
           path: .
           target: /
-  mongo:
-    image: mongo
-    restart: always
+  # mongo:
+  #   image: mongo
+  #   restart: always

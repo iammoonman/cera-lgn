@@ -24,7 +24,8 @@ def grab_draft(id: str | int):
     if d is None:
         logger.warning(f"Failed to get draft with id: {id}")
         return None
-    e = glintwing.SwissEvent(id=f"{id}", channel_id=str(d["meta"].get("channel_id")), host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=[d["R_0"], d["R_1"], d["R_2"]], set_code=d["meta"].get("set_code"), seats=d.get("players"), round_times=d["meta"].get("round_times"))
+    rounds = [d[r] for r in d.keys() if r not in ["id", "meta", "players"]]
+    e = glintwing.SwissEvent(id=f"{id}", channel_id=str(d["meta"].get("channel_id")), host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=rounds, set_code=d["meta"].get("set_code"), seats=d.get("players"), round_times=d["meta"].get("round_times"))
     return e
 
 

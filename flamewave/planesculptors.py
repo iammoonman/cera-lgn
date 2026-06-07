@@ -31,9 +31,7 @@ def get_ps_set(setcode):
     code = legal_sets[setcode]
     response = requests.get(
         f"https://www.planesculptors.net/set/{code}?json",
-        headers={
-            "User-Agent": "Python 3.9.13 CERA",
-        },
+        headers={"User-Agent": "CERA-LGN/0.0"},
     )
     data: dict = response.json()
     cards: dict[str, dict] = data["cards"]

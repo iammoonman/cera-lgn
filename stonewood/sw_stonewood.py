@@ -2,6 +2,7 @@ import random
 import discord
 from discord.ext import commands
 import requests
+from stonewood import logger
 
 
 class Stonewood(commands.Cog):
@@ -23,15 +24,18 @@ class Stonewood(commands.Cog):
     @commands.slash_command(name="scryfall-update", description="Updates the bulk data used by the application.")
     async def update(self, ctx: discord.ApplicationContext):
         await ctx.respond(content="Updating! Please wait a few moments before issuing another command.", ephemeral=True)
-        resp = requests.get("https://api.scryfall.com/bulk-data")
+        resp = requests.get("https://api.scryfall.com/bulk-data", headers={"User-Agent": "CERA-LGN/0.0", "Accept": "*/*"})
         body = resp.json()
         download_uri = None
+        if 'data' not in body:
+            logger.info(f"Failed to get cards: {body}")
+            return await ctx.send(content="Updating default_cards failed. Contact Moon.")
         for direction in body['data']:
             if direction['type'] == 'default_cards':
                 download_uri = direction['download_uri']
         if download_uri is None:
             return await ctx.send(content="Updating default_cards failed. Contact Moon.")
-        deep_resp = requests.get(download_uri)
+        deep_resp = requests.get(download_uri, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "*/*"})
         with open("default-cards.json", "wb") as fd:
             for chunk in deep_resp.iter_content(chunk_size=128):
                 fd.write(chunk)
