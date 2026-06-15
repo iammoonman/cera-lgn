@@ -20,11 +20,11 @@ def grab_draft(id: str | int):
     client = pymongo.MongoClient(os.environ["external_mongo"])
     db = client.get_database("LimitedPerspective")
     coll = db["Event"]
-    d = coll.find_one({"id": f"{id}"})
+    d = coll.find_one({"id": f"{id}"}, projection={"_id": False})
     if d is None:
         logger.warning(f"Failed to get draft with id: {id}")
         return None
-    rounds = [d[r] for r in d.keys() if r not in ["id", "meta", "players"]]
+    rounds = [d[r] for r in d.keys() if r not in ["id", "meta", "players", "_id"]]
     e = glintwing.SwissEvent(id=f"{id}", channel_id=str(d["meta"].get("channel_id")), host=d["meta"].get("host"), tag=d["meta"].get("tag"), description=d["meta"].get("description"), title=d["meta"].get("title"), cube_id=d["meta"].get("cube_id"), rounds=rounds, set_code=d["meta"].get("set_code"), seats=d.get("players"), round_times=d["meta"].get("round_times"))
     return e
 
@@ -49,6 +49,7 @@ def get_tags(ctx: discord.AutocompleteContext | None = None) -> list[discord.Opt
         return r
     for entry in d:
         r.append(discord.OptionChoice(entry["label"], entry["id"]))
+    logger.info(f"{len(d)} tags loaded.")
     return r[:20]
 
 

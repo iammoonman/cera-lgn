@@ -29,7 +29,7 @@ def max_matching(adj: dict[T, tuple[T, int]], nodes: list[T]) -> tuple[dict[T, T
     blossom: dict[T, bool] = {l: False for l in nodes}  # helper array for marking blossoms
 
     def lca(a: T, b: T) -> T:
-        """Find least common ancestor of a and b in the forest of alternating tree."""
+        """Find least common ancestor of a and b in the alternating tree."""
         nonlocal parent
         nonlocal base
         nonlocal match_dict
@@ -50,7 +50,7 @@ def max_matching(adj: dict[T, tuple[T, int]], nodes: list[T]) -> tuple[dict[T, T
             count += 1
 
     def mark_path(v: T, b: T, x: T) -> None:
-        """Mark vertices along the path from v to base b, setting their parent to x."""
+        """Mark vertices in the tree from v to base b, setting their parent to x."""
         nonlocal blossom
         nonlocal parent
         nonlocal match_dict
@@ -84,10 +84,12 @@ def max_matching(adj: dict[T, tuple[T, int]], nodes: list[T]) -> tuple[dict[T, T
                 # two cases to skip
                 if base[v] == base[u] or match_dict[v] == u:
                     continue
+                # if the node is the root or is added to the current path, it's probably a cycle
                 # found a blossom or an odd cycle edge
                 if u == root or (match_dict[u] is not None and parent[match_dict[u]] is not None):
+                    # find the shortest part of the path needed to make the blossoms not matter
                     curbase = lca(v, u)
-                    # unfold the blossoms
+                    # unfold all blossoms
                     blossom = {n: False for n in nodes}
                     mark_path(v, curbase, u)
                     mark_path(u, curbase, v)
@@ -101,8 +103,11 @@ def max_matching(adj: dict[T, tuple[T, int]], nodes: list[T]) -> tuple[dict[T, T
                 # otherwise extend the alternating tree
                 elif parent[u] is None:
                     parent[u] = v
+                    # if the next node is not matched with anything
                     if match_dict[u] is None:
-                        # augmenting path found: flip matches along the path
+                        # augmenting path found
+                        # so flip matches along the path
+                        #  if the path started with an unmatched node, we just ran into an unmatched node, so they can both become matched by flipping
                         curr = u
                         while curr is not None:
                             prev = parent[curr]
