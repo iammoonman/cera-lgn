@@ -37,13 +37,13 @@ def scryfall_set(setcode):
     """Returns list of JSON data containing all cards from the set. Deprecated."""
     full_set_json = []
     time.sleep(0.25)
-    response = requests.get(f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints", headers={"User-Agent": "Python 3.9.13 CERA"})
+    response = requests.get(f"https://api.scryfall.com/cards/search?q=set%3A{setcode}&unique=prints", headers={"User-Agent": "CERA-LGN/0.0"})
     full_set_json += (resjson := response.json())["data"]
     while resjson["has_more"]:
         time.sleep(0.25)
         response = requests.get(
             resjson["next_page"],
-            headers={"User-Agent": "Python 3.9.13 CERA"},
+            headers={"User-Agent": "CERA-LGN/0.0"},
         )
         full_set_json += (resjson := response.json())["data"]
     return full_set_json
@@ -61,7 +61,7 @@ def ijson_collection(cardlist, out_dict=False):
             card_obj = flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}{o["set"]}'] = card_obj
-        if o['set'] == 'plst' and f'{o["collector_number"]}mb1' in str_l:
+        if o["set"] == "plst" and f'{o["collector_number"]}mb1' in str_l:
             card_obj = flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}mb1'] = card_obj
@@ -100,13 +100,14 @@ def mm_collection(cardlist, out_dict=False):
             card_obj = flamewave.tts_parse(card)
             blob_json.append(card_obj)
             out[f'{card["collector_number"]}{card["set"]}'] = card_obj
-        if card['set'] == 'plst' and f'{card["collector_number"]}mb1' in string_list:
+        if card["set"] == "plst" and f'{card["collector_number"]}mb1' in string_list:
             card_obj = flamewave.tts_parse(card)
             blob_json.append(card_obj)
             out[f'{card["collector_number"]}{card["set"]}'] = card_obj
     if out_dict:
         return out
     return blob_json
+
 
 def ijson_collection_scryfallIDs(cardlist, out_dict=False):
     """Returns list of JSON data containing all cards from the list by collector_number and set."""
@@ -119,13 +120,14 @@ def ijson_collection_scryfallIDs(cardlist, out_dict=False):
         if o["id"] in str_l:
             card_obj = flamewave.tts_parse(o)
             blob_json.append(card_obj)
-            out[o['id']] = card_obj
+            out[o["id"]] = card_obj
         if len(blob_json) == len(cardlist):
             break
     f.close()
     if out_dict:
         return out
     return blob_json
+
 
 def ijson_collection_basics(setcode: str) -> list:
     """Returns list of JSON data containing all cards from the list by collector_number and set."""

@@ -12,7 +12,7 @@ def get_cube(cc_id, p_len):
     save = flamewave.tts_classes.Save(name=f"packs of the cube with id {cc_id}")
     response = requests.get(
         f"https://cubecobra.com/cube/api/cubeJSON/{cc_id}",
-        headers={"UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"},
+        headers={"User-Agent": "CERA-LGN/0.0"},
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
