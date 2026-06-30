@@ -68,6 +68,11 @@ def rarity_icon(rarity):
     return ""
 
 
+def poke_kai_cache(imagelink):
+    newlink = imagelink.replace("/normal/", "/large/").replace("https://cards.scryfall.io", "https://img.klrmngr.com")
+    return re.sub(r"\?\d+", "", newlink)
+
+
 def tts_parse(card):
     card_obj = {
         "oracle_id": card["oracle_id"] if "oracle_id" in card.keys() else "",
@@ -88,7 +93,7 @@ def tts_parse(card):
                     "type_line": face["type_line"],
                     "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"] if "type_line" in face else False,
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
+                    "image_uris": {"normal": poke_kai_cache(face["image_uris"]["normal"]), "small": face["image_uris"]["small"]},
                     "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "mana_cost": face["mana_cost"],
@@ -102,7 +107,7 @@ def tts_parse(card):
             "name": card["name"],
             "type_line": card["type_line"],
             "oracle_text": make_oracle_normal(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "image_uris": {"normal": poke_kai_cache(card["image_uris"]["normal"]), "small": card["image_uris"]["small"]},
             "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "mana_cost": card["mana_cost"],
@@ -112,7 +117,7 @@ def tts_parse(card):
         extra_obj = {
             "type_line": card["type_line"],
             "oracle_text": make_oracle_splitadventure(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "image_uris": {"normal": poke_kai_cache(card["image_uris"]["normal"]), "small": card["image_uris"]["small"]},
             "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "mana_cost": card["mana_cost"],
@@ -125,7 +130,7 @@ def tts_parse(card):
                     "name": face["name"],
                     "type_line": face["type_line"],
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+                    "image_uris": {"normal": poke_kai_cache(card["image_uris"]["normal"]), "small": card["image_uris"]["small"]},
                     "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "mana_cost": face["mana_cost"],
@@ -137,7 +142,7 @@ def tts_parse(card):
     elif card["layout"] == "Vanguard" or card["layout"] == "vanguard":
         extra_obj = {
             "oracle_text": make_oracle_vanguard(card),
-            "image_uris": {"normal": card["image_uris"]["normal"]},
+            "image_uris": {"normal": poke_kai_cache(card["image_uris"]["normal"])},
             "power": 0,
             "toughness": 0,
             "mana_cost": card["mana_cost"],
@@ -150,7 +155,7 @@ def tts_parse(card):
                     "name": face["name"],
                     "type_line": face["type_line"],
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": face["image_uris"]["normal"]},
+                    "image_uris": {"normal": poke_kai_cache(face["image_uris"]["normal"])},
                     "power": 0,
                     "toughness": 0,
                     "mana_cost": face["mana_cost"],
@@ -165,7 +170,7 @@ def tts_parse(card):
     else:
         extra_obj = {
             "oracle_text": make_oracle_normal(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
+            "image_uris": {"normal": poke_kai_cache(card["image_uris"]["normal"]), "small": card["image_uris"]["small"]},
             "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "mana_cost": card["mana_cost"],

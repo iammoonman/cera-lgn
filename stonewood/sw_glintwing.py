@@ -140,7 +140,7 @@ class Glintwing(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if user.id == self.bot.user.id:
+        if user.id == self.bot.user.id or reaction.message.author != self.bot.user:
             return
         cont = False
         async for u in reaction.users():
