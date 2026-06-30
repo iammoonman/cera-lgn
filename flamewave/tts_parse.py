@@ -67,94 +67,103 @@ def rarity_icon(rarity):
         return "[9c202b]「B」[-]"
     return ""
 
-
 def tts_parse(card):
     card_obj = {
         "oracle_id": card["oracle_id"] if "oracle_id" in card.keys() else "",
         "cmc": card["cmc"] if "cmc" in card.keys() else 0,
         "type_line": card["type_line"] if "type_line" in card.keys() else "",
         "layout": card["layout"],
-        "set": card["set"],
+        "oracle_text": "",
         "name": card["name"],
-        "collector_number": card["collector_number"],
         "planar": "Battle " in card["type_line"] or "Plane " in card["type_line"] if "type_line" in card else False,
     }
     if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle", "double_faced_token"]:
         extra_obj = {
+            "raw_name": card["card_faces"][0]["name"],
+            "raw_mana_cost": card["card_faces"][0]["mana_cost"],
+            "raw_type_line": card["card_faces"][0]["type_line"],
+            "raw_oracle_text": card["card_faces"][0]["oracle_text"] if "oracle_text" in card["card_faces"][0] else "",
             "stitched": card["stitched"] if "stitched" in card else False,
             "card_faces": [
                 {
                     "name": face["name"],
                     "type_line": face["type_line"],
                     "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"] if "type_line" in face else False,
+                    "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
                     "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
-                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
-                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
                     "mana_cost": face["mana_cost"],
-                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else 0,
+                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
                 for side, face in enumerate(card["card_faces"])
             ],
         }
-    elif card["layout"] in ["battle"]:
-        extra_obj = {
-            "name": card["name"],
-            "type_line": card["type_line"],
-            "oracle_text": make_oracle_normal(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
-            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
-            "mana_cost": card["mana_cost"],
-            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
-        }
     elif card["layout"] in ["split", "adventure", "prepare"]:
         extra_obj = {
+            "raw_name": card["card_faces"][0]["name"],
+            "raw_mana_cost": card["card_faces"][0]["mana_cost"],
+            "raw_type_line": card["card_faces"][0]["type_line"],
+            "raw_oracle_text": card["card_faces"][0]["oracle_text"] if "oracle_text" in card["card_faces"][0] else "",
             "type_line": card["type_line"],
             "oracle_text": make_oracle_splitadventure(card),
             "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
-            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else None,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else None,
             "mana_cost": card["mana_cost"],
-            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
     elif card["layout"] in ["flip"]:
         extra_obj = {
+            "raw_name": card["card_faces"][0]["name"],
+            "raw_mana_cost": card["card_faces"][0]["mana_cost"],
+            "raw_type_line": card["card_faces"][0]["type_line"],
+            "raw_oracle_text": card["card_faces"][0]["oracle_text"] if "oracle_text" in card["card_faces"][0] else "",
             "card_faces": [
                 {
                     "name": face["name"],
                     "type_line": face["type_line"],
+                    "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
                     "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
-                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
                     "mana_cost": face["mana_cost"],
-                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else 0,
+                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
                 for side, face in enumerate(card["card_faces"])
             ],
         }
     elif card["layout"] == "Vanguard" or card["layout"] == "vanguard":
         extra_obj = {
+            "raw_name": card["name"],
+            "raw_type_line": card["type_line"],
+            "raw_oracle_text": card["oracle_text"] if "oracle_text" in card else "",
             "oracle_text": make_oracle_vanguard(card),
             "image_uris": {"normal": card["image_uris"]["normal"]},
-            "power": 0,
-            "toughness": 0,
+            "power": None,
+            "toughness": None,
             "mana_cost": card["mana_cost"],
-            "loyalty": 0,
+            "loyalty": None,
         }
     elif card["layout"] in ["reversible_card"]:
         extra_obj = {
+            "raw_name": card["card_faces"][0]["name"],
+            "raw_mana_cost": card["card_faces"][0]["mana_cost"],
+            "raw_type_line": card["card_faces"][0]["type_line"],
+            "raw_oracle_text": card["card_faces"][0]["oracle_text"] if "oracle_text" in card["card_faces"][0] else "",
             "card_faces": [
                 {
                     "name": face["name"],
                     "type_line": face["type_line"],
+                    "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
                     "image_uris": {"normal": face["image_uris"]["normal"]},
-                    "power": 0,
-                    "toughness": 0,
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
                     "mana_cost": face["mana_cost"],
-                    "loyalty": 0,
+                    "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
                 for side, face in enumerate(card["card_faces"])
             ],
@@ -165,11 +174,15 @@ def tts_parse(card):
     else:
         extra_obj = {
             "oracle_text": make_oracle_normal(card),
+            "raw_name": card["name"],
+            "raw_mana_cost": card["mana_cost"],
+            "raw_type_line": card["type_line"],
+            "raw_oracle_text": card["oracle_text"] if "oracle_text" in card else "",
             "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
-            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else None,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else None,
             "mana_cost": card["mana_cost"],
-            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
     card_obj = {**card_obj, **extra_obj}
     return card_obj
