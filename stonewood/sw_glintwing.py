@@ -49,7 +49,7 @@ def get_tags(ctx: discord.AutocompleteContext | None = None) -> list[discord.Opt
         return r
     for entry in d:
         r.append(discord.OptionChoice(entry["label"], entry["id"]))
-    logger.info(f"{len(d)} tags loaded.")
+    logger.info(f"{len(r)} tags loaded.")
     return r[:20]
 
 
