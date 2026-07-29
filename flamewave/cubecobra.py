@@ -16,7 +16,7 @@ def get_cube(cc_id, p_len):
     )
     js = response.json()
     cube_cards = js["cards"]["mainboard"]
-    cardinfo = flamewave.collection_import.mm_collection(
+    cardinfo = flamewave.collection_import.jsonl_collection(
         [[n["details"]["collector_number"], n["details"]["set"]] for n in cube_cards],
         out_dict=True,
     )

@@ -4,6 +4,7 @@ import orjson
 import flamewave
 import requests
 import time
+import json
 
 
 def scryfall_collection(cardlist, out_dict=False):
@@ -17,7 +18,7 @@ def scryfall_collection(cardlist, out_dict=False):
         f"https://api.scryfall.com/cards/collection",
         json={"identifiers": [{"set": i[0], "name": i[1]} for i in cardlist]},
         headers={
-            "User-Agent": "Python 3.9.13 CERA",
+            "User-Agent": "Python 3.13.7 CERA",
             "Content-Type": "application/json",
         },
     )
@@ -139,4 +140,55 @@ def ijson_collection_basics(setcode: str) -> list:
             card_obj = flamewave.tts_parse(o)
             blob_json.append(card_obj)
     f.close()
+    return blob_json
+
+def jsonl_collection_scryfallIDs(cardlist, out_dict=False):
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    str_l = {a: True for a in cardlist}
+    out = {}
+    f = open("default-cards.jsonl", "r")
+    for line in f:
+        o = json.loads(line)
+        if o["id"] in str_l:
+            card_obj = flamewave.tts_parse(o)
+            blob_json.append(card_obj)
+            out[o["id"]] = card_obj
+            del str_l[o["id"]]
+        if len(blob_json) == len(cardlist):
+            break
+    f.close()
+    if out_dict:
+        return out
+    return blob_json
+
+def jsonl_collection_basics(setcode: str) -> list:
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    f = open("default-cards.jsonl", "r")
+    for line in f:
+        o = json.loads(line)
+        if o["set"] == setcode and o["name"] in ["Forest", "Mountain", "Swamp", "Island", "Plains"]:
+            card_obj = flamewave.tts_parse(o)
+            blob_json.append(card_obj)
+    f.close()
+    return blob_json
+
+def jsonl_collection(cardlist, out_dict=False):
+    """Returns list of JSON data containing all cards from the list by collector_number and set."""
+    blob_json = []
+    str_l = {f"{a[0]}{a[1]}": True for a in cardlist}
+    out = {}
+    f = open("default-cards.jsonl", "r")
+    for line in f:
+        o = json.loads(line)
+        if f'{o["collector_number"]}{o["set"]}' in str_l or o["set"] == "plst" and f'{o["collector_number"]}mb1' in str_l:
+            card_obj = flamewave.tts_parse(o)
+            blob_json.append(card_obj)
+            out[f'{o["collector_number"]}{o["set"]}'] = card_obj
+        if len(blob_json) == len(cardlist):
+            break
+    f.close()
+    if out_dict:
+        return out
     return blob_json

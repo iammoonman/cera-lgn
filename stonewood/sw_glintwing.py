@@ -385,7 +385,7 @@ class IG_View(discord.ui.View):
             round_num, this_round = this_draft.current_round
             logger.info(f"Retreating draft {ctx.message.id} from round {round_num}")
             this_draft.rounds.pop()
-            this.draft.round_times.pop()
+            this_draft.round_times.pop()
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.respond(content="Interaction received.", ephemeral=True)

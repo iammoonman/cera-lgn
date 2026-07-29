@@ -20,7 +20,7 @@ def full_draftmancer_log(draft_file: io.BytesIO):
     cards_generator = ijson.kvitems(draft_file, "carddata")
     for k, v in cards_generator:
         cards[k] = v["id"]  # add extra properties for customs
-    ij_cards = collection_import.ijson_collection_scryfallIDs(cards.values(), True)
+    ij_cards = collection_import.jsonl_collection_scryfallIDs(cards.values(), True)
     draft_file.seek(0)
     users = {}
     users_generator = ijson.kvitems(draft_file, "users")
