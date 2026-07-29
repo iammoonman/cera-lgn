@@ -396,10 +396,10 @@ class Deck:
             """Contains oracle text, power/toughness, and loyalty if any."""
             self.CardID = counter * 100
 
-            self.XML = write_xmlui(cardData["card_faces"][0] if is_dfc(cardData) or is_split_card(cardData) else cardData, cardData)
+            self.XML = "" # write_xmlui(cardData["card_faces"][0] if is_dfc(cardData) or is_split_card(cardData) else cardData, cardData)
             self.isPlanar = (cardData["planar"] if "planar" in cardData else False) or cardData["layout"] == "split"
             self.CustomDeck = {
-                "FaceURL": blank_image(cardData["card_faces"][0] if is_dfc(cardData) else cardData, cardData),
+                "FaceURL": cardData["card_faces"][0]["image_uris"]["normal"] if is_dfc(cardData) else cardData["image_uris"]["normal"], # blank_image(cardData["card_faces"][0] if is_dfc(cardData) else cardData, cardData),
                 "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
@@ -410,7 +410,7 @@ class Deck:
             self.States = None
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
-                    "FaceURL": blank_image(cardData["card_faces"][1], cardData),
+                    "FaceURL": cardData["card_faces"][1]["image_uris"]["normal"], # blank_image(cardData["card_faces"][1], cardData),
                     "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                     "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
@@ -430,7 +430,7 @@ class Deck:
                         "CardID": int((counter * 1000) - 100) * 100 + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
-                        "XmlUI": write_xmlui(cardData["card_faces"][1], cardData, True),
+                        "XmlUI": "" # write_xmlui(cardData["card_faces"][1], cardData, True),
                         # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
                     }
                 }
