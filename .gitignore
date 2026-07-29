@@ -162,6 +162,7 @@ cython_debug/
 **/packs.json
 drafthandler/t_testing.py
 default-cards*.json
+default-cards*.jsonl
 pagessite/package-lock.json
 
 node_modules

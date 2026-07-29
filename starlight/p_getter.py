@@ -16,7 +16,7 @@ def get_packs(setcode, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = flamewave.collection_import.mm_collection(all_cn_sets)
+    set_info = flamewave.collection_import.jsonl_collection(all_cn_sets)
     for p in all_packs:
         new_colle = []
         for crd in p[0]:
@@ -61,7 +61,7 @@ def get_packs_v3(setcode, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = {**flamewave.collection_import.mm_collection(all_cn_sets, True), **flamewave.planesculptors.ps_collection(all_cn_sets, True)}
+    set_info = {**flamewave.collection_import.jsonl_collection(all_cn_sets, True), **flamewave.planesculptors.ps_collection(all_cn_sets, True)}
     for p in all_packs:
         new_colle = []
         for crd in p[0]:
@@ -95,7 +95,7 @@ def get_p1p1_v3(setcode):
     raw_cn_cards, foil_indexes, seed = starlight.p_generation.pack_gen_v3(set=setJSON, d_c=duplicate_control_list)
     # Log the seed
     # log["seeds"].append(seed)
-    set_info = {**flamewave.collection_import.mm_collection(raw_cn_cards, True), **flamewave.planesculptors.ps_collection(raw_cn_cards, True)}
+    set_info = {**flamewave.collection_import.jsonl_collection(raw_cn_cards, True), **flamewave.planesculptors.ps_collection(raw_cn_cards, True)}
     new_colle = []
     for crd in raw_cn_cards:
         if f"{crd[0]}{crd[1]}" in set_info:
@@ -132,7 +132,7 @@ def get_packs_setfile(setfile, num_packs, land_pack=False):
     all_cn_sets = []
     for p in all_packs:
         all_cn_sets += p[0]
-    set_info = {**flamewave.collection_import.mm_collection(all_cn_sets, True), **flamewave.planesculptors.ps_collection(all_cn_sets, True)}
+    set_info = {**flamewave.collection_import.jsonl_collection(all_cn_sets, True), **flamewave.planesculptors.ps_collection(all_cn_sets, True)}
     for p in all_packs:
         new_colle = []
         for crd in p[0]:

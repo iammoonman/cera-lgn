@@ -49,7 +49,7 @@ def get_tags(ctx: discord.AutocompleteContext | None = None) -> list[discord.Opt
         return r
     for entry in d:
         r.append(discord.OptionChoice(entry["label"], entry["id"]))
-    logger.info(f"{len(d)} tags loaded.")
+    logger.info(f"{len(r)} tags loaded.")
     return r[:20]
 
 
@@ -140,7 +140,7 @@ class Glintwing(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if user.id == self.bot.user.id:
+        if user.id == self.bot.user.id or reaction.message.author != self.bot.user:
             return
         cont = False
         async for u in reaction.users():
@@ -385,7 +385,7 @@ class IG_View(discord.ui.View):
             round_num, this_round = this_draft.current_round
             logger.info(f"Retreating draft {ctx.message.id} from round {round_num}")
             this_draft.rounds.pop()
-            this.draft.round_times.pop()
+            this_draft.round_times.pop()
             put_draft(this_draft)
             await ctx.message.edit(embeds=[await intermediate_em(this_draft, self.bot, ctx.guild_id)], view=self)
         return await ctx.respond(content="Interaction received.", ephemeral=True)

@@ -67,6 +67,15 @@ def rarity_icon(rarity):
         return "[9c202b]「B」[-]"
     return ""
 
+
+def poke_kai_cache(imagelink):
+    newlink = imagelink.replace("/normal/", "/large/").replace("https://cards.scryfall.io", "https://img.klrmngr.com")
+    return re.sub(r"\?\d+", "", newlink)
+
+def cera_cache(scryfall_id: str, front_or_back: str) -> str:
+    return f"https://cera-lgn.stream/{front_or_back}/{scryfall_id[0]}/{scryfall_id[1]}/{scryfall_id}.webp"
+
+
 def tts_parse(card):
     card_obj = {
         "oracle_id": card["oracle_id"] if "oracle_id" in card.keys() else "",
@@ -91,14 +100,25 @@ def tts_parse(card):
                     "planar": "Battle " in face["type_line"] or "Plane " in face["type_line"] if "type_line" in face else False,
                     "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": face["image_uris"]["normal"], "small": face["image_uris"]["small"]},
-                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
-                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "image_uris": {"normal": cera_cache(card["id"], "front" if side == 0 else "back"), "small": face["image_uris"]["small"]},
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "mana_cost": face["mana_cost"],
                     "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
                 for side, face in enumerate(card["card_faces"])
             ],
+        }
+    elif card["layout"] in ["battle"]:
+        extra_obj = {
+            "name": card["name"],
+            "type_line": card["type_line"],
+            "oracle_text": make_oracle_normal(card),
+            "image_uris": {"normal": cera_cache(card["id"], "front"), "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "mana_cost": card["mana_cost"],
+            "loyalty": card["loyalty"] if "loyalty" in card.keys() else 0,
         }
     elif card["layout"] in ["split", "adventure", "prepare"]:
         extra_obj = {
@@ -108,9 +128,9 @@ def tts_parse(card):
             "raw_oracle_text": card["card_faces"][0]["oracle_text"] if "oracle_text" in card["card_faces"][0] else "",
             "type_line": card["type_line"],
             "oracle_text": make_oracle_splitadventure(card),
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else None,
-            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else None,
+            "image_uris": {"normal": cera_cache(card["id"], "front"), "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
@@ -126,9 +146,9 @@ def tts_parse(card):
                     "type_line": face["type_line"],
                     "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
-                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "image_uris": {"normal": cera_cache(card["id"], "front" if side == 0 else "back"), "small": card["image_uris"]["small"]},
+                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else 0,
+                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else 0,
                     "mana_cost": face["mana_cost"],
                     "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
@@ -141,9 +161,9 @@ def tts_parse(card):
             "raw_type_line": card["type_line"],
             "raw_oracle_text": card["oracle_text"] if "oracle_text" in card else "",
             "oracle_text": make_oracle_vanguard(card),
-            "image_uris": {"normal": card["image_uris"]["normal"]},
-            "power": None,
-            "toughness": None,
+            "image_uris": {"normal": cera_cache(card["id"], "front")},
+            "power": 0,
+            "toughness": 0,
             "mana_cost": card["mana_cost"],
             "loyalty": None,
         }
@@ -159,9 +179,9 @@ def tts_parse(card):
                     "type_line": face["type_line"],
                     "raw_oracle_text": face["oracle_text"] if "oracle_text" in face else "",
                     "oracle_text": make_oracle_dfc(card, side == 0),
-                    "image_uris": {"normal": face["image_uris"]["normal"]},
-                    "power": face["power"] if "power" in face.keys() and "toughness" in face.keys() else None,
-                    "toughness": face["toughness"] if "power" in face.keys() and "toughness" in face.keys() else None,
+                    "image_uris": {"normal": cera_cache(card["id"], "front" if side == 0 else "back")},
+                    "power": 0,
+                    "toughness": 0,
                     "mana_cost": face["mana_cost"],
                     "loyalty": face["loyalty"] if "loyalty" in face.keys() else None,
                 }
@@ -174,13 +194,9 @@ def tts_parse(card):
     else:
         extra_obj = {
             "oracle_text": make_oracle_normal(card),
-            "raw_name": card["name"],
-            "raw_mana_cost": card["mana_cost"],
-            "raw_type_line": card["type_line"],
-            "raw_oracle_text": card["oracle_text"] if "oracle_text" in card else "",
-            "image_uris": {"normal": card["image_uris"]["normal"], "small": card["image_uris"]["small"]},
-            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else None,
-            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else None,
+            "image_uris": {"normal": cera_cache(card["id"], "front"), "small": card["image_uris"]["small"]},
+            "power": card["power"] if "power" in card.keys() and "toughness" in card.keys() else 0,
+            "toughness": card["toughness"] if "power" in card.keys() and "toughness" in card.keys() else 0,
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
