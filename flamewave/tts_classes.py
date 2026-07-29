@@ -339,6 +339,7 @@ class Deck:
             self.CustomDeck = self.frontImage
             self.AttachedDecals = decals if isFoil else []
             self.States = None
+            self.Script = None
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
@@ -364,6 +365,10 @@ class Deck:
                         # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
                     }
                 }
+            if "all_parts" in cardData.keys():
+                tokens = [part for part in cardData["all_parts"] if part["component"] in ["meld_result", "token"]]
+                if len(tokens) > 0:
+                    self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + [f"{{{part["name"]},{part["id"]},{"//" in part["name"]}}}" for part in tokens] + '}}) end self.setLuaScript("") end'
 
         def toDict(self):
             """Returns a dictionary for the final JSON."""
@@ -380,10 +385,11 @@ class Deck:
                 "States": self.States,
                 "AttachedDecals": self.AttachedDecals,
                 "XmlUI": self.XML,
+                "LuaScript": self.Script
                 # "SidewaysCard": self.SidewaysCard,
             }
 
-    class CardBlobTwo:
+    class CardBlobBlankImage:
         def __init__(self, cardData, counter, isFoil=False, decals=[]):
             """Represents one card."""
             self.Nickname = f'{cardData["name"]}\n{cardData["type_line"]} {round(cardData["cmc"])}MV'
@@ -396,10 +402,10 @@ class Deck:
             """Contains oracle text, power/toughness, and loyalty if any."""
             self.CardID = counter * 100
 
-            self.XML = "" # write_xmlui(cardData["card_faces"][0] if is_dfc(cardData) or is_split_card(cardData) else cardData, cardData)
+            self.XML = write_xmlui(cardData["card_faces"][0] if is_dfc(cardData) or is_split_card(cardData) else cardData, cardData)
             self.isPlanar = (cardData["planar"] if "planar" in cardData else False) or cardData["layout"] == "split"
             self.CustomDeck = {
-                "FaceURL": cardData["card_faces"][0]["image_uris"]["normal"] if is_dfc(cardData) else cardData["image_uris"]["normal"], # blank_image(cardData["card_faces"][0] if is_dfc(cardData) else cardData, cardData),
+                "FaceURL": blank_image(cardData["card_faces"][0] if is_dfc(cardData) else cardData, cardData),
                 "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
@@ -410,7 +416,7 @@ class Deck:
             self.States = None
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
-                    "FaceURL": cardData["card_faces"][1]["image_uris"]["normal"], # blank_image(cardData["card_faces"][1], cardData),
+                    "FaceURL": blank_image(cardData["card_faces"][1], cardData),
                     "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                     "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
@@ -430,7 +436,7 @@ class Deck:
                         "CardID": int((counter * 1000) - 100) * 100 + ((1 if cardData["stitched"] else 0) if "stitched" in cardData else 0),
                         "CustomDeck": {str((counter * 1000) - 100): backImage},
                         "AttachedDecals": (decals if isFoil else []),
-                        "XmlUI": "" # write_xmlui(cardData["card_faces"][1], cardData, True),
+                        "XmlUI": write_xmlui(cardData["card_faces"][1], cardData, True),
                         # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
                     }
                 }
@@ -456,7 +462,7 @@ class Deck:
     def import_cards(self, cardDataList, foilIndexes=[]):
         """Takes a list of card objects from a Scryfall search."""
         for index, item in enumerate(cardDataList):
-            self.ContainedObjects.append(tempCard := self.CardBlobTwo(item, self.Counter + 1, index in foilIndexes, self.Decals).toDict())
+            self.ContainedObjects.append(tempCard := self.CardBlob(item, self.Counter + 1, index in foilIndexes, self.Decals).toDict())
             self.DeckIDs.append(int((self.Counter + 1) * 100))
             self.CustomDeck[str((self.Counter + 1) * 100)] = tempCard["CustomDeck"]
             self.Counter += 1
