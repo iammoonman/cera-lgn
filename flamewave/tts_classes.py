@@ -329,7 +329,7 @@ class Deck:
                     "",
                     cardData["card_faces"][0]["image_uris"]["normal"] if "card_faces" in cardData and "adventure" != cardData["layout"] and "split" != cardData["layout"] else cardData["image_uris"]["normal"],
                 ),
-                "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
+                "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
                 "BackIsHidden": True,
@@ -344,7 +344,7 @@ class Deck:
             if "card_faces" in cardData and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
-                    "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
+                    "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                     "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
                     "BackIsHidden": True,
@@ -367,7 +367,7 @@ class Deck:
                     }
                 }
             if "all_parts" in cardData:
-                tokens = [part for part in cardData["all_parts"] if part["component"] in ["meld_result", "token"]]
+                tokens = [part for part in cardData["all_parts"] if part["component"] in ["meld_result", "token"] and part["id"] != cardData["id"]]
                 if len(tokens) > 0:
                     self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + ','.join(['{"' + part["name"] + '","' + part["id"] + '",' + ("true" if "//" in part["name"] else "false") + "}" for part in tokens]) + '}}) end self.setLuaScript("") end'
 
@@ -407,7 +407,7 @@ class Deck:
             self.isPlanar = (cardData["planar"] if "planar" in cardData else False) or cardData["layout"] == "split"
             self.CustomDeck = {
                 "FaceURL": blank_image(cardData["card_faces"][0] if is_dfc(cardData) else cardData, cardData),
-                "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
+                "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                 "NumHeight": 1,
                 "BackIsHidden": True,
@@ -418,7 +418,7 @@ class Deck:
             if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": blank_image(cardData["card_faces"][1], cardData),
-                    "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
+                    "BackURL": "https://i.imgur.com/TyC0LWj.jpg",
                     "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
                     "NumHeight": 1,
                     "BackIsHidden": True,
