@@ -26,7 +26,7 @@ def scryfall_collection(cardlist, out_dict=False):
     out = []
     out_2 = {}
     for item in f_n:
-        c_obj = flamewave.tts_parse(item)
+        c_obj = item # flamewave.tts_parse(item)
         out.append(c_obj)
         out_2[c_obj["name"] + c_obj["set"]] = c_obj
     if out_dict:
@@ -59,11 +59,11 @@ def ijson_collection(cardlist, out_dict=False):
     objects = ijson.items(f, "item")
     for o in objects:
         if f'{o["collector_number"]}{o["set"]}' in str_l:
-            card_obj = flamewave.tts_parse(o)
+            card_obj = o # flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}{o["set"]}'] = card_obj
         if o["set"] == "plst" and f'{o["collector_number"]}mb1' in str_l:
-            card_obj = flamewave.tts_parse(o)
+            card_obj = o # flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[f'{o["collector_number"]}mb1'] = card_obj
         if len(blob_json) == len(cardlist):
@@ -98,11 +98,11 @@ def mm_collection(cardlist, out_dict=False):
         except:
             break
         if f'{card["collector_number"]}{card["set"]}' in string_list:
-            card_obj = flamewave.tts_parse(card)
+            card_obj = card # flamewave.tts_parse(card)
             blob_json.append(card_obj)
             out[f'{card["collector_number"]}{card["set"]}'] = card_obj
         if card["set"] == "plst" and f'{card["collector_number"]}mb1' in string_list:
-            card_obj = flamewave.tts_parse(card)
+            card_obj = card # flamewave.tts_parse(card)
             blob_json.append(card_obj)
             out[f'{card["collector_number"]}{card["set"]}'] = card_obj
     if out_dict:
@@ -119,7 +119,7 @@ def ijson_collection_scryfallIDs(cardlist, out_dict=False):
     objects = ijson.items(f, "item")
     for o in objects:
         if o["id"] in str_l:
-            card_obj = flamewave.tts_parse(o)
+            card_obj = o # flamewave.tts_parse(o)
             blob_json.append(card_obj)
             out[o["id"]] = card_obj
         if len(blob_json) == len(cardlist):
@@ -137,7 +137,7 @@ def ijson_collection_basics(setcode: str) -> list:
     objects = ijson.items(f, "item")
     for o in objects:
         if o["set"] == setcode and o["name"] in ["Forest", "Mountain", "Swamp", "Island", "Plains"]:
-            card_obj = flamewave.tts_parse(o)
+            card_obj = o # flamewave.tts_parse(o)
             blob_json.append(card_obj)
     f.close()
     return blob_json
