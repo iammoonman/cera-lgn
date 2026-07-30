@@ -327,7 +327,7 @@ class Deck:
                 "FaceURL": re.sub(
                     "\?\d+$",
                     "",
-                    cardData["card_faces"][0]["image_uris"]["normal"] if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"] else cardData["image_uris"]["normal"],
+                    cardData["card_faces"][0]["image_uris"]["normal"] if "card_faces" in cardData and "adventure" != cardData["layout"] and "split" != cardData["layout"] else cardData["image_uris"]["normal"],
                 ),
                 "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
                 "NumWidth": (2 if cardData["stitched"] else 1) if "stitched" in cardData else 1,
@@ -340,7 +340,8 @@ class Deck:
             self.AttachedDecals = decals if isFoil else []
             self.States = None
             self.Script = None
-            if "card_faces" in cardData.keys() and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
+            self.XML = None
+            if "card_faces" in cardData and "adventure" != cardData["layout"] and "split" != cardData["layout"]:
                 backImage = {
                     "FaceURL": re.sub("\?\d+$", "", cardData["card_faces"][1]["image_uris"]["normal"]),
                     "BackURL": "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg",
@@ -365,10 +366,10 @@ class Deck:
                         # "SidewaysCard": "Battle" in cardData["card_faces"][1]["type_line"] or "Plane" in cardData["card_faces"][1]["type_line"]
                     }
                 }
-            if "all_parts" in cardData.keys():
+            if "all_parts" in cardData:
                 tokens = [part for part in cardData["all_parts"] if part["component"] in ["meld_result", "token"]]
                 if len(tokens) > 0:
-                    self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + [f"{{{part["name"]},{part["id"]},{"//" in part["name"]}}}" for part in tokens] + '}}) end self.setLuaScript("") end'
+                    self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + ','.join(['{"' + part["name"] + '","' + part["id"] + '",' + ("true" if "//" in part["name"] else "false") + "}" for part in tokens]) + '}}) end self.setLuaScript("") end'
 
         def toDict(self):
             """Returns a dictionary for the final JSON."""
@@ -385,7 +386,7 @@ class Deck:
                 "States": self.States,
                 "AttachedDecals": self.AttachedDecals,
                 "XmlUI": self.XML,
-                "LuaScript": self.Script
+                "LuaScript": self.Script,
                 # "SidewaysCard": self.SidewaysCard,
             }
 

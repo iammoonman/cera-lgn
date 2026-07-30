@@ -200,5 +200,8 @@ def tts_parse(card):
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
+        if "all_parts" in card.keys():
+            extra_obj["all_parts"] = card["all_parts"]
+
     card_obj = {**card_obj, **extra_obj}
     return card_obj

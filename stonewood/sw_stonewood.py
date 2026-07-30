@@ -73,14 +73,14 @@ class Stonewood(commands.Cog):
                 image_uri_A = to_grid(card["card_faces"][0]["image_uris"]["normal"])
                 image_uri_B = to_grid(card["card_faces"][1]["image_uris"]["normal"])
                 if not s3_has_object(strip_uri(image_uri_A)):
-                    print(f"Uploading card image for {card["card_faces"][0]["name"]}")
+                    print(f'Uploading card image for {card["card_faces"][0]["name"]}')
                     img_resp = requests.get(image_uri_A, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
                     upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_A))
                     did_upload = True
                 # else:
                     # print(f"Skipping {card["card_faces"][0]["name"]}")
                 if not s3_has_object(strip_uri(image_uri_B)):
-                    print(f"Uploading card image for {card["card_faces"][1]["name"]}")
+                    print(f'Uploading card image for {card["card_faces"][1]["name"]}')
                     img_resp = requests.get(image_uri_B, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
                     upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_B))
                     did_upload = True
@@ -89,7 +89,7 @@ class Stonewood(commands.Cog):
             else:
                 image_uri = to_grid(card["image_uris"]["normal"])
                 if not s3_has_object(strip_uri(image_uri)):
-                    print(f"Uploading card image for {card["name"]}")
+                    print(f'Uploading card image for {card["name"]}')
                     img_resp = requests.get(image_uri, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
                     upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri))
                     did_upload = True
