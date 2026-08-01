@@ -78,6 +78,7 @@ def cera_cache(scryfall_id: str, front_or_back: str) -> str:
 
 def tts_parse(card):
     card_obj = {
+        "id": card["id"],
         "oracle_id": card["oracle_id"] if "oracle_id" in card.keys() else "",
         "cmc": card["cmc"] if "cmc" in card.keys() else 0,
         "type_line": card["type_line"] if "type_line" in card.keys() else "",
@@ -200,8 +201,8 @@ def tts_parse(card):
             "mana_cost": card["mana_cost"],
             "loyalty": card["loyalty"] if "loyalty" in card.keys() else None,
         }
-        if "all_parts" in card.keys():
-            extra_obj["all_parts"] = card["all_parts"]
+    if "all_parts" in card.keys():
+        card_obj["all_parts"] = card["all_parts"]
 
     card_obj = {**card_obj, **extra_obj}
     return card_obj
