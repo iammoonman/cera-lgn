@@ -2,8 +2,8 @@ import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 from stonewood import logger
 import re
+import os
 
-s3_client = None
 try:
     # Create S3 client
     s3_client = boto3.client("s3", endpoint_url=os.environ["R2_ENDPOINT"], aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"], aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"])

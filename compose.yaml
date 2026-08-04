@@ -5,6 +5,9 @@ services:
     environment:
       token: ${token}
       external_mongo: ${external_mongo}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
       internal_mongo: "mongo"
       PYTHONUNBUFFERED: 1
     ports:

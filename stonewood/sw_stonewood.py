@@ -8,6 +8,62 @@ from flamewave import s3_has_object, upload_to_s3, strip_uri, to_grid
 import io
 import time
 import json
+import typing
+import asyncio
+import functools
+import threading
+
+
+def threaded_decorator(function):
+    def inner_function(*args):
+        function_thread = threading.Thread(target=function, args=args)
+        function_thread.start()
+
+    return inner_function
+
+
+@threaded_decorator
+def blocking_func():
+    f = open("default-cards.jsonl", "r", encoding="utf8")
+    i = 0
+    for j in f:
+        did_upload = False
+        card = json.loads(j)
+        if card["oversized"] or card["lang"] not in ["en", "ph", "dw", "qya"] or (card["digital"] and not card["set_type"] == "alchemy") or card["layout"] == "art_series" or card["set_type"] == "memorabilia" or card["set_type"] == "minigame" or card["image_status"] == "missing" or card["image_status"] == "lowres" or ("promo_types" in card and "thick" in card["promo_types"]) or ("promo_types" in card and "datestamped" in card["promo_types"]) or ("promo_types" in card and "thick" in card["promo_types"]):
+            # logger.info(f"Skipping a missing image.")
+            continue
+        if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle", "double_faced_token", "reversible_card"]:
+            image_uri_A = to_grid(card["card_faces"][0]["image_uris"]["normal"])
+            image_uri_B = to_grid(card["card_faces"][1]["image_uris"]["normal"])
+            if not s3_has_object(strip_uri(image_uri_A)):
+                logger.info(f'Uploading card image for {card["card_faces"][0]["name"]}')
+                img_resp = requests.get(image_uri_A, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
+                upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_A))
+                did_upload = True
+            # else:
+            #     logger.info(f"Skipping {card["card_faces"][0]["name"]}")
+            if not s3_has_object(strip_uri(image_uri_B)):
+                logger.info(f'Uploading card image for {card["card_faces"][1]["name"]}')
+                img_resp = requests.get(image_uri_B, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
+                upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_B))
+                did_upload = True
+            # else:
+            #     logger.info(f"Skipping {card["card_faces"][1]["name"]}")
+        else:
+            image_uri = to_grid(card["image_uris"]["normal"])
+            if not s3_has_object(strip_uri(image_uri)):
+                logger.info(f'Uploading card image for {card["name"]} as {strip_uri(image_uri)}')
+                img_resp = requests.get(image_uri, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
+                upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri))
+                did_upload = True
+            # else:
+            #     logger.info(f"Skipping {card["name"]}")
+        if did_upload:
+            i += 1
+            time.sleep(2)
+    f.close()
+    logger.info(f"Done uploading {i} images.")
+
 
 class Stonewood(commands.Cog):
     def __init__(self, bot):
@@ -31,75 +87,27 @@ class Stonewood(commands.Cog):
         resp = requests.get("https://api.scryfall.com/bulk-data", headers={"User-Agent": "CERA-LGN/0.0", "Accept": "*/*"})
         body = resp.json()
         download_uri = None
-        if 'data' not in body:
+        if "data" not in body:
             logger.info(f"Failed to get cards: {body}")
             return await ctx.send(content="Updating default_cards failed. Contact Moon.")
-        for direction in body['data']:
-            if direction['type'] == 'default_cards':
-                download_uri = direction['jsonl_download_uri']
+        for direction in body["data"]:
+            if direction["type"] == "default_cards":
+                download_uri = direction["jsonl_download_uri"]
         if download_uri is None:
             return await ctx.send(content="Updating default_cards failed. Contact Moon.")
         deep_resp = requests.get(download_uri, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "*/*"})
         with open("default-cards.jsonl", "w") as fd:
-            decompressed_string = gzip.decompress(deep_resp.content).decode('utf-8')
+            decompressed_string = gzip.decompress(deep_resp.content).decode("utf-8")
             fd.write(decompressed_string)
-    
+
     @commands.slash_command(name="image-update", description="Updates the image cache with any potential new images.")
     async def image(self, ctx: discord.ApplicationContext):
+        await ctx.defer()
         if str(ctx.author.id) != "237059875073556481":
             await ctx.respond(content="Blocked so that this command doesn't get spammed. <@237059875073556481>, update the image cache!")
             return
-        f = open("default-cards.jsonl", "r", encoding="utf8")
-        i = 0
-        for j in f:
-            did_upload = False
-            card = json.loads(j)
-            if card["lang"] not in ["en", "ph", "dw", "qya"]:
-                # print(f"Skipping a non-localized card.")
-                continue
-            if card["digital"] and not card["set_type"] == "alchemy":
-                # print(f"Skipping a digital card.")
-                continue
-            if card["layout"] == "art_series":
-                # print(f"Skipping an art series card.")
-                continue
-            if card["set_type"] == "memorabilia" or card["set_type"] == "minigame":
-                # print(f"Skipping a meme card.")
-                continue
-            if card["image_status"] == "missing" or card["image_status"] == "lowres":
-                # print(f"Skipping a missing image.")
-                continue
-            if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle", "double_faced_token", "reversible_card"]:
-                image_uri_A = to_grid(card["card_faces"][0]["image_uris"]["normal"])
-                image_uri_B = to_grid(card["card_faces"][1]["image_uris"]["normal"])
-                if not s3_has_object(strip_uri(image_uri_A)):
-                    print(f'Uploading card image for {card["card_faces"][0]["name"]}')
-                    img_resp = requests.get(image_uri_A, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
-                    upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_A))
-                    did_upload = True
-                # else:
-                    # print(f"Skipping {card["card_faces"][0]["name"]}")
-                if not s3_has_object(strip_uri(image_uri_B)):
-                    print(f'Uploading card image for {card["card_faces"][1]["name"]}')
-                    img_resp = requests.get(image_uri_B, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
-                    upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri_B))
-                    did_upload = True
-                # else:
-                    # print(f"Skipping {card["card_faces"][1]["name"]}")
-            else:
-                image_uri = to_grid(card["image_uris"]["normal"])
-                if not s3_has_object(strip_uri(image_uri)):
-                    print(f'Uploading card image for {card["name"]}')
-                    img_resp = requests.get(image_uri, headers={"User-Agent": "CERA-LGN/0.0", "Accept": "image/webp"})
-                    upload_to_s3(io.BytesIO(img_resp.content), strip_uri(image_uri))
-                    did_upload = True
-                # else:
-                    # print(f"Skipping {card["name"]}")
-            if did_upload:
-                i += 1
-                time.sleep(2)
-        f.close()
-        await ctx.respond(content=f"Done updating {i} images!")
+        blocking_func()
+        await ctx.respond(content=f"Updating the image cache! This may take a while. Please be patient.")
 
 
 def setup(bot):

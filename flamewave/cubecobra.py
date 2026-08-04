@@ -5,6 +5,8 @@ import csv
 import copy
 import json
 
+def cera_cache(scryfall_id: str, front_or_back: str) -> str:
+    return f"https://cera-lgn.stream/{front_or_back}/{scryfall_id[0]}/{scryfall_id[1]}/{scryfall_id}.webp"
 
 def get_cube(cc_id, p_len):
     """Returns a JSON save file for Tabletop Simulator."""
@@ -29,18 +31,18 @@ def get_cube(cc_id, p_len):
                 "card_faces": [
                     {
                         **card["card_faces"][0],
-                        "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else card["card_faces"][0]["image_uris"]["normal"]},
+                        "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["card_faces"][0]["image_uris"]["normal"], 'front')},
                     },
                     {
                         **card["card_faces"][1],
-                        "image_uris": {"normal": row["imgBackUrl"] if "imgBackUrl" in row else card["card_faces"][1]["image_uris"]["normal"]},
+                        "image_uris": {"normal": row["imgBackUrl"] if "imgBackUrl" in row else cera_cache(card["card_faces"][1]["image_uris"]["normal"], 'back')},
                     },
                 ],
                 "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         else:
             x = {
-                "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else card["image_uris"]["normal"]},
+                "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["image_uris"]["normal"], 'front')},
                 "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         cubelist.append({**card, **x})
