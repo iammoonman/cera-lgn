@@ -369,14 +369,14 @@ class Deck:
             if "all_parts" in cardData:
                 tokens = [part for part in cardData["all_parts"] if part["component"] in ["meld_result", "token"] and part["id"] != cardData["id"]]
                 if len(tokens) > 0:
-                    self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + ','.join(['{"' + part["name"] + '","' + part["id"] + '",' + ("true" if "//" in part["name"] else "false") + "}" for part in tokens]) + '}}) end self.setLuaScript("") end'
+                    self.Script = 'function onLoad() tbl=Global.getVar("Table") if tbl ~= nil then tbl.call("addToTable", {"' + cardData["name"] + '", {' + ','.join(['{"' + part["name"] + '","' + "https://cera-lgn.stream/front/" + part["id"][0] + "/" + part["id"][1] + "/" + part["id"] + ".webp" + '"' + (',"' + "https://cera-lgn.stream/front/" + part["id"][0] + "/" + part["id"][1] + "/" + part["id"] + '.webp"' if "//" in part["name"] else "") + "}" for part in tokens]) + '}}) end self.setLuaScript("") end'
 
         def toDict(self):
             """Returns a dictionary for the final JSON."""
             return {
                 "Nickname": self.Nickname,
                 "Name": self.Name,
-                "Memo": self.Memo,
+                # "Memo": self.Memo,
                 "Description": self.Description,
                 "ColorDiffuse": self.ColorDiffuse,
                 "Transform": self.Transform,

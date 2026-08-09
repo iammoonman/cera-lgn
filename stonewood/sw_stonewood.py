@@ -29,7 +29,7 @@ def blocking_func():
     for j in f:
         did_upload = False
         card = json.loads(j)
-        if card["oversized"] or card["lang"] not in ["en", "ph", "dw", "qya"] or (card["digital"] and not card["set_type"] == "alchemy") or card["layout"] == "art_series" or card["set_type"] == "memorabilia" or card["set_type"] == "minigame" or card["image_status"] == "missing" or card["image_status"] == "lowres" or ("promo_types" in card and "thick" in card["promo_types"]) or ("promo_types" in card and "datestamped" in card["promo_types"]) or ("promo_types" in card and "thick" in card["promo_types"]):
+        if card["oversized"] or card["lang"] not in ["en", "ph", "dw", "qya"] or (card["digital"] and not card["set_type"] == "alchemy") or card["layout"] == "art_series" or card["set_type"] == "memorabilia" or card["set_type"] == "minigame" or card["image_status"] == "missing" or card["image_status"] == "lowres" or ("promo_types" in card and "thick" in card["promo_types"]) or ("promo_types" in card and "datestamped" in card["promo_types"]):
             # logger.info(f"Skipping a missing image.")
             continue
         if "card_faces" in card.keys() and card["layout"] in ["transform", "modal_dfc", "battle", "double_faced_token", "reversible_card"]:

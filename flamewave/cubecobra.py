@@ -31,18 +31,18 @@ def get_cube(cc_id, p_len):
                 "card_faces": [
                     {
                         **card["card_faces"][0],
-                        "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["card_faces"][0]["image_uris"]["normal"], 'front')},
+                        "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["details"]["scryfall_id"], 'front')},
                     },
                     {
                         **card["card_faces"][1],
-                        "image_uris": {"normal": row["imgBackUrl"] if "imgBackUrl" in row else cera_cache(card["card_faces"][1]["image_uris"]["normal"], 'back')},
+                        "image_uris": {"normal": row["imgBackUrl"] if "imgBackUrl" in row else cera_cache(card["details"]["scryfall_id"], 'back')},
                     },
                 ],
                 "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         else:
             x = {
-                "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["image_uris"]["normal"], 'front')},
+                "image_uris": {"normal": row["imgUrl"] if "imgUrl" in row else cera_cache(card["details"]["scryfall_id"], 'front')},
                 "finish": row["finish"] == "Foil" if "finish" in row else False,
             }
         cubelist.append({**card, **x})
